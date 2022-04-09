@@ -1,0 +1,105 @@
+Based off the web front-end that I amended for InguzDSP
+
+Conceptual Design
+custom.conf
+
+Source -> Sox -> CamillaDSP -> Output
+
+Source this will be the initial source and could be various rates and bit depth
+Sox will be used to standardise the rate and bit depth. Initially this will be 24/96; but later will be configurable
+CamillDSP this will be a barebones install of CamillDSP the yaml file will have the same id as the player and will be managed via the plugin scrpt
+CamillaDSP will be configured with Stdin and Out both at 24/96, again this may be later configurable.
+Output this step may not be necessary but will allow basic setup for the player.
+
+Notes on behaviour
+Initialise
+The Plugin PM will
+create a section in the custom.conf for a new player
+create a default yaml file for a new player
+optionally re-write the custom.conf if a key value changes
+
+Change in value via UI
+any change via the UI will directly update the players local copy of the YAML file.
+the change will require the stream to be re-started
+enhancement - it may be possible to poke the CamilladDSP web socket to make the change dynamic
+
+Saving a preset
+The Plugin PM will copy the players current yaml file to the Preset folder and change the name to the user supplied name
+
+Loading a preset
+The Plugin PM will copy the named yaml file and replace the players default file with it.
+NB this process should not change the input and output sections and should only update filters etc
+
+Convolution filter
+in CamillaDSP wav/raw files need to be at the same bit depth and rate as the music playing any impulses loaded will be converted to the appropriate rate(s)
+This will require suffixes to be appended to the file names.
+
+
+
+Initialise
+ Given  I first load the DSP page
+ When I will read in all the Lists
+ And I will read in all the data
+ Then I will refresh all the list controls
+ And I will refresh all the data values
+ And I will refresh all the EQ values
+ 
+ 
+Change Bands 
+ Given I change the EQ Band
+ When I Save the Number of Bands
+ Then I will read in all the data
+ And I will refresh all the EQ values
+ 
+ 
+Load Preset
+  Given I select a Preset
+  When I save the Value
+  And I copy the Preset to the Save Preset field
+  Then I will read in all the data
+  And I will refresh all the data values
+  And I will refresh all the EQ values
+   
+  	
+Save a Preset
+  Given I save a preset
+  When I save the Value
+  Then I add the new Preset to the Dropdown
+  Then I display a Save Message
+
+
+Select a Filter
+ Given I select a filter
+ When I save the Value
+ Then I display a Save Message
+
+Change an EQ Band
+ Given I have amended an EQ Band
+ When I save the EQ Band 
+ 
+ 
+ --------------------------
+ replace -> onmousedown
+ with --> onpointerdown
+ 
+ Add in style formatting: below
+ 
+ input[type=range] {
+  pointer-events: none;
+}
+
+input[type=range]::-webkit-slider-thumb {
+  pointer-events: auto;
+}
+
+input[type=range]::-moz-range-thumb {
+  pointer-events: auto;
+}
+
+input[type=range]::-ms-thumb {
+  pointer-events: auto;
+}
+ 
+ 
+ 
+ 
