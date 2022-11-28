@@ -4,15 +4,139 @@ package Plugins::SqueezeDSP::Plugin;
 	# SqueezeDSP\Plugin.pm - a SlimServer plugin.
 	# Makes a remote-control user interface, and writes settings files, which
 	# provide parameters for operation of a convolution and filter engine.
-	
+	#
+	# This file is licensed to you under the terms below.  If you received other
+	# files as part of a package containing this file, each might have different
+	# license terms.  If you do not accept the terms, do not use the software.
+	#
+	# Copyright (c) 2006-2012 by Hugh Pyle, inguzaudio.com, and contributors.
+	#
+	# Permission is hereby granted, free of charge, to any person obtaining a
+	# copy of this software and associated documentation files (the "Software"),
+	# to deal in the Software without restriction, including without limitation
+	# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+	# and/or sell copies of the Software, and to permit persons to whom the
+	# Software is furnished to do so, subject to the following conditions:
+	#
+	# The above copyright notice and this permission notice shall be included in
+	# all copies or substantial portions of the Software.
+	#
+	# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+	# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+	# IN THE SOFTWARE.
 	# ----------------------------------------------------------------------------
 	#
+	# todo (TBD):
+	# 	web html5, ditch silverlight
+	# 	web silverlight animated "loading" thing
+	# 	web "extra text" on values (flat, etc)
+	# 	jive EQ adjust frequency (later, when we have a bar... radiobuttons would be too clunky)
+	# 	jive SigGen adjust frequency (ditto)
+	# 	jive titlebar icon?
+	# 	anything else marked TBD
 	#
 	#
 	# Revision history:
+	# 0.9.47			Amended Flac Conv to allow seek -
+	#					split templates into separate versioned file; updates are now based off this.
+	# 0.9.46
+	# JF 2022-11		Remove real old code, relating to 9_2_1 versions and earlier.
+	#					Removed settings for server pre 7.3
+	#					changed plugin location for settings to be in plugin prefs folder
+	#					copy application binary to plugin path	
+	#					changed location of binary so that is auto-detected 
+	#					added code for setting executable status to binary if not windows
+	#					fixed issues with generating custom.conf - no more additional white lines
+	#					fixed issue where re-boot required on regeneration of custom.conf
+	
+						
+	# JF 2020-03		Removed references to Silverlight - and added in new SL freed stuff
+	# JB's edits
+	# 20181212			added aac, mp4 filetypes
+	# 					corrected alc filetype to work with later versions of LMS
+	# 					deleted aap entry - replaced with aac entry
+	# 					added spt entry for Spotty (spotify plugin)
+	# 					changed FLAC compression levels to 0 (were 5)
+	# 					(very little lost in size but 0 takes significantly less time to encode)
 	#
-	#	
-	#	Initial version
+	# 20170805			Warning: Using a hash as a reference is deprecated at 3138
+	# 					L3138 $request->addResultLoop( 'Points_loop', $cnt, $ff, %h->{$ff} );
+	# 					changed %h->{$ff} to $h{$ff}
+	#
+	# High Pyle's revisions start here
+	# 0.9.33   20120101   encode with flac -5, CPU is cheap now
+	#          20110601   Merge contrib from do0g
+	# 0.9.30   20090105   SqueezeCenter 7.3 support
+	#                     add UHJ filetype
+	#                     remove SHN support
+	#                     add seek (for WAV and similar)
+	# 0.9.29   20081130   SqueezeCenter 7.2.1 support
+	#                     fix amb RotateZ serialization
+	# 0.9.28   20080412   SqueezeCenter version
+	#                     add CLI
+	#                     add Jive UI
+	#                     add web/silverlight UI
+	#                     add ambisonic UI stuff
+	#                     balance, width to 9dB; all incr 0.1dB
+	#                     lists sort case insensitively
+	#                     add sweep(short)
+	#                     add .aap (http://wiki.slimdevices.com/index.cgi?AACplus)
+	#                     fix 'save preset'
+	#                     fix flatness 0 written as 10
+	#                     restart track immediately when changing test-signal type
+	# 0.9.27   20070930   no change
+	# 0.9.25   20070916   add stereo pink noise test signals
+	#                     better save-presets default (patch from Toby)
+	#                     add -wavo for all FLAC transcodes, mostly for spdif
+	# 0.9.24   20070812   add -wav for [alac]
+	#                     Register the .amb type properly (6.5)
+	# 0.9.23   20070625   Fix large-size Adjust menu
+	#                     Add current-values to menus
+	#                     Add .amb support (Ambisonics B-format)
+	# 0.9.22   20070514   Fix compatibility with SlimServer 6.3.1 (again)
+	#                     Fix bad savePrefs bug
+	# 0.9.21   20070506   Sweep-with-EQ: separate versions for left and right
+	#                     move convert.conf to plugin dir for easier uninstall
+	#                     adjustable frequency centers for each EQ band
+	#                     fix the HASH(...) bug when loading from empty xml
+	#                     more robustness when loading presets/settings
+	#                     report cause of fatal errors when upgrading etc
+	# 0.9.20   20070422   remove non-band-limited signal generator functions
+	# 0.9.18   20070314   skew +/-25 samples, increase from 12
+	#                     signal generator: EQ'd versions, channel ident
+	#                     signal generator: editable frequency
+	# 0.9.16   20070311   Fix compatibility with SlimServer 6.3.1
+	# 0.9.15   20070310   Add signal-generator mode
+	#                     Put the source formatting back
+	#                     Miscellaneous tweaks
+	# 0.9.13   20070113   Fix & test the APE, Ogg and MusePack file types
+	# 0.9.12   20070113   Add linux support (debian, redhat)
+	# 0.9.11   20070101   Nice graphical button overlay
+	#                     Don't show the Flatness menu unless a room-correction
+	#                       filter has been selected (it's a no-op)
+	#                     Add matrix/width controls
+	#                     Add balance/skew controls
+	#                     Move equalizer type onto its own submenu
+	#                     Better defaults for first-time use
+	#                     Source formatting: fewer tabs
+	# 0.9.10   20061106   Fix non-44100 bitrates (SlimServer 6.5 or greater
+	#                       only), otherwise they play too fast or too slow
+	#                     Fix the AIFF filetype
+	#                     Fix the ALC (apple lossless) filetype
+	# 0.9.9    20060930   Use the $RATE$ flag to pass thru samplerate for 6.5
+	#                       and above
+	#                     Fix the WAV source type (for arbitrary wav files)
+	#                     Fix for mov123 (big-endian output)
+	# 0.9.8    20060811   Send WAV not FLAC to softsqueeze and SB1 clients
+	#                     Make menus' last-used-position stickier
+	# 0.9.7    20060730   Add 'flatness' control
+	# 0.9.6    20060716   Transcode to FLAC24 to avoid losing any dynamic range
+	# 0.9.5    20060603   Beta release under MIT-style free software license
+	#
 	#
 =cut
 
@@ -48,27 +172,27 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.01";
+my $revision = "0.0.05";
 use vars qw($VERSION);
 $VERSION = $revision;
 
 # Names and name-related constants...
 #
-my $thistag = "inguzeq";
+my $thistag = "squeezedsp";
 my $thisapp = "SqueezeDSP";
 my $binary;
-my $settingstag = "InguzEQSettings";
+my $settingstag = "SqueezeDSPSettings";
 my $confBegin = "SqueezeDSP#begin";
 my $confEnd = "SqueezeDSP#end";
-my $modeAdjust       = "PLUGIN.InguzEQ.Adjust";
-my $modeValue        = "PLUGIN.InguzEQ.Value";
-my $modePresets      = "PLUGIN.InguzEQ.Presets";
-my $modeSettings     = "PLUGIN.InguzEQ.Settings";
-my $modeEqualization = "PLUGIN.InguzEQ.Equalization";
-my $modeRoomCorr     = "PLUGIN.InguzEQ.RoomCorrection";
-my $modeMatrix       = "PLUGIN.InguzEQ.Matrix";
-my $modeSigGen       = "PLUGIN.InguzEQ.SignalGenerator";
-my $modeAmbisonic    = "PLUGIN.InguzEQ.Ambisonic";
+my $modeAdjust       = "PLUGIN.SqueezeDSP.Adjust";
+my $modeValue        = "PLUGIN.SqueezeDSP.Value";
+my $modePresets      = "PLUGIN.SqueezeDSP.Presets";
+my $modeSettings     = "PLUGIN.SqueezeDSP.Settings";
+my $modeEqualization = "PLUGIN.SqueezeDSP.Equalization";
+my $modeRoomCorr     = "PLUGIN.SqueezeDSP.RoomCorrection";
+my $modeMatrix       = "PLUGIN.SqueezeDSP.Matrix";
+my $modeSigGen       = "PLUGIN.SqueezeDSP.SignalGenerator";
+my $modeAmbisonic    = "PLUGIN.SqueezeDSP.Ambisonic";
 
 my $log = Slim::Utils::Log->addLogCategory({ 'category' => 'plugin.' . $thistag, 'defaultLevel' => 'WARN', 'description'  => $thisapp });
 
@@ -137,12 +261,12 @@ my @fq31 = ( 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 50
 my %noFunctions = ();  # const
 my $needUpgrade = 0;
 my $fatalError;
-my $pluginDataDir;            # <appdata>\inguzeq
-my $pluginSettingsDataDir;    # <appdata>\inguzeq\Settings     used for settings and presets
-my $pluginImpulsesDataDir;    # <appdata>\inguzeq\Impulses     used for room correction impulse filters
-my $pluginMatrixDataDir;      # <appdata>\inguzeq\Matrix       used for cross-feed matrix impulse filters
-my $pluginMeasurementDataDir; # <appdata>\inguzeq\Measurement  used for measurement sweeps and noise samples
-my $pluginTempDataDir;        # <appdata>\inguzeq\Temp         used for any temporary stuff
+my $pluginDataDir;            # <appdata>\squeezedsp
+my $pluginSettingsDataDir;    # <appdata>\squeezedsp\Settings     used for settings and presets
+my $pluginImpulsesDataDir;    # <appdata>\squeezedsp\Impulses     used for room correction impulse filters
+my $pluginMatrixDataDir;      # <appdata>\squeezedsp\Matrix       used for cross-feed matrix impulse filters
+my $pluginMeasurementDataDir; # <appdata>\squeezedsp\Measurement  used for measurement sweeps and noise samples
+my $pluginTempDataDir;        # <appdata>\squeezedsp\Temp         used for any temporary stuff
 my @presetsMenuChoices;
 my @presetsMenuValues;
 my $doneJiveInit = 0;
@@ -420,22 +544,6 @@ sub initPlugin
 
 	my $appdata;
 	#This is where preferences are stored.
-=begin mhereger suggested changing this to a folder installed on the plugin path.
-
-	 
-	 if(Slim::Utils::OSDetect::OS() eq 'win')
-	 {
-		# # Application data lives in a folder under \Documents and Settings\All Users\Application Data\
-		# # (plugin may not always have write access to \Program Files\SqueezeCenter\Plugins\)
-		 $appdata = Win32::GetFolderPath(0x0023); # 0x0023 is Win32::CSIDL_COMMON_APPDATA, but on linux that breaks for some reason
-	 }
-	 else
-	 {
-		# # debian, redhat, and everything else
-		 $appdata = '/usr/share';
-		# #$appdata = '/usr/local/slimserver/prefs';
-	 }
-=cut	
 
     $appdata = Slim::Utils::Prefs::dir();
 	# Make sure our appdata directory exists, if at all possible
@@ -760,9 +868,15 @@ sub webPages
 	if( Slim::Utils::PluginManager->isEnabled("Plugins::SqueezeDSP::Plugin") )
 	{
 		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/index.html", \&handleWebIndex);
-		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/squeezedsp.png", \&handleWebStatic);
+		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/inguz.png", \&handleWebStatic);
+
+		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/sqdsp_data.js", \&handleWebStatic);
+		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/sqdsp_controls.js", \&handleWebStatic);
+		
 		Slim::Web::Pages->addPageLinks("plugins", { $class->getDisplayName => 'plugins/SqueezeDSP/index.html' });
-		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => 'plugins/SqueezeDSP/squeezedsp.png' });
+		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => 'plugins/SqueezeDSP/inguz.png' });
+		
+		Slim::Web::Pages->addPageLinks("style", { $class->getDisplayName => 'plugins/SqueezeDSP/squeezedsp_style.css'});
 	}
 	else
 	{
@@ -777,7 +891,6 @@ sub handleWebIndex
 	if( $client = Slim::Player::Client::getClient($params->{player}) )
 	{
 		return Slim::Web::HTTP::filltemplatefile('plugins/SqueezeDSP/index.html', $params);
-
 	}
 }
 
@@ -1344,7 +1457,7 @@ sub jiveTopMenu
 		$k =~ s/\.\.\.//;
 		push @menuItems, {
 			text => $menuItem,
-#			window => { 'text' => $k, 'icon-id' => 'plugins/InguzEQ/inguz.png', 'titleStyle' => 'artists' },
+#			window => { 'text' => $k, 'icon-id' => 'plugins/SqueezeDSP/inguz.png', 'titleStyle' => 'artists' },
 			id => $thistag . $menuValu,
 			weight => ($listIndex + 1) * 10,
 #			node => $thistag,

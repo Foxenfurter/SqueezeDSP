@@ -1,6 +1,6 @@
 [%- pagetitle = 'PLUGIN_INGUZEQ_MODULEDESC' | string; pageicon = 'PLUGIN_INGUZEQ_MODULEDESC' -%]
 [%- pwd_list = BLOCK -%]/
-	<a href="[% webroot %]plugins/InguzEQ/index.html?player=[% player | uri %]">
+	<a href="[% webroot %]plugins/SqueezeDSP/index.html?player=[% player | uri %]">
 		[% "PLUGIN_INGUZEQ_DISPLAYNAME" | string %]
 	</a>
 [% END -%]
@@ -8,23 +8,22 @@
 
 <!--
 	Settings page
-	
-	This page was originally part of the InguzEQ plugin, http://inguzaudio.com/EQ/
-	and was licensed to you under the terms described in "Plugin.pm"
-
-	Copyright (c) 2006-2009 by Hugh Pyle, inguzaudio.com, and contributors.
-	
-	Modified by Jonathan Fox 2021
+		
+	Modified by Jonathan Fox 2022
 -->
 
 <!-- Script for the model -->
 <script type="text/javascript" src="/html/prototype.js"></script>
-<!--script type="text/javascript" src="InguzLib.js"></script-->
 
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="./eq_style.css"/>
+<link rel="stylesheet" type="text/css" href="./sqdsp_style.css"/>
 <script type="text/javascript" src="./inguz_data.js"></script>
 <script type="text/javascript" src="./inguz_controls.js"></script>
+
+<!--script type="text/javascript" src="./sqdsp_data.js"></script>
+<script type="text/javascript" src="./sqdsp_controls.js"></script-->
+
+
 
 <script>
 
@@ -35,16 +34,15 @@
 	<!-- the style-police -->
 		
 	<div>
+	
 	<div class="bubble" id="myMessage">To use please select EQ on Extras Menu</div>
-	<Output>Inguz DRC Config</Output>
+	<Output>SqueezeDSP Config v0.0.04</Output>
 	<Output style="float: right;" id="myPlayer"></Output>
 	<!--Output style="float: right;" id="myPlayerName">[% "PLAYER_NAME" | string %]</Output-->
 	</div>
-	<!-- silverlight central 
-		Jonathan Fox - 	kept for posterity! -->
 	<table style="width:100%;padding:0; display:none;" zzz_onresize="resizeContainer()">
 		<tr><td>
-			<div id="SilverlightPlugInHost" style="margin-right:20px; height:200px; width:95%;"></div>
+			<div id="RestTestHost" style="margin-right:20px; height:200px; width:95%;"></div>
 		</td></tr>
 	</table>
 <!-- for Testing Rest Calls-->
@@ -58,7 +56,7 @@
 	<input type ="Button" onclick="Initialise()" value = "Initialise" >
 
 	<input type ="Button" onclick="LocalDisplayEQ()" value="Display EQ Sliders" >
-	<input type ="Button" onclick="SilverlightPlugInHost.innerText = checkInguzLib();" value = "Check Inguz" >	
+	<input type ="Button" onclick="RestTestHost.innerText = checkInguzLib();" value = "Check Inguz" >	
 	<input type ="Button" onclick="control_NewPreset.className='Boring';" value = "Reset Animation" -->
 </DIV>
 	<!-- settings fields -->
@@ -69,7 +67,7 @@
 		<TR  id="control_Preset">
 			<TD class="rowTitleLong"><Output class="songInfoTitle">[% "PLUGIN_INGUZEQ_CHOOSE_PRESET" | string %]</a></Output></TD>
 			<TD class="rowBody">
-				<select class="ing-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.conf',''); NewFieldValue('Preset', this, true); "  >
+				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.conf',''); NewFieldValue('Preset', this, true); "  >
 					<option value="-">None</option>
 				</select>
 			</TD>
@@ -78,8 +76,8 @@
 		<TR id="control_NewPreset">
 			<TD class="rowTitleLong"><Output class="songInfoTitle">[% "PLUGIN_INGUZEQ_SAVEPRESETFILE" | string %]</Output></TD>
 			<TD class="rowBody">
-				<input class="ing-edit" id="edt_NewPreset" value="None" />								
-				<input class="ing-click" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)" </input></TD>
+				<input class="sqdsp-edit" id="edt_NewPreset" value="None" />								
+				<input class="sqdsp-click" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)" </input></TD>
 		</TR>
 	</TABLE>	
 	[% END %]
@@ -91,7 +89,7 @@
 		<TR id="control_Filter">
 			<TD class="rowTitleLong"><Output  class="songInfoTitle">[% "PLUGIN_INGUZEQ_ROOMCORR" | string %]</a></Output></TD>
 			<TD class="rowBody">
-				<select class="ing-select" id="sel_Filter" onchange="NewFieldValue('Filter', this, false)" >
+				<select class="sqdsp-select" id="sel_Filter" onchange="NewFieldValue('Filter', this, false)" >
 					<option value="-">None</option>
 				</select>
 			</TD>
@@ -100,7 +98,7 @@
 		<TR id="control_Matrix">
 			<TD class="rowTitleLong"><Output  class="songInfoTitle">[% "PLUGIN_INGUZEQ_MATRIX" | string %]</a></Output></TD>
 			<TD class="rowBody">
-				<select class="ing-select" id="sel_Matrix" onchange="NewFieldValue('Matrix', this, false)" >
+				<select class="sqdsp-select" id="sel_Matrix" onchange="NewFieldValue('Matrix', this, false)" >
 					<option value="-">None</option>
 				</select>
 			</TD>
@@ -202,7 +200,7 @@
 	<TR id="control_Amb">
 			<TD class="rowTitleLong"><Output class="songInfoTitle">[% "PLUGIN_INGUZEQ_AMBI_DECODE" | string %]</a></Output></TD>
 			<TD class="rowBody">
-				<select class="ing-select" id="sel_Amb"  onchange= "NewFieldValue('Amb', this, false); SetAmb( this)" >
+				<select class="sqdsp-select" id="sel_Amb"  onchange= "NewFieldValue('Amb', this, false); SetAmb( this)" >
 					<option value="UHJ">[% "PLUGIN_INGUZEQ_AMBI_UHJ" | string %]</option>
 					<option value="Blumlein">[% "PLUGIN_INGUZEQ_AMBI_BLUMLEIN" | string %]</option>
 					<option value="Crossed">[% "PLUGIN_INGUZEQ_AMBI_CARDIOID" | string %]</option>
@@ -281,7 +279,7 @@
 
 <script>
 myPlayer.value = playerid;
-//myPlayerName.value = 'Donkey'; //player_name;
+alert (myPlayer.value);
 window.setTimeout( function() {
 	Initialise();
 	GetCurrentPlayerSettings();
