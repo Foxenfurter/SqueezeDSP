@@ -1,5 +1,5 @@
 # string file for package Plugins::SqueezeDSP::Plugin;
-# Part of the SqueezeDSP plugin, http://inguzaudio.com/EQ/
+# Part of the SqueezeDSP plugin, 
 # This file is licensed to you under the terms described in "Plugin.pm"
 #
 # Licenceed under GPL
@@ -8,7 +8,7 @@ PLUGIN_INGUZEQ_MODULEDESC
 	EN	SqueezeDSP and Room Correction
 
 PLUGIN_INGUZEQ_DISPLAYNAME
-	EN	EQ
+	EN	SqueezeboxDSP
 
 PLUGIN_INGUZEQ_LINE1
 	EN	Equalization

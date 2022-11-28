@@ -48,7 +48,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.01";
+my $revision = "0.0.02";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -60,15 +60,15 @@ my $binary;
 my $settingstag = "InguzEQSettings";
 my $confBegin = "SqueezeDSP#begin";
 my $confEnd = "SqueezeDSP#end";
-my $modeAdjust       = "PLUGIN.InguzEQ.Adjust";
-my $modeValue        = "PLUGIN.InguzEQ.Value";
-my $modePresets      = "PLUGIN.InguzEQ.Presets";
-my $modeSettings     = "PLUGIN.InguzEQ.Settings";
-my $modeEqualization = "PLUGIN.InguzEQ.Equalization";
-my $modeRoomCorr     = "PLUGIN.InguzEQ.RoomCorrection";
-my $modeMatrix       = "PLUGIN.InguzEQ.Matrix";
-my $modeSigGen       = "PLUGIN.InguzEQ.SignalGenerator";
-my $modeAmbisonic    = "PLUGIN.InguzEQ.Ambisonic";
+my $modeAdjust       = "PLUGIN.SqueezeDSP.Adjust";
+my $modeValue        = "PLUGIN.SqueezeDSP.Value";
+my $modePresets      = "PLUGIN.SqueezeDSP.Presets";
+my $modeSettings     = "PLUGIN.SqueezeDSP.Settings";
+my $modeEqualization = "PLUGIN.SqueezeDSP.Equalization";
+my $modeRoomCorr     = "PLUGIN.SqueezeDSP.RoomCorrection";
+my $modeMatrix       = "PLUGIN.SqueezeDSP.Matrix";
+my $modeSigGen       = "PLUGIN.SqueezeDSP.SignalGenerator";
+my $modeAmbisonic    = "PLUGIN.SqueezeDSP.Ambisonic";
 
 my $log = Slim::Utils::Log->addLogCategory({ 'category' => 'plugin.' . $thistag, 'defaultLevel' => 'WARN', 'description'  => $thisapp });
 
@@ -94,7 +94,8 @@ my $AMBROTATEXKEY = "XR3";
 # the usual convolver controlled by this plugin is called InguzDSP - this is
 # the command inserted in custom-convert.conf
 #
-my $convolver = "InguzDSP";
+#my $convolver = "InguzDSP";
+my $convolver = "SqueezeDSP";
 my $configPath = "";
 #use the revision number from the config file
 my $myconfigrevision = get_config_revision();
@@ -368,7 +369,7 @@ sub binaries {
 	}
 		
 	if ($os->{'os'} eq 'Windows') {
-		return qw(\publishWin32\InguzDSP.exe);
+		return qw(\publishWin64\SqueezeDSP.exe);
 	}	
 	
 }
@@ -491,7 +492,7 @@ sub initPlugin
 	#do any cleanup
 	housekeeping();
 	#do any app config settings, simplifies handover to Inguz app
-	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'InguzDSP.dll.config');
+	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP.dll.config');
 	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
 	
