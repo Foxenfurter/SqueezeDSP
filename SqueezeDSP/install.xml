@@ -2,21 +2,21 @@
 <extension>
   <name>PLUGIN_INGUZEQ_DISPLAYNAME</name>
   <description>PLUGIN_INGUZEQ_MODULEDESC</description>
-  <module>Plugins::InguzEQ::Plugin</module>
-  <version>0.9.39</version>
+  <module>Plugins::SqueezeDSP::Plugin</module>
+  <version>0.0.03</version>
 
-  <creator>Inguz Audio/Jonathan Fox</creator>
+  <creator>Jonathan Fox (Foxenfurter/Foxesden)</creator>
   <email></email>
   <homepageURL>https://github.com/Foxenfurter?tab=repositories</homepageURL>
         
   <id>85d7af9a-6766-11ed-9022-0242ac120002</id>
-  <optionsURL>plugins/InguzEQ/index.html</optionsURL>
+  <optionsURL>plugins/SqueezeDSP/index.html</optionsURL>
   <type>2</type>
   <defaultState>enabled</defaultState>
 
   <targetApplication>
   <id>SqueezeCenter</id>
-   <minVersion>7.3.0</minVersion>
+   <minVersion>7.7.0</minVersion>
    <maxVersion>*</maxVersion>
   </targetApplication>
 </extension>
