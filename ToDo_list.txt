@@ -5,6 +5,13 @@ custom.conf
 
 Source -> Sox -> CamillaDSP -> Output
 
+Example pipeline for flac
+flc flc * d0:50:99:85:19:e9
+# FRI
+[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ |  sox  -q -t wav - -t wav -C 0 -r 96000 -b24 - | [CamillaDSP] C:\ProgramData\SqueezeDSP\Settings\d0_50_99_85_19_e9.yml  | [flac] -cs -0 --totally-silent -
+
+
+
 Source this will be the initial source and could be various rates and bit depth
 Sox will be used to standardise the rate and bit depth. Initially this will be 24/96; but later will be configurable
 CamillDSP this will be a barebones install of CamillDSP the yaml file will have the same id as the player and will be managed via the plugin scrpt

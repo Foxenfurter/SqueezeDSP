@@ -1,6 +1,6 @@
-package Plugins::SqueezeDSP::Settings;
+package Plugins::S::Settings;
 # ----------------------------------------------------------------------------
-# SqueezeDSP\Settings.pm - player settings for SqueezeDSP plugin
+# SqueezeDSP	\Settings.pm - player settings for SqueezeDSP plugin
 # ----------------------------------------------------------------------------
 
 use strict;
@@ -9,8 +9,8 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Plugins::SqueezeDSP::Plugin;
 
-my $thistag = "SqueezeDSP";
-my $thisapp = "SqueezeDSP";
+my $thistag = "inguzeq";
+my $thisapp = "InguzEQ";
 
 my $log = logger('plugin.' . $thistag);
 my $prefs = preferences('plugin.' . $thistag);
@@ -25,7 +25,7 @@ sub new
 
 sub name
 {
-    return 'PLUGIN_SQUEEZEDSP_DISPLAYNAME';
+    return 'PLUGIN_INGUZEQ_DISPLAYNAME';
 }
 
 sub needsClient

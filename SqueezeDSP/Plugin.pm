@@ -1,53 +1,164 @@
 package Plugins::SqueezeDSP::Plugin;
-# ----------------------------------------------------------------------------
-# SqueezeDSP\Plugin.pm - a SlimServer plugin.
-# Makes a remote-control user interface, and writes settings files, which
-# provide parameters for operation of a convolution and filter engine.
-#
-#
-# Permission is hereby granted, free of charge, to any person obtaining a
-# copy of this software and associated documentation files (the "Software"),
-# to deal in the Software without restriction, including without limitation
-# the rights to use, copy, modify, merge, publish, distribute, sublicense,
-# and/or sell copies of the Software, and to permit persons to whom the
-# Software is furnished to do so, subject to the following conditions:
-#
-
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
-# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
-# IN THE SOFTWARE.
-# ----------------------------------------------------------------------------
-#
-# todo (TBD):
-# See todo list in Git https://github.com/Foxenfurter/SqueezeDSP
-#
-#
-#
-# Revision history:
-# Initial Version
-#
-#
-#
-
+=pod version history
+	# ----------------------------------------------------------------------------
+	# SqueezeDSP\Plugin.pm - a SlimServer plugin.
+	# Makes a remote-control user interface, and writes settings files, which
+	# provide parameters for operation of a convolution and filter engine.
+	#
+	# This file is licensed to you under the terms below.  If you received other
+	# files as part of a package containing this file, each might have different
+	# license terms.  If you do not accept the terms, do not use the software.
+	#
+	# Copyright (c) 2006-2012 by Hugh Pyle, inguzaudio.com, and contributors.
+	#
+	# Permission is hereby granted, free of charge, to any person obtaining a
+	# copy of this software and associated documentation files (the "Software"),
+	# to deal in the Software without restriction, including without limitation
+	# the rights to use, copy, modify, merge, publish, distribute, sublicense,
+	# and/or sell copies of the Software, and to permit persons to whom the
+	# Software is furnished to do so, subject to the following conditions:
+	#
+	# The above copyright notice and this permission notice shall be included in
+	# all copies or substantial portions of the Software.
+	#
+	# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+	# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+	# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+	# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+	# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+	# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+	# IN THE SOFTWARE.
+	# ----------------------------------------------------------------------------
+	#
+	# todo (TBD):
+	# 	web html5, ditch silverlight
+	# 	web silverlight animated "loading" thing
+	# 	web "extra text" on values (flat, etc)
+	# 	jive EQ adjust frequency (later, when we have a bar... radiobuttons would be too clunky)
+	# 	jive SigGen adjust frequency (ditto)
+	# 	jive titlebar icon?
+	# 	anything else marked TBD
+	#
+	#
+	# Revision history:
+	# 0.9.47			Amended Flac Conv to allow seek -
+	#					split templates into separate versioned file; updates are now based off this.
+	# 0.9.46
+	# JF 2022-11		Remove real old code, relating to 9_2_1 versions and earlier.
+	#					Removed settings for server pre 7.3
+	#					changed plugin location for settings to be in plugin prefs folder
+	#					copy application binary to plugin path	
+	#					changed location of binary so that is auto-detected 
+	#					added code for setting executable status to binary if not windows
+	#					fixed issues with generating custom.conf - no more additional white lines
+	#					fixed issue where re-boot required on regeneration of custom.conf
+	
+						
+	# JF 2020-03		Removed references to Silverlight - and added in new SL freed stuff
+	# JB's edits
+	# 20181212			added aac, mp4 filetypes
+	# 					corrected alc filetype to work with later versions of LMS
+	# 					deleted aap entry - replaced with aac entry
+	# 					added spt entry for Spotty (spotify plugin)
+	# 					changed FLAC compression levels to 0 (were 5)
+	# 					(very little lost in size but 0 takes significantly less time to encode)
+	#
+	# 20170805			Warning: Using a hash as a reference is deprecated at 3138
+	# 					L3138 $request->addResultLoop( 'Points_loop', $cnt, $ff, %h->{$ff} );
+	# 					changed %h->{$ff} to $h{$ff}
+	#
+	# High Pyle's revisions start here
+	# 0.9.33   20120101   encode with flac -5, CPU is cheap now
+	#          20110601   Merge contrib from do0g
+	# 0.9.30   20090105   SqueezeCenter 7.3 support
+	#                     add UHJ filetype
+	#                     remove SHN support
+	#                     add seek (for WAV and similar)
+	# 0.9.29   20081130   SqueezeCenter 7.2.1 support
+	#                     fix amb RotateZ serialization
+	# 0.9.28   20080412   SqueezeCenter version
+	#                     add CLI
+	#                     add Jive UI
+	#                     add web/silverlight UI
+	#                     add ambisonic UI stuff
+	#                     balance, width to 9dB; all incr 0.1dB
+	#                     lists sort case insensitively
+	#                     add sweep(short)
+	#                     add .aap (http://wiki.slimdevices.com/index.cgi?AACplus)
+	#                     fix 'save preset'
+	#                     fix flatness 0 written as 10
+	#                     restart track immediately when changing test-signal type
+	# 0.9.27   20070930   no change
+	# 0.9.25   20070916   add stereo pink noise test signals
+	#                     better save-presets default (patch from Toby)
+	#                     add -wavo for all FLAC transcodes, mostly for spdif
+	# 0.9.24   20070812   add -wav for [alac]
+	#                     Register the .amb type properly (6.5)
+	# 0.9.23   20070625   Fix large-size Adjust menu
+	#                     Add current-values to menus
+	#                     Add .amb support (Ambisonics B-format)
+	# 0.9.22   20070514   Fix compatibility with SlimServer 6.3.1 (again)
+	#                     Fix bad savePrefs bug
+	# 0.9.21   20070506   Sweep-with-EQ: separate versions for left and right
+	#                     move convert.conf to plugin dir for easier uninstall
+	#                     adjustable frequency centers for each EQ band
+	#                     fix the HASH(...) bug when loading from empty xml
+	#                     more robustness when loading presets/settings
+	#                     report cause of fatal errors when upgrading etc
+	# 0.9.20   20070422   remove non-band-limited signal generator functions
+	# 0.9.18   20070314   skew +/-25 samples, increase from 12
+	#                     signal generator: EQ'd versions, channel ident
+	#                     signal generator: editable frequency
+	# 0.9.16   20070311   Fix compatibility with SlimServer 6.3.1
+	# 0.9.15   20070310   Add signal-generator mode
+	#                     Put the source formatting back
+	#                     Miscellaneous tweaks
+	# 0.9.13   20070113   Fix & test the APE, Ogg and MusePack file types
+	# 0.9.12   20070113   Add linux support (debian, redhat)
+	# 0.9.11   20070101   Nice graphical button overlay
+	#                     Don't show the Flatness menu unless a room-correction
+	#                       filter has been selected (it's a no-op)
+	#                     Add matrix/width controls
+	#                     Add balance/skew controls
+	#                     Move equalizer type onto its own submenu
+	#                     Better defaults for first-time use
+	#                     Source formatting: fewer tabs
+	# 0.9.10   20061106   Fix non-44100 bitrates (SlimServer 6.5 or greater
+	#                       only), otherwise they play too fast or too slow
+	#                     Fix the AIFF filetype
+	#                     Fix the ALC (apple lossless) filetype
+	# 0.9.9    20060930   Use the $RATE$ flag to pass thru samplerate for 6.5
+	#                       and above
+	#                     Fix the WAV source type (for arbitrary wav files)
+	#                     Fix for mov123 (big-endian output)
+	# 0.9.8    20060811   Send WAV not FLAC to softsqueeze and SB1 clients
+	#                     Make menus' last-used-position stickier
+	# 0.9.7    20060730   Add 'flatness' control
+	# 0.9.6    20060716   Transcode to FLAC24 to avoid losing any dynamic range
+	# 0.9.5    20060603   Beta release under MIT-style free software license
+	#
+	#
+=cut
 
 use strict;
 use base qw(Slim::Plugin::Base);
 use Slim::Utils::Misc;
+use Slim::Utils::OSDetect;
 use File::Spec::Functions qw(:ALL);
 use File::Path;
+use File::Copy;
 use FindBin qw($Bin);
 use XML::Simple;
-use JSON::XS qw(from_json);
+use JSON::XS qw(decode_json);
 use Data::Dumper;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 
+use Slim::Player::TranscodingHelper;
+
 use Plugins::SqueezeDSP::Settings;
+
+use Plugins::SqueezeDSP::TemplateConfig;
 
 {
 	if($^O =~ /Win32/) {
@@ -55,33 +166,33 @@ use Plugins::SqueezeDSP::Settings;
 	}
 }
 
-
 # ------ names and versions ------
 
 # Revision number.
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.02";
+my $revision = "0.9.47";
 use vars qw($VERSION);
 $VERSION = $revision;
 
 # Names and name-related constants...
 #
-my $thistag = "squeezedsp";
-my $thisapp = "SqueezeDSP";
-my $settingstag = "SqueezeDSPSettings";
-my $confBegin = "squeezedsp#begin";
-my $confEnd = "squeezedsp#end";
-my $modeAdjust       = "PLUGIN.SqueezeDSP.Adjust";
-my $modeValue        = "PLUGIN.SqueezeDSP.Value";
-my $modePresets      = "PLUGIN.SqueezeDSP.Presets";
-my $modeSettings     = "PLUGIN.SqueezeDSP.Settings";
-my $modeEqualization = "PLUGIN.SqueezeDSP.Equalization";
-my $modeRoomCorr     = "PLUGIN.SqueezeDSP.RoomCorrection";
-my $modeMatrix       = "PLUGIN.SqueezeDSP.Matrix";
-my $modeSigGen       = "PLUGIN.SqueezeDSP.SignalGenerator";
-my $modeAmbisonic    = "PLUGIN.SqueezeDSP.Ambisonic";
+my $thistag = "inguzeq";
+my $thisapp = "InguzEQ";
+my $binary;
+my $settingstag = "InguzEQSettings";
+my $confBegin = "inguzeq#begin";
+my $confEnd = "inguzeq#end";
+my $modeAdjust       = "PLUGIN.InguzEQ.Adjust";
+my $modeValue        = "PLUGIN.InguzEQ.Value";
+my $modePresets      = "PLUGIN.InguzEQ.Presets";
+my $modeSettings     = "PLUGIN.InguzEQ.Settings";
+my $modeEqualization = "PLUGIN.InguzEQ.Equalization";
+my $modeRoomCorr     = "PLUGIN.InguzEQ.RoomCorrection";
+my $modeMatrix       = "PLUGIN.InguzEQ.Matrix";
+my $modeSigGen       = "PLUGIN.InguzEQ.SignalGenerator";
+my $modeAmbisonic    = "PLUGIN.InguzEQ.Ambisonic";
 
 my $log = Slim::Utils::Log->addLogCategory({ 'category' => 'plugin.' . $thistag, 'defaultLevel' => 'WARN', 'description'  => $thisapp });
 
@@ -104,10 +215,14 @@ my $AMBROTATEZKEY = "XR1";
 my $AMBROTATEYKEY = "XR2";
 my $AMBROTATEXKEY = "XR3";
 
-# the usual convolver controlled by this plugin is called CamillaDSP - this is
+# the usual convolver controlled by this plugin is called InguzDSP - this is
 # the command inserted in custom-convert.conf
 #
-my $convolver = "CamillaDSP";
+my $convolver = "InguzDSP";
+my $configPath = "";
+#use the revision number from the config file
+my $myconfigrevision = get_config_revision();
+	
 
 
 # ------ equalization channel stuff ------
@@ -146,12 +261,12 @@ my @fq31 = ( 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 50
 my %noFunctions = ();  # const
 my $needUpgrade = 0;
 my $fatalError;
-my $pluginDataDir;            # <appdata>\squeezedsp
-my $pluginSettingsDataDir;    # <appdata>\squeezedsp\Settings     used for settings and presets
-my $pluginImpulsesDataDir;    # <appdata>\squeezedsp\Impulses     used for room correction impulse filters
-my $pluginMatrixDataDir;      # <appdata>\squeezedsp\Matrix       used for cross-feed matrix impulse filters
-my $pluginMeasurementDataDir; # <appdata>\squeezedsp\Measurement  used for measurement sweeps and noise samples
-my $pluginTempDataDir;        # <appdata>\squeezedsp\Temp         used for any temporary stuff
+my $pluginDataDir;            # <appdata>\inguzeq
+my $pluginSettingsDataDir;    # <appdata>\inguzeq\Settings     used for settings and presets
+my $pluginImpulsesDataDir;    # <appdata>\inguzeq\Impulses     used for room correction impulse filters
+my $pluginMatrixDataDir;      # <appdata>\inguzeq\Matrix       used for cross-feed matrix impulse filters
+my $pluginMeasurementDataDir; # <appdata>\inguzeq\Measurement  used for measurement sweeps and noise samples
+my $pluginTempDataDir;        # <appdata>\inguzeq\Temp         used for any temporary stuff
 my @presetsMenuChoices;
 my @presetsMenuValues;
 my $doneJiveInit = 0;
@@ -167,7 +282,25 @@ sub keyval
 sub debug
 {
 	my $txt = shift;
-	$log->info("SqueezeDSP: " . $txt . "\n");
+	$log->info( $thisapp .": " . $txt . "\n");
+	#Putting an error here for easier debug
+	#$log->error( "Fox: " .  $txt . "\n" );
+}
+
+
+sub oops
+{
+	my ( $client, $desc, $message ) = @_;
+	$log->warn( "oops: " . $desc . ' - ' . $message );
+	$client->showBriefly( { line => [ $desc, $message ] } , 2);
+}
+
+sub fatal
+{
+	my ( $client, $desc, $message ) = @_;
+	$log->error( "fatal: " . $desc . ' - ' . $message );
+	$client->showBriefly( { line => [ $desc, $message ] } , 2);
+	$fatalError = $message;
 }
 
 # Format a value (bass level -> "+3dB", etc)
@@ -176,30 +309,30 @@ sub valuelabel
 	my $client = shift;
 	my $item = shift;
 	my $valu = shift;
-	my $labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_DECIBELS' );
+	my $labl = ' ' . $client->string( 'PLUGIN_INGUZEQ_DECIBELS' );
 	my $sign = ( $valu > 0 ) ? '+' : '';
-	my $extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_EQ_FLAT' ) : '';
+	my $extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_INGUZEQ_EQ_FLAT' ) : '';
 	if( $item eq $QUIETNESSKEY )
 	{
 		$sign = '';
 		$labl = '';
-		$extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_QUIETNESS_OFF' ) : '';
+		$extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_INGUZEQ_QUIETNESS_OFF' ) : '';
 	}
 	elsif( $item eq $FLATNESSKEY )
 	{
 		$sign = '';
 		$labl = '';
-		$extra = ( $valu == 10 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_FLATNESS_FLAT' ) : '';
+		$extra = ( $valu == 10 ) ? ' ' . $client->string( 'PLUGIN_INGUZEQ_FLATNESS_FLAT' ) : '';
 	}
 	elsif( ($item eq $SKEWKEY) || ($item eq $DEPTHKEY) )
 	{
-		$labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_SAMPLES' );
+		$labl = ' ' . $client->string( 'PLUGIN_INGUZEQ_SAMPLES' );
 		$extra = '';
 	}
 	elsif( ($item eq $AMBANGLEKEY) || ($item eq $AMBROTATEZKEY) || ($item eq $AMBROTATEYKEY) || ($item eq $AMBROTATEXKEY) )
 	{
 		$sign = '';
-		$labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_DEGREES' );
+		$labl = ' ' . $client->string( 'PLUGIN_INGUZEQ_DEGREES' );
 		$extra = '';
 	}
 	elsif( $item eq $AMBDIRECTKEY )
@@ -208,10 +341,10 @@ sub valuelabel
 		$labl = '';
 		# hypercardioid is 0.3333 (1/3)
 		# supercardioid is 0.5773 (sqrt3/3)
-		if( $valu==0 )    { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_FIGURE8' ); }
-		if( $valu==0.33 ) { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_HYPERCARDIOID' ); }
-		if( $valu==0.58 ) { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_SUPERCARDIOID' ); }
-		if( $valu==1 )    { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_CARDIOID' ); }
+		if( $valu==0 )    { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_FIGURE8' ); }
+		if( $valu==0.33 ) { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_HYPERCARDIOID' ); }
+		if( $valu==0.58 ) { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_SUPERCARDIOID' ); }
+		if( $valu==1 )    { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_CARDIOID' ); }
 	}
 	elsif( $item eq $AMBJWKEY )
 	{
@@ -219,7 +352,6 @@ sub valuelabel
 		$labl = '';
 		$extra = '';
 	}
-#	debug( 'valuelabel(' . $item . ')=' . $sign . $valu . $labl . $extra );
 	return $sign . $valu . $labl . $extra;
 }
 
@@ -235,23 +367,23 @@ sub freqlabel
 	{
 		if( $bandcount==2 )
 		{
-			my @v = ( 'PLUGIN_SQUEEZEDSP_BASS', 'PLUGIN_SQUEEZEDSP_TREBLE' );
+			my @v = ( 'PLUGIN_INGUZEQ_BASS', 'PLUGIN_INGUZEQ_TREBLE' );
 			$labl = $client->string( $v[$item] );
 		}
 		elsif( $bandcount==3 )
 		{
-			my @v = ( 'PLUGIN_SQUEEZEDSP_BASS', 'PLUGIN_SQUEEZEDSP_MID', 'PLUGIN_SQUEEZEDSP_TREBLE' );
+			my @v = ( 'PLUGIN_INGUZEQ_BASS', 'PLUGIN_INGUZEQ_MID', 'PLUGIN_INGUZEQ_TREBLE' );
 			$labl = $client->string( $v[$item] );
 		}
 		else
 		{
 			if( $freq > 1000 )
 			{
-				$labl = ( int( $freq / 100 ) / 10 ) . ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_KILOHERTZ' );
+				$labl = ( int( $freq / 100 ) / 10 ) . ' ' . $client->string( 'PLUGIN_INGUZEQ_KILOHERTZ' );
 			}
 			else
 			{
-				$labl = int( $freq ) . ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' );
+				$labl = int( $freq ) . ' ' . $client->string( 'PLUGIN_INGUZEQ_HERTZ' );
 			}
 		}
 	}
@@ -304,15 +436,6 @@ sub defaultFreqs
 	return @bandfreqs;
 }
 
-sub oldConfigPath
-{
-	# Before 0.9.21, and also for 6.3.1 slimserver, config file is slimserver-convert.conf
-	my @dirs = Slim::Utils::OSDetect::dirsFor('convert');
-	my $configPath = catdir( $dirs[0], 'slimserver-convert.conf' );
-	debug( "Old CP:" . $configPath );
-	return $configPath;
-}
-
 sub newConfigPath
 {
 	my @rootdirs = Slim::Utils::PluginManager::dirsFor($thisapp,'enabled');
@@ -322,11 +445,58 @@ sub newConfigPath
 		{
 			my $cp = catdir( $d, 'custom-convert.conf' );
 			debug( "New CP:" . $cp );
+			
 			return $cp;
 		}
 	}
-	return oldConfigPath();
+	fatal ("can't find directory with custom-convert.conf");
+	return;
 }
+
+#Setup path to Binary - may need to compile more versions to support this
+sub binaries {
+	my $os = Slim::Utils::OSDetect::details();
+	
+	if ($os->{'os'} eq 'Linux') {
+
+		if ($os->{'osArch'} =~ /x86_64/) {
+			return qw(/publishLinux-x64/InguzDSP );
+		}
+		if ($os->{'binArch'} =~ /i386/) {
+			return qw(/publishLinux-x86/InguzDSP);
+		}
+		if ($os->{'osArch'} =~ /aarch64/) {
+			return qw(/publishlinux-arm64/InguzDSP) ;
+		}
+		if ($os->{'binArch'} =~ /armhf/) {
+			return qw( /publishlinux-arm/InguzDSP );
+		}
+		if ($os->{'binArch'} =~ /arm/) {
+			return qw( /publishlinux-arm/InguzDSP );
+		}
+		
+		# fallback to offering all linux options for case when architecture detection does not work
+		return qw( /publishLinux-x86/InguzDSP );
+	}
+	
+	if ($os->{'os'} eq 'Unix') {
+	
+		if ($os->{'osName'} =~ /freebsd/) {
+			return qw( /publishLinux-x64/InguzDSP );
+		}
+		
+	}	
+	
+	if ($os->{'os'} eq 'Darwin') {
+		return qw(/publishOsx-x64/InguzDSP );
+	}
+		
+	if ($os->{'os'} eq 'Windows') {
+		return qw(\publishWin32\InguzDSP.exe);
+	}	
+	
+}
+
 
 
 # ------ slimserver delegates and initialization ------
@@ -338,7 +508,7 @@ sub getFunctions
 
 sub getDisplayName
 {
-	return 'PLUGIN_SQUEEZEDSP_DISPLAYNAME';
+	return 'PLUGIN_INGUZEQ_DISPLAYNAME';
 }
 
 sub enabled
@@ -373,19 +543,25 @@ sub initPlugin
 	Slim::Control::Request::addDispatch([$thistag . '.ambimenu', '_index', '_quantity'],     [1, 1, 1, \&ambimenuCommand]);		# amb settings sub-menu for Jive
 
 	my $appdata;
-	if(Slim::Utils::OSDetect::OS() eq 'win')
-	{
-		# Application data lives in a folder under \Documents and Settings\All Users\Application Data\
-		# (plugin may not always have write access to \Program Files\SqueezeCenter\Plugins\)
-		$appdata = Win32::GetFolderPath(0x0023); # 0x0023 is Win32::CSIDL_COMMON_APPDATA, but on linux that breaks for some reason
-	}
-	else
-	{
-		# debian, redhat, and everything else
-		$appdata = '/usr/share';
-		#$appdata = '/usr/local/slimserver/prefs';
-	}
+	#This is where preferences are stored.
+=begin mhereger suggested changing this to a folder installed on the plugin path.
 
+	 
+	 if(Slim::Utils::OSDetect::OS() eq 'win')
+	 {
+		# # Application data lives in a folder under \Documents and Settings\All Users\Application Data\
+		# # (plugin may not always have write access to \Program Files\SqueezeCenter\Plugins\)
+		 $appdata = Win32::GetFolderPath(0x0023); # 0x0023 is Win32::CSIDL_COMMON_APPDATA, but on linux that breaks for some reason
+	 }
+	 else
+	 {
+		# # debian, redhat, and everything else
+		 $appdata = '/usr/share';
+		# #$appdata = '/usr/local/slimserver/prefs';
+	 }
+=cut	
+
+    $appdata = Slim::Utils::Prefs::dir();
 	# Make sure our appdata directory exists, if at all possible
 	# Note: linux requires this already created, with owner slimserver
 	$pluginDataDir = catdir( $appdata, $thisapp );
@@ -406,13 +582,101 @@ sub initPlugin
 
 	$pluginTempDataDir = catdir( $pluginDataDir, 'Temp' );
 	mkdir( $pluginTempDataDir );
-
+		
+	my $bin = $class->binaries;
+	debug( "Fox plugin path: " . $bin . " binary" );
+	my $exec = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $bin);
+	debug( "Fox plugin path: " . $exec . " exec" );
+	#extension is only used for windows
+	my $binExtension = ".exe";
+	# set extension for windows
+	if (Slim::Utils::OSDetect::details()->{'os'} ne 'Windows') {
+		$binExtension = ""	;
+	}		
+	if (!-e $exec) {
+		$log->warn("$exec not executable");
+		return;
+	}
+	#derive standard binary path
+	$bin = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $convolver . $binExtension);
+	debug('standard binary path: ' . $bin);
+	# copy correct binary into bin folder unless it already exists
+	unless (-e $bin) {
+		debug('copying binary' . $exec );
+		copy( $exec , $bin)  or die "copy failed: $!";
+		#we know only windows has an extension, now set the binary
+		if ( $binExtension == "") {
+				debug('executable not having \'x\' permission, correcting');
+				chmod (0555, $bin);
+				
+		}	
+	}
+	
+	#do any cleanup
+	housekeeping();
+	#do any app config settings, simplifies handover to Inguz app
+	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'InguzDSP.dll.config');
+	my $soxbinary = Slim::Utils::Misc::findbin('sox');
+	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
+	
 	# Subscribe to player connect/disconnect messages
 	Slim::Control::Request::subscribe(
 		\&clientEvent,
 		[['client'],['new','reconnect','disconnect']]
 	);
 }
+
+sub housekeeping
+{
+	# Clean up temp directory as it tends to get full. Only want to get rid of filters and some json files
+	unlink glob catdir ( $pluginTempDataDir, "/",  '*.filter');
+	unlink glob catdir ( $pluginTempDataDir , "/", '*.json');
+	
+}
+
+sub amendPluginConfig()
+{
+	#routine for adding a value to a key in the app config.
+	my $myXML = shift;
+	my $myKey = shift;
+	my $myValue = shift;
+	debug('Fox amend file: ' .  $myXML . ' for key =' . $myKey . ' value= ' . $myValue );
+	my  $simple = XMLin($myXML, ForceArray => 1,
+                         KeepRoot   => 1,
+                         KeyAttr    => [], );
+	my $found = 0;						
+
+	my $str = "";
+	#this returns the number of low values in the add array
+	my $Elements = @{$simple->{configuration}[0]->{appSettings}[0]->{add}} ;
+	# now loop through the structure and see if myKey exists
+	#I am sure this could be done more neatly, but it works!
+	my $count = 0;
+	for (my $count = 0 ; $count < $Elements  ; $count++)
+	{
+		#get the key
+		$str = $simple->{configuration}[0]->{appSettings}[0]->{add}[$count]->{key} ;
+		#compare to the key we want
+		if ($str eq $myKey)
+		{
+			debug (	$str . " value found " ) ;
+			#set value
+			$simple->{configuration}[0]->{appSettings}[0]->{add}[$count]->{value} = $myValue;
+			$found = 1;		
+		}
+	}
+	#ok we didn't find it, so we now push the value in.	
+    if ($found == 0) { 
+		debug ("Adding Key");
+		push @{ $simple->{configuration}[0]{appSettings}[0]{add} }, { key  => $myKey,
+                                                        value => $myValue,
+                                                      };
+		}
+	#now save the updated cml	
+	print XMLout($simple, KeepRoot => 1, OutputFile => $myXML, );
+
+}
+
 
 sub shutdown
 {
@@ -448,36 +712,20 @@ sub clientEvent {
 }
 
 
-sub oops
-{
-	my ( $client, $desc, $message ) = @_;
-	$log->warn( "oops: " . $desc . ' - ' . $message );
-	$client->showBriefly( { line => [ $desc, $message ] } , 2);
-}
-
-sub fatal
-{
-	my ( $client, $desc, $message ) = @_;
-	$log->error( "fatal: " . $desc . ' - ' . $message );
-	$client->showBriefly( { line => [ $desc, $message ] } , 2);
-	$fatalError = $message;
-}
-
 sub initConfiguration
 {
 	# called when a client first appears
 	# (not on plugin init, because we need the client ID)
 	#
 	my $client = shift;
-	debug( "client " . $client->id() . " initializing" );
+	debug( "client " . $client->id() ." name " . $client->name ." initializing" );
 
 	# Check the current and previous installed versions of the plugin,
 	# in case we need to upgrade the prefs store (for this client)
 	#
 	my $prevrev = $prefs->client($client)->get( 'version' ) || '0.0.0.0';
-
+	
 	# For SlimServer 6.5 and later: conf file is "custom-convert.conf" in the plugin's folder.
-	# For SlimServer 6.3, it's "slimserver-convert.conf" in $bin.
 	# Write this .conf with sections for every client
 	# (because the convolver needs clientID as parameter)
 	# (and because different clients can have different transcode rules, eg SB1 doesn't understand FLAC)
@@ -493,65 +741,14 @@ sub initConfiguration
 	my @clientIDs = sort map { $_->id() } Slim::Player::Client::clients();
 	my @foundClients;
 
-	# Is there an existing slimserver-convert.conf in $Bin?
-	my $configPath = oldConfigPath();
+	#All this crap is related to moving a config location
+
 
 	# Pre... flag used to upgrade the prefs format.
 	my $PRE_0_9_21 = 0;
 	my $tryMoveConfig = 0;
-	if( -f $configPath )
-	{
-		$PRE_0_9_21 = 1;
-		$tryMoveConfig = 1;
-	}
-		
-	if( $tryMoveConfig )
-	{
-		# As of plugin 0.9.21 we've moved to the Plugins/SqueezeDSP directory
-		# so let's see if this one can be deleted
-
-		open( OLDCONFIG, "$configPath" ) || do { fatal( $client, undef, "Can't read from $configPath" ); return 0; };
-		@origLines = <OLDCONFIG>;
-		close( OLDCONFIG );
-
-		my $reWrite = 0;
-		my $canDelete = 1;
-		my $oldBlock = 0;
-		foreach( @origLines )
-		{
-			my $ignore = 0;
-			if( m/^\s*$/ ) {$ignore = 1;}
-			if( m/# Modified by $thisapp/i ) {$ignore = 1;}
-			if( m/#$confBegin#/i ) {$oldBlock = 1; $reWrite = 1;}
-			if( m/#$confEnd#/i ) {$oldBlock = 0; $ignore = 1; $reWrite = 1;}
-			next if( $ignore || $oldBlock );
-			$canDelete = 0;
-			last if $reWrite;
-		}
-		
-		if($canDelete)
-		{
-			debug( "deleting old " . $configPath );
-			unlink( $configPath )  || do { fatal( $client, undef, "Can't delete old $configPath" ); return 0; };
-		}
-		elsif( $reWrite )
-		{
-			debug( "rewriting old " . $configPath );
-			open( OUT, ">$configPath" ) || do { fatal( $client, undef, "Can't write to $configPath" ); return; };
-			my $now = localtime;
-			print OUT "# Modified by $thisapp, $now: moved to plugin folder\n";
-			my $copying = 1;
-			foreach ( @origLines )
-			{
-				my $ignore = 0;
-				$ignore = 1 if m/# Modified by $thisapp/i;
-				$copying = 0 if m/#$confBegin#/i;
-				print OUT if $copying && !$ignore;
-				$copying = 1 if m/#$confEnd#/i;
-			}
-		}
-	}
 	
+
 	# Is there an existing transcode configuration file?
 	@origLines = ();
 	$configPath = newConfigPath();
@@ -566,7 +763,9 @@ sub initConfiguration
 		@origLines = <CONFIG>;
 		close( CONFIG );
 
-		my @revs = split /\./, $revision;
+		#my @revs = split /\./, $revision;
+
+		my @revs = split /\./, $myconfigrevision;
 		for( @origLines )
 		{
 			if( m/#$confBegin#rev\:(.*)#client\:(.*)#/i )
@@ -576,26 +775,36 @@ sub initConfiguration
 				{
 					my $vert = shift( @test ) || 0;
 					next if $vert == $ver;  # file is same version as me
-					last if $vert > $ver;  # file is later than me
-					$upgradeReason = "Previous version $1 less than my $revision ($vert less than $ver)" unless $needUpgrade;
+					
+					# useful to force versions to be same.
+					# this step ignores templates that are lower than in the config. I think it is useful to ignore this so that we amend on any difference. 
+					# Although we should expect the number to incremented upwards. 
+					# last if $vert > $ver;  # file is later than me
+					# debug ("Script version higher than config: " . $ver . " - " . $vert );
+					debug ("Template version higher than config: " . $ver . " - " . $vert );
+					#$upgradeReason = "Previous version $1 less than my $revision ($vert less than $ver)" unless $needUpgrade;
+					$upgradeReason = "Previous version $1 less than my $myconfigrevision ($vert less than $ver)" unless $needUpgrade;
 					$needUpgrade = 1;
 					last;
 				}
 				push( @foundClients, $2 );
 			}
-#			last if $needUpgrade;
+        #continue looping through as otherwise we bale as soon as the version is read			
+        #	last if $needUpgrade;
 		}
 		@foundClients = sort @foundClients;
-
-#		unless( $needUpgrade )
-#		{
+		# original code don't need to do this if we need and upgrade
+		unless( $needUpgrade )
+		{
 			for my $c (@clientIDs)
 			{
 				my $ok = 0;
+				#loop through all the found clients vs clients
 				for my $cc (@foundClients)
 				{
 					if( $c eq $cc )
 					{
+						#if found client matches a client
 						$ok = 1;
 						last;
 					}
@@ -604,15 +813,17 @@ sub initConfiguration
 				{
 					$upgradeReason = "Client $c was not yet registered" unless $needUpgrade;
 					$needUpgrade = 1;
+					debug ("Client $c was not yet registered" );
 					push( @foundClients, $c );
-#					last;
+					last;
 				}
 			}
-#		}
+		}
 	}
 	else
 	{
 		# Need to create the config file from scratch
+		debug ("Config Not found, new one created" );
 		$upgradeReason = "New configuration" unless $needUpgrade;
 		$needUpgrade = 1;
 		@foundClients = @clientIDs;
@@ -634,15 +845,16 @@ sub initConfiguration
 	my $copying = 1;
 	foreach ( @origLines )
 	{
-		$copying = 0 if m/#$confBegin#/i;
-		print OUT if $copying;
-		$copying = 1 if m/#$confEnd#/i;
+		#This should be searching for existing lines containing update reasons - original had a bug which added a lots of blanks based
+		print OUT if m/# Modified by $thisapp/i;
+		
 	}
+	# Add a line to create some white space
 	print OUT "\n";
 
 	foreach my $clientID ( @foundClients )
 	{
-		print OUT "# #$confBegin#rev:$revision#client:$clientID# ***** BEGIN AUTOMATICALLY GENERATED SECTION - DO NOT EDIT ****\n";
+		print OUT "# #$confBegin#rev:$myconfigrevision#client:$clientID# ***** BEGIN AUTOMATICALLY GENERATED SECTION - DO NOT EDIT ****\n";
 
 		my $n = template( $clientID );
 		print OUT $n;
@@ -654,7 +866,11 @@ sub initConfiguration
 	
 	print OUT "";
 	close( OUT );
-	debug( "Rewrite done, needs restart" );
+	
+	#restart will trigger a re-writeso re-set need upgrade to off.
+	$needUpgrade = 0;
+	my $myRestart = Slim::Player::TranscodingHelper::loadConversionTables();
+	debug( "Reload Conversion Tables" );
 }
 
 
@@ -665,16 +881,12 @@ sub webPages
 {
 	my $class = shift;
 
-	if( Slim::Utils::PluginManager->isEnabled("Plugins::SqueezeDSP::Plugin") )
+	if( Slim::Utils::PluginManager->isEnabled("Plugins::InguzEQ::Plugin") )
 	{
-		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/index.html", \&handleWebIndex);
-	#	Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/Silverlight.js", \&handleWebStatic);
-	#	Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/Scene.js", \&handleWebStatic);
-	#	Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/Model.js", \&handleWebStatic);
-	#	Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/Scene.xaml", \&handleWebStatic);
-		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/squeezedsp.png", \&handleWebStatic);
-		Slim::Web::Pages->addPageLinks("plugins", { $class->getDisplayName => 'plugins/SqueezeDSP/index.html' });
-		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => 'plugins/SqueezeDSP/squeezedsp.png' });
+		Slim::Web::Pages->addPageFunction("plugins/InguzEQ/index.html", \&handleWebIndex);
+		Slim::Web::Pages->addPageFunction("plugins/InguzEQ/inguz.png", \&handleWebStatic);
+		Slim::Web::Pages->addPageLinks("plugins", { $class->getDisplayName => 'plugins/InguzEQ/index.html' });
+		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => 'plugins/InguzEQ/inguz.png' });
 	}
 	else
 	{
@@ -688,15 +900,17 @@ sub handleWebIndex
 	my ( $client, $params ) = @_;
 	if( $client = Slim::Player::Client::getClient($params->{player}) )
 	{
+		return Slim::Web::HTTP::filltemplatefile('plugins/InguzEQ/index.html', $params);
+		#We now no longer need to flash the restart message, because the table is reloaded automatically	
 		# Very first thing: check the config and prefs.
-		if( $needUpgrade==1 )
-		{
-			return Slim::Web::HTTP::filltemplatefile('plugins/SqueezeDSP/restart.html', $params);
-		}
-		else
-		{
-			return Slim::Web::HTTP::filltemplatefile('plugins/SqueezeDSP/index.html', $params);
-		}
+		#if( $needUpgrade==1 )
+		#{
+	#		return Slim::Web::HTTP::filltemplatefile('plugins/InguzEQ/restart.html', $params);
+	#	}
+	#	else
+	#	{
+	#		return Slim::Web::HTTP::filltemplatefile('plugins/InguzEQ/index.html', $params);
+	#	}
 	}
 }
 
@@ -846,7 +1060,7 @@ sub loadPrefs
 
 	defaultPrefs( $client );
 
-	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_LOADED');
+	my $line = $client->string('PLUGIN_INGUZEQ_PRESET_LOADED');
 	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 }
 
@@ -933,7 +1147,7 @@ sub SigGenAttributes
 
 	if( $siggen eq 'Ident' )
 	{
-		return( "Type=\"Ident\" L=\"" . $client->string('PLUGIN_SQUEEZEDSP_SIGGEN_IDENT_L') . "\" R=\"" . $client->string('PLUGIN_SQUEEZEDSP_SIGGEN_IDENT_R') . "\"" ); 
+		return( "Type=\"Ident\" L=\"" . $client->string('PLUGIN_INGUZEQ_SIGGEN_IDENT_L') . "\" R=\"" . $client->string('PLUGIN_INGUZEQ_SIGGEN_IDENT_R') . "\"" ); 
 	}
 	if( $siggen eq 'Sweep' )
 	{
@@ -1049,56 +1263,7 @@ sub upgradePrefs
 		my $client = Slim::Player::Client::getClient( $clientID );
 		if( defined( $client ) )
 		{
-			if( $PRE_0_9_21 )
-			{
-				# For versions before 0.9.21
-				# - The chosen band values (gain, dB) are stored in slim prefs 'squeezedsp-band<X>value' where X is zero thru 8.
-				# - The 0 thru 8 represent the fixed freqs on our scale,
-				#   so with a 2-band UI, that's 'band0value' and 'band8value'.
-				# For later versions:
-				# - the prefs are stored as 'squeezedsp-b<X>value' where X is 0 for the first band (whatever its frequency),
-				#   1 for the second band (whatever its frequency), and so on (so allowing an unlimited number of bands if anyone ever wanted)
-				# - there's also a set of 'squeezedsp-b<X>freq' values with the center frequencies.
-				#   Of course the center frequencies must be sorted and distinct.
-				my @opts = ();
-				my @frqs = ();
-				my $bandcount = getPref( $client, 'bands' );
-				if( $bandcount==3 )
-				{
-					@opts = ('00', '04', '08');
-					@frqs = @fq3;
-				}
-				elsif( $bandcount==5 )
-				{
-					@opts = ('00', '02', '04', '06', '08');
-					@frqs = @fq5;
-				}
-				elsif( $bandcount==9 )
-				{
-					@opts = ('00', '01', '02', '03', '04', '05', '06', '07', '08');
-					@frqs = @fq9;
-				}
-				else
-				{
-					@opts = ('00', '08');
-					@frqs = @fq2;
-				}
-				my $j = 0;
-				for my $n ( @opts )
-				{
-					debug( $j. "@" . $frqs[$j] . "=" . ( getPref( $client, 'band' . $n . 'value' ) || 0 ) );
-					setPref( $client, 'b' . $j . 'value', ( getPref( $client, 'band' . $n . 'value' ) || 0 ) );
-					setPref( $client, 'b' . $j . 'freq',  $frqs[$j] );
-					$j++;
-				}
-				# Now clean up all the bandNvalue prefs
-				for my $k ( '0', '1', '2', '3', '4', '5', '6', '7', '8', '00', '01', '02', '03', '04', '05', '06', '07', '08' )
-				{
-					delPref( $client, 'band' . $k . 'value' );
-				}
-			}
 
-			# if( $prevrev eq 'x.y.zz' ) { .... }
 			
 			unless( $prevrev eq $revision )
 			{
@@ -1162,7 +1327,7 @@ sub getMainMenuChoices
 	}
 	elsif( $needUpgrade==1 )
 	{
-		$opts{$ERRORKEY} = $client->string( 'PLUGIN_SQUEEZEDSP_RESTART' );
+		$opts{$ERRORKEY} = $client->string( 'PLUGIN_INGUZEQ_RESTART' );
 	}
 	else
 	{
@@ -1176,14 +1341,14 @@ sub getMainMenuChoices
 
 		if( currentFilter( $client ) ne '-' )
 		{
-			$opts{'91.' . $FLATNESSKEY} = $client->string( 'PLUGIN_SQUEEZEDSP_FLATNESS' );
+			$opts{'91.' . $FLATNESSKEY} = $client->string( 'PLUGIN_INGUZEQ_FLATNESS' );
 		}
 
-		$opts{'92.' . $QUIETNESSKEY} = $client->string( 'PLUGIN_SQUEEZEDSP_QUIETNESS' );
-		$opts{'93.' . $BALANCEKEY}   = $client->string( 'PLUGIN_SQUEEZEDSP_BALANCE' );
-		$opts{'94.' . $WIDTHKEY}     = $client->string( 'PLUGIN_SQUEEZEDSP_WIDTH' );
-		$opts{'95.' . $SETTINGSKEY}  = $client->string( 'PLUGIN_SQUEEZEDSP_SETTINGS' );
-		$opts{'96.' . $PRESETSKEY}   = $client->string( 'PLUGIN_SQUEEZEDSP_PRESETS' );
+		$opts{'92.' . $QUIETNESSKEY} = $client->string( 'PLUGIN_INGUZEQ_QUIETNESS' );
+		$opts{'93.' . $BALANCEKEY}   = $client->string( 'PLUGIN_INGUZEQ_BALANCE' );
+		$opts{'94.' . $WIDTHKEY}     = $client->string( 'PLUGIN_INGUZEQ_WIDTH' );
+		$opts{'95.' . $SETTINGSKEY}  = $client->string( 'PLUGIN_INGUZEQ_SETTINGS' );
+		$opts{'96.' . $PRESETSKEY}   = $client->string( 'PLUGIN_INGUZEQ_PRESETS' );
 	}
 	return %opts;
 }
@@ -1214,7 +1379,7 @@ sub setMode
 	# Use INPUT.List to display the main menu
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_LINE1',
+		'header' => 'PLUGIN_INGUZEQ_LINE1',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choices,
@@ -1312,7 +1477,7 @@ sub jiveTopMenu
 		$k =~ s/\.\.\.//;
 		push @menuItems, {
 			text => $menuItem,
-#			window => { 'text' => $k, 'icon-id' => 'plugins/SqueezeDSP/squeezedsp.png', 'titleStyle' => 'artists' },
+#			window => { 'text' => $k, 'icon-id' => 'plugins/InguzEQ/inguz.png', 'titleStyle' => 'artists' },
 			id => $thistag . $menuValu,
 			weight => ($listIndex + 1) * 10,
 #			node => $thistag,
@@ -1382,7 +1547,7 @@ sub jiveClearTopMenu
 }
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Settings ------
+# ------ Mode: PLUGIN.InguzEQ.Settings ------
 # Display the setttings menu
 
 
@@ -1391,16 +1556,16 @@ sub getSettingsOptions
 	my $addAmbi = shift;
 
 	my %opts = ();
-	$opts{'-e-'} = 'PLUGIN_SQUEEZEDSP_EQUALIZER';
-	$opts{'-r-'} = 'PLUGIN_SQUEEZEDSP_ROOMCORR';
-	$opts{'-x-'} = 'PLUGIN_SQUEEZEDSP_MATRIX';
-	$opts{$SKEWKEY} = 'PLUGIN_SQUEEZEDSP_SKEW';
-#	$opts{$DEPTHKEY} = 'PLUGIN_SQUEEZEDSP_DEPTH';
-	$opts{'-y-'} = 'PLUGIN_SQUEEZEDSP_SIGGEN';
+	$opts{'-e-'} = 'PLUGIN_INGUZEQ_EQUALIZER';
+	$opts{'-r-'} = 'PLUGIN_INGUZEQ_ROOMCORR';
+	$opts{'-x-'} = 'PLUGIN_INGUZEQ_MATRIX';
+	$opts{$SKEWKEY} = 'PLUGIN_INGUZEQ_SKEW';
+#	$opts{$DEPTHKEY} = 'PLUGIN_INGUZEQ_DEPTH';
+	$opts{'-y-'} = 'PLUGIN_INGUZEQ_SIGGEN';
 
 	if( $addAmbi )
 	{
-		$opts{'-z-'} = 'PLUGIN_SQUEEZEDSP_AMBI_DECODE';
+		$opts{'-z-'} = 'PLUGIN_INGUZEQ_AMBI_DECODE';
 	}
 
 	return %opts;
@@ -1433,7 +1598,7 @@ sub setSettingsMode
 	# Use INPUT.List to display the choices
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_SETTINGS',
+		'header' => 'PLUGIN_INGUZEQ_CHOOSE_SETTINGS',
 		'stringHeader' => 1,
 		'listRef' => \@choicev,
 		'externRef' => \@choices,
@@ -1591,23 +1756,23 @@ Slim::Buttons::Common::addMode( $modeSettings, \%noFunctions, \&setSettingsMode 
 
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Ambisonic ------
+# ------ Mode: PLUGIN.InguzEQ.Ambisonic ------
 # Display the Ambisonic setttings menu
 
 
 sub getAmbiOptions
 {
 	my %opts = ();
-	$opts{'01.UHJ'} = 'PLUGIN_SQUEEZEDSP_AMBI_UHJ';
-	$opts{'02.Blumlein'} = 'PLUGIN_SQUEEZEDSP_AMBI_BLUMLEIN';
-	$opts{'03.Crossed'} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID';
-#	$opts{'04.Crossed+jW'} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_PLUSJW';
-	$opts{$AMBANGLEKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_ANGLE';
-	$opts{$AMBDIRECTKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_DIRECT';
-#	$opts{$AMBJWKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_JW';
-	$opts{$AMBROTATEZKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_ROTATION_Z';
-	$opts{$AMBROTATEYKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_ROTATION_Y';
-	$opts{$AMBROTATEXKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_ROTATION_X';
+	$opts{'01.UHJ'} = 'PLUGIN_INGUZEQ_AMBI_UHJ';
+	$opts{'02.Blumlein'} = 'PLUGIN_INGUZEQ_AMBI_BLUMLEIN';
+	$opts{'03.Crossed'} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID';
+#	$opts{'04.Crossed+jW'} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_PLUSJW';
+	$opts{$AMBANGLEKEY} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_ANGLE';
+	$opts{$AMBDIRECTKEY} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_DIRECT';
+#	$opts{$AMBJWKEY} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_JW';
+	$opts{$AMBROTATEZKEY} = 'PLUGIN_INGUZEQ_AMBI_ROTATION_Z';
+	$opts{$AMBROTATEYKEY} = 'PLUGIN_INGUZEQ_AMBI_ROTATION_Y';
+	$opts{$AMBROTATEXKEY} = 'PLUGIN_INGUZEQ_AMBI_ROTATION_X';
 
 	return %opts;
 }
@@ -1639,7 +1804,7 @@ sub setAmbiMode
 	# Use INPUT.List to display the choices
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_AMBI_CHOOSE_SETTINGS',
+		'header' => 'PLUGIN_INGUZEQ_AMBI_CHOOSE_SETTINGS',
 		'stringHeader' => 1,
 		'listRef' => \@choicev,
 		'externRef' => \@choices,
@@ -1775,7 +1940,7 @@ sub jiveAmbiMenuDispatch
 Slim::Buttons::Common::addMode( $modeAmbisonic, \%noFunctions, \&setAmbiMode );
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Equalization ------
+# ------ Mode: PLUGIN.InguzEQ.Equalization ------
 # Choose how many channels of equalization to use
 
 
@@ -1783,14 +1948,14 @@ sub getEqualizationOptions
 {
 	my $more = shift;
 	my %opts = ();
-	$opts{"02"} = 'PLUGIN_SQUEEZEDSP_2BAND';
-	$opts{"03"} = 'PLUGIN_SQUEEZEDSP_3BAND';
-	$opts{"05"} = 'PLUGIN_SQUEEZEDSP_5BAND';
-	$opts{"09"} = 'PLUGIN_SQUEEZEDSP_9BAND';
+	$opts{"02"} = 'PLUGIN_INGUZEQ_2BAND';
+	$opts{"03"} = 'PLUGIN_INGUZEQ_3BAND';
+	$opts{"05"} = 'PLUGIN_INGUZEQ_5BAND';
+	$opts{"09"} = 'PLUGIN_INGUZEQ_9BAND';
 	if( $more )
 	{
-		$opts{"15"} = 'PLUGIN_SQUEEZEDSP_15BAND';
-		$opts{"31"} = 'PLUGIN_SQUEEZEDSP_31BAND';
+		$opts{"15"} = 'PLUGIN_INGUZEQ_15BAND';
+		$opts{"31"} = 'PLUGIN_INGUZEQ_31BAND';
 	}
 	return %opts;
 }
@@ -1813,7 +1978,7 @@ sub setEqualizationMode
 	# Use INPUT.List to display the list of band choices
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_EQSETTINGS',
+		'header' => 'PLUGIN_INGUZEQ_CHOOSE_EQSETTINGS',
 		'stringHeader' => 1,
 		'listRef' => \@choicev,
 		'externRef' => \@choices,
@@ -1894,7 +2059,7 @@ Slim::Buttons::Common::addMode( $modeEqualization, \%noFunctions, \&setEqualizat
 
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Adjust ------
+# ------ Mode: PLUGIN.InguzEQ.Adjust ------
 # Displays bar for editing one band of equalization
 
 sub setAdjustMode
@@ -2036,8 +2201,8 @@ sub setAdjustMode
 					if( $item < $bandcount-1 ) { $max = int( getPref( $client, 'b' . ($item+1). 'freq' ) || defaultFreq( $client, ($item+1), $bandcount ) ) - 5; }
 					debug( $item . " of " . $bandcount . ", min " . $min . ", max " . $max );
 					Slim::Buttons::Common::pushModeLeft( $client, $modeValue, { 
-						'header' => $client->string( 'PLUGIN_SQUEEZEDSP_BANDCENTER' ),
-						'suffix' => ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' ),
+						'header' => $client->string( 'PLUGIN_INGUZEQ_BANDCENTER' ),
+						'suffix' => ' ' . $client->string( 'PLUGIN_INGUZEQ_HERTZ' ),
 						'min' => $min,
 						'max' => $max,
 						'increment' => 1,
@@ -2193,7 +2358,7 @@ Slim::Buttons::Common::addMode( $modeAdjust, \%noFunctions, \&setAdjustMode );
 
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Presets ------
+# ------ Mode: PLUGIN.InguzEQ.Presets ------
 # Displays menu to load a preset
 # Presets are files "xxx.preset.conf" in the plugin's Data folder.
 # They are exactly the same format as the "xxx.settings.conf" file used for client settings,
@@ -2231,7 +2396,7 @@ sub getPresetsList
 {
 	my $client = shift;
 	my $nopath = shift;
-	my %presets = ( '-' => $client->string('PLUGIN_SQUEEZEDSP_SAVEPRESETAS') );
+	my %presets = ( '-' => $client->string('PLUGIN_INGUZEQ_SAVEPRESETAS') );
 	my %more = getPresetsListNoNone( $client, $nopath );
 	@presets{keys %more} = values %more;
 	return %presets;
@@ -2262,7 +2427,7 @@ sub setPresetsMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_PRESET',
+		'header' => 'PLUGIN_INGUZEQ_CHOOSE_PRESET',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@presetsMenuValues,
@@ -2345,7 +2510,7 @@ sub savePreset
 	$name =~ s/\.(?:(preset\.conf))$//i;
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_SAVEPRESETFILE',
+		'header' => 'PLUGIN_INGUZEQ_SAVEPRESETFILE',
 		'stringHeader' => 1,
 		'charsRef' => \@chars,
 		'numberLetterRef' => \@mixed,
@@ -2364,7 +2529,7 @@ sub savePreset
 					my $ok = savePrefs( $client, $file );
 					Slim::Buttons::Common::popMode( $client );
 					$client->pushLeft();
-					$client->showBriefly( { line => [ $name, $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED') ] } , 2) if $ok;
+					$client->showBriefly( { line => [ $name, $client->string('PLUGIN_INGUZEQ_PRESET_SAVED') ] } , 2) if $ok;
 					# reload the presets list
 					initPresetsChoices( $client );
 				}
@@ -2409,9 +2574,9 @@ sub jivePresetsMenu
 				input => {
 					initialText  => '',
 					len          => 1,
-					allowedChars => Slim::Utils::Strings::string('PLUGIN_SQUEEZEDSP_FILECHARS'),
+					allowedChars => Slim::Utils::Strings::string('PLUGIN_INGUZEQ_FILECHARS'),
 					help         => {
-						           text => Slim::Utils::Strings::string('PLUGIN_SQUEEZEDSP_PRESET_HELP'),
+						           text => Slim::Utils::Strings::string('PLUGIN_INGUZEQ_PRESET_HELP'),
 					},
 					softbutton1  => Slim::Utils::Strings::string('INSERT'),
 					softbutton2  => Slim::Utils::Strings::string('DELETE'),
@@ -2427,7 +2592,7 @@ sub jivePresetsMenu
 					},
 				},
 				window => {
-					text => Slim::Utils::Strings::string('PLUGIN_SQUEEZEDSP_SAVEPRESETFILE'),
+					text => Slim::Utils::Strings::string('PLUGIN_INGUZEQ_SAVEPRESETFILE'),
 				},
 			};
 		}
@@ -2457,9 +2622,7 @@ sub jivePresetsMenu
 Slim::Buttons::Common::addMode( $modePresets, \%noFunctions, \&setPresetsMode );
 
 
-
-
-# ------ Mode: PLUGIN.SqueezeDSP.RoomCorrection ------
+# ------ Mode: PLUGIN.InguzEQ.RoomCorrection ------
 # Displays menu to select a correction filter.
 # Correction filters are any file in the plugin's Data folder with .WAV file extension.
 # Of course not all wav files will work properly as filters, but this plugin doesn't know that.
@@ -2496,7 +2659,7 @@ sub getFiltersList
 	my $client = shift;
 	my $folder = shift;
 	my $nopath = shift;
-	my %impulses = ( '-' => $client->string('PLUGIN_SQUEEZEDSP_FILTERNONE') );
+	my %impulses = ( '-' => $client->string('PLUGIN_INGUZEQ_FILTERNONE') );
 	my %more = getFiltersListNoNone( $client, $folder, $nopath );
 	@impulses{keys %more} = values %more;
 	return %impulses;
@@ -2526,7 +2689,7 @@ sub setRoomCorrectionMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_RCFILTER',
+		'header' => 'PLUGIN_INGUZEQ_CHOOSE_RCFILTER',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choicev,
@@ -2599,7 +2762,7 @@ Slim::Buttons::Common::addMode( $modeRoomCorr, \%noFunctions, \&setRoomCorrectio
 
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Matrix ------
+# ------ Mode: PLUGIN.InguzEQ.Matrix ------
 # Displays menu to control stereo image width and cross-feed filters.
 # Cross-feed filters are any file in the plugin's Matrix folder with .WAV file extension.
 # Of course not all wav files will work properly as filters, but this plugin doesn't know that.
@@ -2629,7 +2792,7 @@ sub setMatrixMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_MATRIXFILTER',
+		'header' => 'PLUGIN_INGUZEQ_CHOOSE_MATRIXFILTER',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choicev,
@@ -2703,7 +2866,7 @@ Slim::Buttons::Common::addMode( $modeMatrix, \%noFunctions, \&setMatrixMode );
 
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.SignalGenerator ------
+# ------ Mode: PLUGIN.InguzEQ.SignalGenerator ------
 # Displays menu to control a signal generator.
 # Signal-generator mode "None" just plays the music.  Anything else overrides the music with a test signal.
 
@@ -2718,24 +2881,24 @@ sub getSignalGeneratorOptions
 {
 	my %opts = ();
 
-	$opts{'01.None'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_NONE';
-	$opts{'02.Ident'}       = 'PLUGIN_SQUEEZEDSP_SIGGEN_IDENT';
-	$opts{'03.Sweep'}       = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP';
-	$opts{'03.SweepShort'}  = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP_SHORT';
-	$opts{'04.SweepEQL'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP_EQ_L';
-	$opts{'05.SweepEQR'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP_EQ_R';
-	$opts{'06.Pink'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK';
-	$opts{'07.PinkEQ'}      = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK_EQ';
-	$opts{'08.PinkSt'}      = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK_STEREO';
-	$opts{'09.PinkStEQ'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK_STEREO_EQ';
-	$opts{'10.White'}       = 'PLUGIN_SQUEEZEDSP_SIGGEN_WHITE';
-	$opts{'11.Sine'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_SINE';
-	$opts{'12.Quad'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_QUAD';
-	$opts{'13.BLSquare'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_SQUARE';
-	$opts{'14.BLTriangle'}  = 'PLUGIN_SQUEEZEDSP_SIGGEN_TRIANGLE';
-	$opts{'15.BLSawtooth'}  = 'PLUGIN_SQUEEZEDSP_SIGGEN_SAWTOOTH';
-	$opts{'16.Intermodulation'} = 'PLUGIN_SQUEEZEDSP_SIGGEN_IM';
-#	$opts{'17.ShapedBurst'} = 'PLUGIN_SQUEEZEDSP_SIGGEN_BURST';
+	$opts{'01.None'}        = 'PLUGIN_INGUZEQ_SIGGEN_NONE';
+	$opts{'02.Ident'}       = 'PLUGIN_INGUZEQ_SIGGEN_IDENT';
+	$opts{'03.Sweep'}       = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP';
+	$opts{'03.SweepShort'}  = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP_SHORT';
+	$opts{'04.SweepEQL'}    = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP_EQ_L';
+	$opts{'05.SweepEQR'}    = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP_EQ_R';
+	$opts{'06.Pink'}        = 'PLUGIN_INGUZEQ_SIGGEN_PINK';
+	$opts{'07.PinkEQ'}      = 'PLUGIN_INGUZEQ_SIGGEN_PINK_EQ';
+	$opts{'08.PinkSt'}      = 'PLUGIN_INGUZEQ_SIGGEN_PINK_STEREO';
+	$opts{'09.PinkStEQ'}    = 'PLUGIN_INGUZEQ_SIGGEN_PINK_STEREO_EQ';
+	$opts{'10.White'}       = 'PLUGIN_INGUZEQ_SIGGEN_WHITE';
+	$opts{'11.Sine'}        = 'PLUGIN_INGUZEQ_SIGGEN_SINE';
+	$opts{'12.Quad'}        = 'PLUGIN_INGUZEQ_SIGGEN_QUAD';
+	$opts{'13.BLSquare'}    = 'PLUGIN_INGUZEQ_SIGGEN_SQUARE';
+	$opts{'14.BLTriangle'}  = 'PLUGIN_INGUZEQ_SIGGEN_TRIANGLE';
+	$opts{'15.BLSawtooth'}  = 'PLUGIN_INGUZEQ_SIGGEN_SAWTOOTH';
+	$opts{'16.Intermodulation'} = 'PLUGIN_INGUZEQ_SIGGEN_IM';
+#	$opts{'17.ShapedBurst'} = 'PLUGIN_INGUZEQ_SIGGEN_BURST';
 
 	return %opts;
 }
@@ -2766,7 +2929,7 @@ sub setSignalGeneratorMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_SIGGEN',
+		'header' => 'PLUGIN_INGUZEQ_CHOOSE_SIGGEN',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choicev,
@@ -2800,7 +2963,7 @@ sub setSignalGeneratorMode
 					my $genfreq = getPref( $client, 'sigfreq' ) || 1000;
 					Slim::Buttons::Common::pushModeLeft( $client, $modeValue, { 
 						'header' => $gentype,
-						'suffix' => ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' ),
+						'suffix' => ' ' . $client->string( 'PLUGIN_INGUZEQ_HERTZ' ),
 						'min' => 10,
 						'max' => 22000,
 						'increment' => 1,
@@ -2868,7 +3031,7 @@ Slim::Buttons::Common::addMode( $modeSigGen, \%noFunctions, \&setSignalGenerator
 
 
 
-# ------ Mode: PLUGIN.SqueezeDSP.Value ------
+# ------ Mode: PLUGIN.InguzEQ.Value ------
 # Numeric value chooser
 #
 # Parameters: header, suffix, min, max, increment, valueRef
@@ -3034,7 +3197,7 @@ sub currentQuery
 	}
 
 	# Include the client's "current.json" file if we can
-	# from_json(...)
+	# decode_json(...)
 
 	my $json = catdir( $pluginTempDataDir, join('_', split(/:/, $client->id())) . '.current.json' );
 	open( CURR, "$json" ) || do
@@ -3048,7 +3211,7 @@ sub currentQuery
 	debug( "@jsdata" );
 	eval
 	{
-		my $current = from_json("@jsdata");
+		my $current = decode_json("@jsdata");
 #		debug(Data::Dump::dump($current));
 		$cnt = 0;
 		my @pts = $current->{'Points_loop'};
@@ -3202,7 +3365,7 @@ sub setvalCommand
 		setBandCount( $client, $val );
 
 		# ShowBriefly to tell jive users that the band count has been set
-		my $line = $client->string('PLUGIN_SQUEEZEDSP_CHOSEN_BANDS');
+		my $line = $client->string('PLUGIN_INGUZEQ_CHOSEN_BANDS');
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 
 		# Refresh the Jive main menu
@@ -3236,7 +3399,7 @@ sub setvalCommand
 		# To find something appropriate to display, we could look up the $prf
 		# in the main menu's items (yuk!).  But easier just to say "ok, got it".
 
-		my $line = $client->string('PLUGIN_SQUEEZEDSP_CHOSEN_VALUE');
+		my $line = $client->string('PLUGIN_INGUZEQ_CHOSEN_VALUE');
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 1 } );
 	}
 	$request->setStatusDone();
@@ -3251,7 +3414,7 @@ sub setFilterValue( $client, $prf, $val )
 	{
 		# that's OK
 		setPref( $client, $prf, $val );
-		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTERNONE' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTERNONE';
+		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_INGUZEQ_CHOSEN_MATRIXFILTERNONE' : 'PLUGIN_INGUZEQ_CHOSEN_RCFILTERNONE';
 		my $line = $client->string( $msg );
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 		return;
@@ -3267,7 +3430,7 @@ sub setFilterValue( $client, $prf, $val )
 	if( -f $path )
 	{
 		setPref( $client, $prf, $path );
-		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTER' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTER';
+		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_INGUZEQ_CHOSEN_MATRIXFILTER' : 'PLUGIN_INGUZEQ_CHOSEN_RCFILTER';
 		my $line = $client->string( $msg );
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 	}
@@ -3394,7 +3557,7 @@ sub saveasCommand
 	setPref( $client, 'preset', $file );
 	savePrefs( $client, $file );
 
-	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED');
+	my $line = $client->string('PLUGIN_INGUZEQ_PRESET_SAVED');
 	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 
 	$request->setStatusDone();
@@ -3510,33 +3673,21 @@ sub template
 		debug( "template? client " . $clientID . " not defined!" );
 		$template = template_FLAC24();  # bah
 	}
+=pod removed support for pre 7.3 server
+=cut
 	elsif( Slim::Player::Client::contentTypeSupported( $client, 'flc' ) && ( $client->model() ne "softsqueeze" ) )
 	{
-		if( $::VERSION ge '7.3' )
-		{
+		
 			# if the player supports flac, use it
 			# except for softsqueeze, which doesn't decode FLAC24 properly
 			debug( "client " . $clientID . " is " . $client->model() . ", using FLAC24" );
 			$template = template_FLAC24();
-		}
-		else
-		{
-			debug( "client " . $clientID . " is " . $client->model() . ", using FLAC24_pre73" );
-			$template = template_FLAC24_pre73();
-		}
+
 	}
 	else
 	{
-		if( $::VERSION ge '7.3' )
-		{
 			debug( "client " . $clientID . " is " . $client->model() . ", using WAV16" );
 			$template = template_WAV16();
-		}
-		else
-		{
-			debug( "client " . $clientID . " is " . $client->model() . ", using WAV16_pre73" );
-			$template = template_WAV16_pre73();
-		}
 	}
 
 	# Fix up the variable bits
@@ -3561,260 +3712,15 @@ sub template
 }
 
 
-
-# transcode for 16-bit WAV output (for softsqueeze, slimp3?, squeezebox1, etc)
-sub template_WAV16_pre73
-{
-	return <<'EOF1';
-
-aap wav * $CLIENTID$
-	[mplayer] -ac faad -demuxer aac -really-quiet -vc null -vo null -cache 64 -af volume=0,resample=44100:0:1,channels=2 -ao pcm:file=$PIPEOUT$ $FILE$ $PIPENUL$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 16
-
-aif wav * $CLIENTID$
-	[$CONVAPP$] -d 16 -id "$CLIENTID$" -wav -be -input "$FILE$" -r $RATE$
-
-alc wav * $CLIENTID$
-	[alac] $FILE$ | [$CONVAPP$] -d 16 -id "$CLIENTID$" -wav -r $RATE$
-
-mp3 wav * $CLIENTID$
-	[lame] --mp3input --decode -t --silent $FILE$ - - | [$CONVAPP$] -d 16 -id "$CLIENTID$" -r $RATE$
-
-wav wav * $CLIENTID$
-	[$CONVAPP$] -d 16 -id "$CLIENTID$" -wav -input $FILE$ -r $RATE$
-
-amb wav * $CLIENTID$
-	[$CONVAPP$] -d 16 -id "$CLIENTID$" -amb -input $FILE$
-
-uhj wav * $CLIENTID$
-	[$CONVAPP$] -d 16 -id "$CLIENTID$" -wav -input $FILE$
-
-flc wav * $CLIENTID$
-	[flac] -dcs --skip=$START$ --until=$END$ -- $FILE$ | [$CONVAPP$] -wav -d 16 -id "$CLIENTID$" -r $RATE$
-
-ogg wav * $CLIENTID$
-	[sox] -t ogg $FILE$ -t raw -r $RATE$ -c 2 -w -s $-x$ - | [$CONVAPP$] -be -d 16 -id "$CLIENTID$" -r $RATE$
-
-wma wav * $CLIENTID$
-	[wmadec] -r $RATE$ -b 16 -n 2 $FILE$  | [$CONVAPP$] -d 16 -id "$CLIENTID$" -r $RATE$
-
-mpc wav * $CLIENTID$
-	[mppdec] --silent --prev --gain 2 $FILE$ - | [$CONVAPP$] -wav -d 16 -id "$CLIENTID$"
-
-ape wav * $CLIENTID$
-	[mac] $FILE$ - -d | [$CONVAPP$] -d 16 -id "$CLIENTID$" -wav
-
-mov wav * $CLIENTID$
-	[mov123] $FILE$ | [$CONVAPP$] -be -d 16 -id "$CLIENTID$" -r $RATE$
-
-EOF1
-}
-
-
-# transcode for 24-bit FLAC output (sb2, sb3, transporter)
-sub template_FLAC24_pre73
-{
-	return <<'EOF1';
-
-aap flc * $CLIENTID$
-	[mplayer] -ac faad -demuxer aac -really-quiet -vc null -vo null -cache 64 -af volume=0,resample=44100:0:1,channels=2 -ao pcm:file=$PIPEOUT$ $FILE$ $PIPENUL$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-aif flc * $CLIENTID$
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ -be -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-alc flc * $CLIENTID$
-	[alac] $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-mp3 flc * $CLIENTID$
-	[lame] --mp3input --decode --silent $FILE$ - - | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-wav flc * $CLIENTID$
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-amb flc * $CLIENTID$
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ -amb -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-uhj flc * $CLIENTID$
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-flc flc * $CLIENTID$
-	[flac] -dcs --skip=$START$ --until=$END$ -- $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-ogg flc * $CLIENTID$
-	[sox] -t ogg $FILE$ -t raw -r $RATE$ -c 2 -w -s $-x$ - | [$CONVAPP$] -id "$CLIENTID$" -be -wavo -d 24 -r $RATE$ | [flac] -cs -5 --totally-silent -
-
-wma flc * $CLIENTID$
-	[wmadec] -r $RATE$ -b 16 -n 2 $FILE$  | [$CONVAPP$] -id "$CLIENTID$" -wavo -d 24 -r $RATE$ | [flac] -cs -5 --totally-silent -
-
-mpc flc * $CLIENTID$
-	[mppdec] --silent --prev --gain 2 $FILE$ - | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-ape flc * $CLIENTID$
-	[mac] $FILE$ - -d | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -5 --totally-silent -
-
-mov flc * $CLIENTID$
-	[mov123] $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -be -wavo -d 24 -r $RATE$ | [flac] -cs -5 --totally-silent -
-
-EOF1
-}
+=pod remove old squeeze versions pre 7.3
+=cut
+=pod templat definition moved into separate file
+=cut
 
 # added aac entry (jb)
 # deleted aap entry (jb)
 # replaced alc entry (jb)
 # added mp4 entry (jb)
 # added spt (spotty) (jb)
-sub template_WAV16
-{
-	return <<'EOF1';
-
-aac wav * $CLIENTID$
-	# IF
-	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-aif wav * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -be -wav -d 16
-
-alc wav * $CLIENTID$
-	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-amb wav * $CLIENTID$
-	# IFT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -amb -d 16
-
-ape wav * $CLIENTID$
-	# F
-	[mac] $FILE$ - -d | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-flc wav * $CLIENTID$
-	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -dcs $START$ $END$ -- $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-mov wav * $CLIENTID$
-	# FR
-	[mov123] $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -be -d 16
-
-mp3 wav * $CLIENTID$
-	# IFD:{RESAMPLE=--resample %D}
-	[lame] --mp3input --decode $RESAMPLE$ --silent $FILE$ - - | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-mp4 wav * $CLIENTID$
-	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-mpc wav * $CLIENTID$
-	# IR
-	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-ogg wav * $CLIENTID$
-	# IFD:{RESAMPLE=-r %D}
-	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ -w - | [$CONVAPP$] -id "$CLIENTID$" -be -d 16
-
-spt flc * $CLIENTID$
-	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-uhj wav * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -wav -d 16
-
-wav wav * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -wav -d 16
-
-wma wav * $CLIENTID$
-	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$] -id "$CLIENTID$" -d 16
-
-wvp wav * $CLIENTID$
-	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$] -id "$CLIENTID$" -wav -d 16
-
-EOF1
-}
-
-
-# transcode for 24-bit FLAC output (sb2, sb3, transporter)
-# aac & mp4 added by jb
-# deleted aap entry - jb
-# replaced alc - jb
-# added spt (spotty) (jb)
-# changed FLAC compressions level to 0 (was 5)
-sub template_FLAC24
-{
-	return <<'EOF1';
-
-aac flc * $CLIENTID$
-	# IF
-	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-aif flc * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -be -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-alc flc * $CLIENTID$
-	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
-
-amb flc * $CLIENTID$
-	# IFT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -amb -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-ape flc * $CLIENTID$
-	# F
-	[mac] $FILE$ - -d | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-flc flc * CommentedOut
-	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -dcs $START$ $END$ -- $FILE$ | [$CONVAPP$] -id "CommentedOut" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-flc flc * $CLIENTID$
-	# FRI
-	[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ |  [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-
-mov flc * $CLIENTID$
-	# FR
-	[mov123] $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -be -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-mp3 flc * $CLIENTID$
-	# IFD:{RESAMPLE=--resample %D}
-	[lame] --mp3input --decode $RESAMPLE$ --silent $FILE$ - - | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-mp4 flc * $CLIENTID$
-	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
-
-mpc flc * $CLIENTID$
-	# IR
-	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-ogg flc * $CLIENTID$
-	# IFD:{RESAMPLE=-r %D}
-	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ -w - | [$CONVAPP$] -id "$CLIENTID$" -be -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-spt flc * $CLIENTID$
-	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
-
-uhj flc * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-wav flc * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] -id "$CLIENTID$" -input $FILE$ $START$ -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-wma flc * $CLIENTID$
-	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$] -id "$CLIENTID$" -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-wvp flc * $CLIENTID$
-	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$] -id "$CLIENTID$" -wav -wavo -d 24 | [flac] -cs -0 --totally-silent -
-
-EOF1
-}
-
 
 1;
