@@ -48,16 +48,19 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.02";
+my $revision = "0.0.04";
 use vars qw($VERSION);
 $VERSION = $revision;
 
 # Names and name-related constants...
 #
-my $thistag = "inguzeq";
+#mytag is used in the menu system
+my $thistag = "squeezedsp";
 my $thisapp = "SqueezeDSP";
+#used for the dsp program binary
 my $binary;
-my $settingstag = "InguzEQSettings";
+#used for the xml tags
+my $settingstag = "SqueezeDSPSettings";
 my $confBegin = "SqueezeDSP#begin";
 my $confEnd = "SqueezeDSP#end";
 my $modeAdjust       = "PLUGIN.SqueezeDSP.Adjust";
@@ -91,10 +94,10 @@ my $AMBROTATEZKEY = "XR1";
 my $AMBROTATEYKEY = "XR2";
 my $AMBROTATEXKEY = "XR3";
 
-# the usual convolver controlled by this plugin is called InguzDSP - this is
+# the usual convolver controlled by this plugin is called SqueezeDSP - this is
 # the command inserted in custom-convert.conf
 #
-#my $convolver = "InguzDSP";
+
 my $convolver = "SqueezeDSP";
 my $configPath = "";
 #use the revision number from the config file
@@ -138,12 +141,12 @@ my @fq31 = ( 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 50
 my %noFunctions = ();  # const
 my $needUpgrade = 0;
 my $fatalError;
-my $pluginDataDir;            # <appdata>\inguzeq
-my $pluginSettingsDataDir;    # <appdata>\inguzeq\Settings     used for settings and presets
-my $pluginImpulsesDataDir;    # <appdata>\inguzeq\Impulses     used for room correction impulse filters
-my $pluginMatrixDataDir;      # <appdata>\inguzeq\Matrix       used for cross-feed matrix impulse filters
-my $pluginMeasurementDataDir; # <appdata>\inguzeq\Measurement  used for measurement sweeps and noise samples
-my $pluginTempDataDir;        # <appdata>\inguzeq\Temp         used for any temporary stuff
+my $pluginDataDir;            # <appdata>\squeezedsp
+my $pluginSettingsDataDir;    # <appdata>\squeezedsp\Settings     used for settings and presets
+my $pluginImpulsesDataDir;    # <appdata>\squeezedsp\Impulses     used for room correction impulse filters
+my $pluginMatrixDataDir;      # <appdata>\squeezedsp\Matrix       used for cross-feed matrix impulse filters
+my $pluginMeasurementDataDir; # <appdata>\squeezedsp\Measurement  used for measurement sweeps and noise samples
+my $pluginTempDataDir;        # <appdata>\squeezedsp\Temp         used for any temporary stuff
 my @presetsMenuChoices;
 my @presetsMenuValues;
 my $doneJiveInit = 0;
@@ -180,36 +183,37 @@ sub fatal
 	$fatalError = $message;
 }
 
+
 # Format a value (bass level -> "+3dB", etc)
 sub valuelabel
 {
 	my $client = shift;
 	my $item = shift;
 	my $valu = shift;
-	my $labl = ' ' . $client->string( 'PLUGIN_INGUZEQ_DECIBELS' );
+	my $labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_DECIBELS' );
 	my $sign = ( $valu > 0 ) ? '+' : '';
-	my $extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_INGUZEQ_EQ_FLAT' ) : '';
+	my $extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_EQ_FLAT' ) : '';
 	if( $item eq $QUIETNESSKEY )
 	{
 		$sign = '';
 		$labl = '';
-		$extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_INGUZEQ_QUIETNESS_OFF' ) : '';
+		$extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_QUIETNESS_OFF' ) : '';
 	}
 	elsif( $item eq $FLATNESSKEY )
 	{
 		$sign = '';
 		$labl = '';
-		$extra = ( $valu == 10 ) ? ' ' . $client->string( 'PLUGIN_INGUZEQ_FLATNESS_FLAT' ) : '';
+		$extra = ( $valu == 10 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_FLATNESS_FLAT' ) : '';
 	}
 	elsif( ($item eq $SKEWKEY) || ($item eq $DEPTHKEY) )
 	{
-		$labl = ' ' . $client->string( 'PLUGIN_INGUZEQ_SAMPLES' );
+		$labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_SAMPLES' );
 		$extra = '';
 	}
 	elsif( ($item eq $AMBANGLEKEY) || ($item eq $AMBROTATEZKEY) || ($item eq $AMBROTATEYKEY) || ($item eq $AMBROTATEXKEY) )
 	{
 		$sign = '';
-		$labl = ' ' . $client->string( 'PLUGIN_INGUZEQ_DEGREES' );
+		$labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_DEGREES' );
 		$extra = '';
 	}
 	elsif( $item eq $AMBDIRECTKEY )
@@ -218,10 +222,10 @@ sub valuelabel
 		$labl = '';
 		# hypercardioid is 0.3333 (1/3)
 		# supercardioid is 0.5773 (sqrt3/3)
-		if( $valu==0 )    { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_FIGURE8' ); }
-		if( $valu==0.33 ) { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_HYPERCARDIOID' ); }
-		if( $valu==0.58 ) { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_SUPERCARDIOID' ); }
-		if( $valu==1 )    { $extra = ' ' . $client->string( 'PLUGIN_INGUZEQ_AMBI_DIRECT_CARDIOID' ); }
+		if( $valu==0 )    { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_FIGURE8' ); }
+		if( $valu==0.33 ) { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_HYPERCARDIOID' ); }
+		if( $valu==0.58 ) { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_SUPERCARDIOID' ); }
+		if( $valu==1 )    { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_CARDIOID' ); }
 	}
 	elsif( $item eq $AMBJWKEY )
 	{
@@ -244,23 +248,23 @@ sub freqlabel
 	{
 		if( $bandcount==2 )
 		{
-			my @v = ( 'PLUGIN_INGUZEQ_BASS', 'PLUGIN_INGUZEQ_TREBLE' );
+			my @v = ( 'PLUGIN_SQUEEZEDSP_BASS', 'PLUGIN_SQUEEZEDSP_TREBLE' );
 			$labl = $client->string( $v[$item] );
 		}
 		elsif( $bandcount==3 )
 		{
-			my @v = ( 'PLUGIN_INGUZEQ_BASS', 'PLUGIN_INGUZEQ_MID', 'PLUGIN_INGUZEQ_TREBLE' );
+			my @v = ( 'PLUGIN_SQUEEZEDSP_BASS', 'PLUGIN_SQUEEZEDSP_MID', 'PLUGIN_SQUEEZEDSP_TREBLE' );
 			$labl = $client->string( $v[$item] );
 		}
 		else
 		{
 			if( $freq > 1000 )
 			{
-				$labl = ( int( $freq / 100 ) / 10 ) . ' ' . $client->string( 'PLUGIN_INGUZEQ_KILOHERTZ' );
+				$labl = ( int( $freq / 100 ) / 10 ) . ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_KILOHERTZ' );
 			}
 			else
 			{
-				$labl = int( $freq ) . ' ' . $client->string( 'PLUGIN_INGUZEQ_HERTZ' );
+				$labl = int( $freq ) . ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' );
 			}
 		}
 	}
@@ -337,35 +341,35 @@ sub binaries {
 	if ($os->{'os'} eq 'Linux') {
 
 		if ($os->{'osArch'} =~ /x86_64/) {
-			return qw(/publishLinux-x64/InguzDSP );
+			return qw(/publishLinux-x64/SqueezeDSP );
 		}
 		if ($os->{'binArch'} =~ /i386/) {
-			return qw(/publishLinux-x86/InguzDSP);
+			return qw(/publishLinux-x86/SqueezeDSP);
 		}
 		if ($os->{'osArch'} =~ /aarch64/) {
-			return qw(/publishlinux-arm64/InguzDSP) ;
+			return qw(/publishlinux-arm64/SqueezeDSP) ;
 		}
 		if ($os->{'binArch'} =~ /armhf/) {
-			return qw( /publishlinux-arm/InguzDSP );
+			return qw( /publishlinux-arm/SqueezeDSP );
 		}
 		if ($os->{'binArch'} =~ /arm/) {
-			return qw( /publishlinux-arm/InguzDSP );
+			return qw( /publishlinux-arm/SqueezeDSP );
 		}
 		
 		# fallback to offering all linux options for case when architecture detection does not work
-		return qw( /publishLinux-x86/InguzDSP );
+		return qw( /publishLinux-x86/SqueezeDSP );
 	}
 	
 	if ($os->{'os'} eq 'Unix') {
 	
 		if ($os->{'osName'} =~ /freebsd/) {
-			return qw( /publishLinux-x64/InguzDSP );
+			return qw( /publishLinux-x64/SqueezeDSP );
 		}
 		
 	}	
 	
 	if ($os->{'os'} eq 'Darwin') {
-		return qw(/publishOsx-x64/InguzDSP );
+		return qw(/publishOsx-x64/SqueezeDSP );
 	}
 		
 	if ($os->{'os'} eq 'Windows') {
@@ -385,7 +389,12 @@ sub getFunctions
 
 sub getDisplayName
 {
-	return 'PLUGIN_INGUZEQ_DISPLAYNAME';
+	return 'PLUGIN_SQUEEZEDSP_DISPLAYNAME';
+}
+
+sub getpluginVersion
+{
+ return $revision;	
 }
 
 sub enabled
@@ -421,22 +430,7 @@ sub initPlugin
 
 	my $appdata;
 	#This is where preferences are stored.
-=begin mhereger suggested changing this to a folder installed on the plugin path.
 
-	 
-	 if(Slim::Utils::OSDetect::OS() eq 'win')
-	 {
-		# # Application data lives in a folder under \Documents and Settings\All Users\Application Data\
-		# # (plugin may not always have write access to \Program Files\SqueezeCenter\Plugins\)
-		 $appdata = Win32::GetFolderPath(0x0023); # 0x0023 is Win32::CSIDL_COMMON_APPDATA, but on linux that breaks for some reason
-	 }
-	 else
-	 {
-		# # debian, redhat, and everything else
-		 $appdata = '/usr/share';
-		# #$appdata = '/usr/local/slimserver/prefs';
-	 }
-=cut	
 
     $appdata = Slim::Utils::Prefs::dir();
 	# Make sure our appdata directory exists, if at all possible
@@ -491,7 +485,7 @@ sub initPlugin
 	
 	#do any cleanup
 	housekeeping();
-	#do any app config settings, simplifies handover to Inguz app
+	#do any app config settings, simplifies handover to SqueezeDSP app
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP.dll.config');
 	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
@@ -928,7 +922,7 @@ sub loadPrefs
 
 	defaultPrefs( $client );
 
-	my $line = $client->string('PLUGIN_INGUZEQ_PRESET_LOADED');
+	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_LOADED');
 	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 }
 
@@ -1015,7 +1009,7 @@ sub SigGenAttributes
 
 	if( $siggen eq 'Ident' )
 	{
-		return( "Type=\"Ident\" L=\"" . $client->string('PLUGIN_INGUZEQ_SIGGEN_IDENT_L') . "\" R=\"" . $client->string('PLUGIN_INGUZEQ_SIGGEN_IDENT_R') . "\"" ); 
+		return( "Type=\"Ident\" L=\"" . $client->string('PLUGIN_SQUEEZEDSP_SIGGEN_IDENT_L') . "\" R=\"" . $client->string('PLUGIN_SQUEEZEDSP_SIGGEN_IDENT_R') . "\"" ); 
 	}
 	if( $siggen eq 'Sweep' )
 	{
@@ -1195,7 +1189,7 @@ sub getMainMenuChoices
 	}
 	elsif( $needUpgrade==1 )
 	{
-		$opts{$ERRORKEY} = $client->string( 'PLUGIN_INGUZEQ_RESTART' );
+		$opts{$ERRORKEY} = $client->string( 'PLUGIN_SQUEEZEDSP_RESTART' );
 	}
 	else
 	{
@@ -1209,14 +1203,14 @@ sub getMainMenuChoices
 
 		if( currentFilter( $client ) ne '-' )
 		{
-			$opts{'91.' . $FLATNESSKEY} = $client->string( 'PLUGIN_INGUZEQ_FLATNESS' );
+			$opts{'91.' . $FLATNESSKEY} = $client->string( 'PLUGIN_SQUEEZEDSP_FLATNESS' );
 		}
 
-		$opts{'92.' . $QUIETNESSKEY} = $client->string( 'PLUGIN_INGUZEQ_QUIETNESS' );
-		$opts{'93.' . $BALANCEKEY}   = $client->string( 'PLUGIN_INGUZEQ_BALANCE' );
-		$opts{'94.' . $WIDTHKEY}     = $client->string( 'PLUGIN_INGUZEQ_WIDTH' );
-		$opts{'95.' . $SETTINGSKEY}  = $client->string( 'PLUGIN_INGUZEQ_SETTINGS' );
-		$opts{'96.' . $PRESETSKEY}   = $client->string( 'PLUGIN_INGUZEQ_PRESETS' );
+		$opts{'92.' . $QUIETNESSKEY} = $client->string( 'PLUGIN_SQUEEZEDSP_QUIETNESS' );
+		$opts{'93.' . $BALANCEKEY}   = $client->string( 'PLUGIN_SQUEEZEDSP_BALANCE' );
+		$opts{'94.' . $WIDTHKEY}     = $client->string( 'PLUGIN_SQUEEZEDSP_WIDTH' );
+		$opts{'95.' . $SETTINGSKEY}  = $client->string( 'PLUGIN_SQUEEZEDSP_SETTINGS' );
+		$opts{'96.' . $PRESETSKEY}   = $client->string( 'PLUGIN_SQUEEZEDSP_PRESETS' );
 	}
 	return %opts;
 }
@@ -1247,7 +1241,7 @@ sub setMode
 	# Use INPUT.List to display the main menu
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_LINE1',
+		'header' => 'PLUGIN_SQUEEZEDSP_LINE1',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choices,
@@ -1345,7 +1339,7 @@ sub jiveTopMenu
 		$k =~ s/\.\.\.//;
 		push @menuItems, {
 			text => $menuItem,
-#			window => { 'text' => $k, 'icon-id' => 'plugins/InguzEQ/inguz.png', 'titleStyle' => 'artists' },
+#			window => { 'text' => $k, 'icon-id' => 'plugins/SqueezeDSP/SqueezeDSP.png', 'titleStyle' => 'artists' },
 			id => $thistag . $menuValu,
 			weight => ($listIndex + 1) * 10,
 #			node => $thistag,
@@ -1415,7 +1409,7 @@ sub jiveClearTopMenu
 }
 
 
-# ------ Mode: PLUGIN.InguzEQ.Settings ------
+# ------ Mode: PLUGIN.SqueezeDSP.Settings ------
 # Display the setttings menu
 
 
@@ -1424,16 +1418,16 @@ sub getSettingsOptions
 	my $addAmbi = shift;
 
 	my %opts = ();
-	$opts{'-e-'} = 'PLUGIN_INGUZEQ_EQUALIZER';
-	$opts{'-r-'} = 'PLUGIN_INGUZEQ_ROOMCORR';
-	$opts{'-x-'} = 'PLUGIN_INGUZEQ_MATRIX';
-	$opts{$SKEWKEY} = 'PLUGIN_INGUZEQ_SKEW';
-#	$opts{$DEPTHKEY} = 'PLUGIN_INGUZEQ_DEPTH';
-	$opts{'-y-'} = 'PLUGIN_INGUZEQ_SIGGEN';
+	$opts{'-e-'} = 'PLUGIN_SQUEEZEDSP_EQUALIZER';
+	$opts{'-r-'} = 'PLUGIN_SQUEEZEDSP_ROOMCORR';
+	$opts{'-x-'} = 'PLUGIN_SQUEEZEDSP_MATRIX';
+	$opts{$SKEWKEY} = 'PLUGIN_SQUEEZEDSP_SKEW';
+#	$opts{$DEPTHKEY} = 'PLUGIN_SQUEEZEDSP_DEPTH';
+	$opts{'-y-'} = 'PLUGIN_SQUEEZEDSP_SIGGEN';
 
 	if( $addAmbi )
 	{
-		$opts{'-z-'} = 'PLUGIN_INGUZEQ_AMBI_DECODE';
+		$opts{'-z-'} = 'PLUGIN_SQUEEZEDSP_AMBI_DECODE';
 	}
 
 	return %opts;
@@ -1466,7 +1460,7 @@ sub setSettingsMode
 	# Use INPUT.List to display the choices
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_CHOOSE_SETTINGS',
+		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_SETTINGS',
 		'stringHeader' => 1,
 		'listRef' => \@choicev,
 		'externRef' => \@choices,
@@ -1624,23 +1618,23 @@ Slim::Buttons::Common::addMode( $modeSettings, \%noFunctions, \&setSettingsMode 
 
 
 
-# ------ Mode: PLUGIN.InguzEQ.Ambisonic ------
+# ------ Mode: PLUGIN.SqueezeDSP.Ambisonic ------
 # Display the Ambisonic setttings menu
 
 
 sub getAmbiOptions
 {
 	my %opts = ();
-	$opts{'01.UHJ'} = 'PLUGIN_INGUZEQ_AMBI_UHJ';
-	$opts{'02.Blumlein'} = 'PLUGIN_INGUZEQ_AMBI_BLUMLEIN';
-	$opts{'03.Crossed'} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID';
-#	$opts{'04.Crossed+jW'} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_PLUSJW';
-	$opts{$AMBANGLEKEY} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_ANGLE';
-	$opts{$AMBDIRECTKEY} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_DIRECT';
-#	$opts{$AMBJWKEY} = 'PLUGIN_INGUZEQ_AMBI_CARDIOID_JW';
-	$opts{$AMBROTATEZKEY} = 'PLUGIN_INGUZEQ_AMBI_ROTATION_Z';
-	$opts{$AMBROTATEYKEY} = 'PLUGIN_INGUZEQ_AMBI_ROTATION_Y';
-	$opts{$AMBROTATEXKEY} = 'PLUGIN_INGUZEQ_AMBI_ROTATION_X';
+	$opts{'01.UHJ'} = 'PLUGIN_SQUEEZEDSP_AMBI_UHJ';
+	$opts{'02.Blumlein'} = 'PLUGIN_SQUEEZEDSP_AMBI_BLUMLEIN';
+	$opts{'03.Crossed'} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID';
+#	$opts{'04.Crossed+jW'} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_PLUSJW';
+	$opts{$AMBANGLEKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_ANGLE';
+	$opts{$AMBDIRECTKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_DIRECT';
+#	$opts{$AMBJWKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_CARDIOID_JW';
+	$opts{$AMBROTATEZKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_ROTATION_Z';
+	$opts{$AMBROTATEYKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_ROTATION_Y';
+	$opts{$AMBROTATEXKEY} = 'PLUGIN_SQUEEZEDSP_AMBI_ROTATION_X';
 
 	return %opts;
 }
@@ -1672,7 +1666,7 @@ sub setAmbiMode
 	# Use INPUT.List to display the choices
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_AMBI_CHOOSE_SETTINGS',
+		'header' => 'PLUGIN_SQUEEZEDSP_AMBI_CHOOSE_SETTINGS',
 		'stringHeader' => 1,
 		'listRef' => \@choicev,
 		'externRef' => \@choices,
@@ -1808,7 +1802,7 @@ sub jiveAmbiMenuDispatch
 Slim::Buttons::Common::addMode( $modeAmbisonic, \%noFunctions, \&setAmbiMode );
 
 
-# ------ Mode: PLUGIN.InguzEQ.Equalization ------
+# ------ Mode: PLUGIN.SqueezeDSP.Equalization ------
 # Choose how many channels of equalization to use
 
 
@@ -1816,14 +1810,14 @@ sub getEqualizationOptions
 {
 	my $more = shift;
 	my %opts = ();
-	$opts{"02"} = 'PLUGIN_INGUZEQ_2BAND';
-	$opts{"03"} = 'PLUGIN_INGUZEQ_3BAND';
-	$opts{"05"} = 'PLUGIN_INGUZEQ_5BAND';
-	$opts{"09"} = 'PLUGIN_INGUZEQ_9BAND';
+	$opts{"02"} = 'PLUGIN_SQUEEZEDSP_2BAND';
+	$opts{"03"} = 'PLUGIN_SQUEEZEDSP_3BAND';
+	$opts{"05"} = 'PLUGIN_SQUEEZEDSP_5BAND';
+	$opts{"09"} = 'PLUGIN_SQUEEZEDSP_9BAND';
 	if( $more )
 	{
-		$opts{"15"} = 'PLUGIN_INGUZEQ_15BAND';
-		$opts{"31"} = 'PLUGIN_INGUZEQ_31BAND';
+		$opts{"15"} = 'PLUGIN_SQUEEZEDSP_15BAND';
+		$opts{"31"} = 'PLUGIN_SQUEEZEDSP_31BAND';
 	}
 	return %opts;
 }
@@ -1846,7 +1840,7 @@ sub setEqualizationMode
 	# Use INPUT.List to display the list of band choices
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_CHOOSE_EQSETTINGS',
+		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_EQSETTINGS',
 		'stringHeader' => 1,
 		'listRef' => \@choicev,
 		'externRef' => \@choices,
@@ -1927,7 +1921,7 @@ Slim::Buttons::Common::addMode( $modeEqualization, \%noFunctions, \&setEqualizat
 
 
 
-# ------ Mode: PLUGIN.InguzEQ.Adjust ------
+# ------ Mode: PLUGIN.SqueezeDSP.Adjust ------
 # Displays bar for editing one band of equalization
 
 sub setAdjustMode
@@ -2069,8 +2063,8 @@ sub setAdjustMode
 					if( $item < $bandcount-1 ) { $max = int( getPref( $client, 'b' . ($item+1). 'freq' ) || defaultFreq( $client, ($item+1), $bandcount ) ) - 5; }
 					debug( $item . " of " . $bandcount . ", min " . $min . ", max " . $max );
 					Slim::Buttons::Common::pushModeLeft( $client, $modeValue, { 
-						'header' => $client->string( 'PLUGIN_INGUZEQ_BANDCENTER' ),
-						'suffix' => ' ' . $client->string( 'PLUGIN_INGUZEQ_HERTZ' ),
+						'header' => $client->string( 'PLUGIN_SQUEEZEDSP_BANDCENTER' ),
+						'suffix' => ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' ),
 						'min' => $min,
 						'max' => $max,
 						'increment' => 1,
@@ -2226,7 +2220,7 @@ Slim::Buttons::Common::addMode( $modeAdjust, \%noFunctions, \&setAdjustMode );
 
 
 
-# ------ Mode: PLUGIN.InguzEQ.Presets ------
+# ------ Mode: PLUGIN.SqueezeDSP.Presets ------
 # Displays menu to load a preset
 # Presets are files "xxx.preset.conf" in the plugin's Data folder.
 # They are exactly the same format as the "xxx.settings.conf" file used for client settings,
@@ -2264,7 +2258,7 @@ sub getPresetsList
 {
 	my $client = shift;
 	my $nopath = shift;
-	my %presets = ( '-' => $client->string('PLUGIN_INGUZEQ_SAVEPRESETAS') );
+	my %presets = ( '-' => $client->string('PLUGIN_SQUEEZEDSP_SAVEPRESETAS') );
 	my %more = getPresetsListNoNone( $client, $nopath );
 	@presets{keys %more} = values %more;
 	return %presets;
@@ -2295,7 +2289,7 @@ sub setPresetsMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_CHOOSE_PRESET',
+		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_PRESET',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@presetsMenuValues,
@@ -2378,7 +2372,7 @@ sub savePreset
 	$name =~ s/\.(?:(preset\.conf))$//i;
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_SAVEPRESETFILE',
+		'header' => 'PLUGIN_SQUEEZEDSP_SAVEPRESETFILE',
 		'stringHeader' => 1,
 		'charsRef' => \@chars,
 		'numberLetterRef' => \@mixed,
@@ -2397,7 +2391,7 @@ sub savePreset
 					my $ok = savePrefs( $client, $file );
 					Slim::Buttons::Common::popMode( $client );
 					$client->pushLeft();
-					$client->showBriefly( { line => [ $name, $client->string('PLUGIN_INGUZEQ_PRESET_SAVED') ] } , 2) if $ok;
+					$client->showBriefly( { line => [ $name, $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED') ] } , 2) if $ok;
 					# reload the presets list
 					initPresetsChoices( $client );
 				}
@@ -2442,9 +2436,9 @@ sub jivePresetsMenu
 				input => {
 					initialText  => '',
 					len          => 1,
-					allowedChars => Slim::Utils::Strings::string('PLUGIN_INGUZEQ_FILECHARS'),
+					allowedChars => Slim::Utils::Strings::string('PLUGIN_SQUEEZEDSP_FILECHARS'),
 					help         => {
-						           text => Slim::Utils::Strings::string('PLUGIN_INGUZEQ_PRESET_HELP'),
+						           text => Slim::Utils::Strings::string('PLUGIN_SQUEEZEDSP_PRESET_HELP'),
 					},
 					softbutton1  => Slim::Utils::Strings::string('INSERT'),
 					softbutton2  => Slim::Utils::Strings::string('DELETE'),
@@ -2460,7 +2454,7 @@ sub jivePresetsMenu
 					},
 				},
 				window => {
-					text => Slim::Utils::Strings::string('PLUGIN_INGUZEQ_SAVEPRESETFILE'),
+					text => Slim::Utils::Strings::string('PLUGIN_SQUEEZEDSP_SAVEPRESETFILE'),
 				},
 			};
 		}
@@ -2490,7 +2484,7 @@ sub jivePresetsMenu
 Slim::Buttons::Common::addMode( $modePresets, \%noFunctions, \&setPresetsMode );
 
 
-# ------ Mode: PLUGIN.InguzEQ.RoomCorrection ------
+# ------ Mode: PLUGIN.SqueezeDSP.RoomCorrection ------
 # Displays menu to select a correction filter.
 # Correction filters are any file in the plugin's Data folder with .WAV file extension.
 # Of course not all wav files will work properly as filters, but this plugin doesn't know that.
@@ -2527,7 +2521,7 @@ sub getFiltersList
 	my $client = shift;
 	my $folder = shift;
 	my $nopath = shift;
-	my %impulses = ( '-' => $client->string('PLUGIN_INGUZEQ_FILTERNONE') );
+	my %impulses = ( '-' => $client->string('PLUGIN_SQUEEZEDSP_FILTERNONE') );
 	my %more = getFiltersListNoNone( $client, $folder, $nopath );
 	@impulses{keys %more} = values %more;
 	return %impulses;
@@ -2557,7 +2551,7 @@ sub setRoomCorrectionMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_CHOOSE_RCFILTER',
+		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_RCFILTER',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choicev,
@@ -2630,7 +2624,7 @@ Slim::Buttons::Common::addMode( $modeRoomCorr, \%noFunctions, \&setRoomCorrectio
 
 
 
-# ------ Mode: PLUGIN.InguzEQ.Matrix ------
+# ------ Mode: PLUGIN.SqueezeDSP.Matrix ------
 # Displays menu to control stereo image width and cross-feed filters.
 # Cross-feed filters are any file in the plugin's Matrix folder with .WAV file extension.
 # Of course not all wav files will work properly as filters, but this plugin doesn't know that.
@@ -2660,7 +2654,7 @@ sub setMatrixMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_CHOOSE_MATRIXFILTER',
+		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_MATRIXFILTER',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choicev,
@@ -2734,7 +2728,7 @@ Slim::Buttons::Common::addMode( $modeMatrix, \%noFunctions, \&setMatrixMode );
 
 
 
-# ------ Mode: PLUGIN.InguzEQ.SignalGenerator ------
+# ------ Mode: PLUGIN.SqueezeDSP.SignalGenerator ------
 # Displays menu to control a signal generator.
 # Signal-generator mode "None" just plays the music.  Anything else overrides the music with a test signal.
 
@@ -2749,24 +2743,24 @@ sub getSignalGeneratorOptions
 {
 	my %opts = ();
 
-	$opts{'01.None'}        = 'PLUGIN_INGUZEQ_SIGGEN_NONE';
-	$opts{'02.Ident'}       = 'PLUGIN_INGUZEQ_SIGGEN_IDENT';
-	$opts{'03.Sweep'}       = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP';
-	$opts{'03.SweepShort'}  = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP_SHORT';
-	$opts{'04.SweepEQL'}    = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP_EQ_L';
-	$opts{'05.SweepEQR'}    = 'PLUGIN_INGUZEQ_SIGGEN_SWEEP_EQ_R';
-	$opts{'06.Pink'}        = 'PLUGIN_INGUZEQ_SIGGEN_PINK';
-	$opts{'07.PinkEQ'}      = 'PLUGIN_INGUZEQ_SIGGEN_PINK_EQ';
-	$opts{'08.PinkSt'}      = 'PLUGIN_INGUZEQ_SIGGEN_PINK_STEREO';
-	$opts{'09.PinkStEQ'}    = 'PLUGIN_INGUZEQ_SIGGEN_PINK_STEREO_EQ';
-	$opts{'10.White'}       = 'PLUGIN_INGUZEQ_SIGGEN_WHITE';
-	$opts{'11.Sine'}        = 'PLUGIN_INGUZEQ_SIGGEN_SINE';
-	$opts{'12.Quad'}        = 'PLUGIN_INGUZEQ_SIGGEN_QUAD';
-	$opts{'13.BLSquare'}    = 'PLUGIN_INGUZEQ_SIGGEN_SQUARE';
-	$opts{'14.BLTriangle'}  = 'PLUGIN_INGUZEQ_SIGGEN_TRIANGLE';
-	$opts{'15.BLSawtooth'}  = 'PLUGIN_INGUZEQ_SIGGEN_SAWTOOTH';
-	$opts{'16.Intermodulation'} = 'PLUGIN_INGUZEQ_SIGGEN_IM';
-#	$opts{'17.ShapedBurst'} = 'PLUGIN_INGUZEQ_SIGGEN_BURST';
+	$opts{'01.None'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_NONE';
+	$opts{'02.Ident'}       = 'PLUGIN_SQUEEZEDSP_SIGGEN_IDENT';
+	$opts{'03.Sweep'}       = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP';
+	$opts{'03.SweepShort'}  = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP_SHORT';
+	$opts{'04.SweepEQL'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP_EQ_L';
+	$opts{'05.SweepEQR'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_SWEEP_EQ_R';
+	$opts{'06.Pink'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK';
+	$opts{'07.PinkEQ'}      = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK_EQ';
+	$opts{'08.PinkSt'}      = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK_STEREO';
+	$opts{'09.PinkStEQ'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_PINK_STEREO_EQ';
+	$opts{'10.White'}       = 'PLUGIN_SQUEEZEDSP_SIGGEN_WHITE';
+	$opts{'11.Sine'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_SINE';
+	$opts{'12.Quad'}        = 'PLUGIN_SQUEEZEDSP_SIGGEN_QUAD';
+	$opts{'13.BLSquare'}    = 'PLUGIN_SQUEEZEDSP_SIGGEN_SQUARE';
+	$opts{'14.BLTriangle'}  = 'PLUGIN_SQUEEZEDSP_SIGGEN_TRIANGLE';
+	$opts{'15.BLSawtooth'}  = 'PLUGIN_SQUEEZEDSP_SIGGEN_SAWTOOTH';
+	$opts{'16.Intermodulation'} = 'PLUGIN_SQUEEZEDSP_SIGGEN_IM';
+#	$opts{'17.ShapedBurst'} = 'PLUGIN_SQUEEZEDSP_SIGGEN_BURST';
 
 	return %opts;
 }
@@ -2797,7 +2791,7 @@ sub setSignalGeneratorMode
 	# Use INPUT.List to display the menu
 	my %params =
 	(
-		'header' => 'PLUGIN_INGUZEQ_CHOOSE_SIGGEN',
+		'header' => 'PLUGIN_SQUEEZEDSP_CHOOSE_SIGGEN',
 		'stringHeader' => 1,
 		'headerAddCount' => 1,
 		'listRef' => \@choicev,
@@ -2831,7 +2825,7 @@ sub setSignalGeneratorMode
 					my $genfreq = getPref( $client, 'sigfreq' ) || 1000;
 					Slim::Buttons::Common::pushModeLeft( $client, $modeValue, { 
 						'header' => $gentype,
-						'suffix' => ' ' . $client->string( 'PLUGIN_INGUZEQ_HERTZ' ),
+						'suffix' => ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' ),
 						'min' => 10,
 						'max' => 22000,
 						'increment' => 1,
@@ -2899,7 +2893,7 @@ Slim::Buttons::Common::addMode( $modeSigGen, \%noFunctions, \&setSignalGenerator
 
 
 
-# ------ Mode: PLUGIN.InguzEQ.Value ------
+# ------ Mode: PLUGIN.SqueezeDSP.Value ------
 # Numeric value chooser
 #
 # Parameters: header, suffix, min, max, increment, valueRef
@@ -3233,7 +3227,7 @@ sub setvalCommand
 		setBandCount( $client, $val );
 
 		# ShowBriefly to tell jive users that the band count has been set
-		my $line = $client->string('PLUGIN_INGUZEQ_CHOSEN_BANDS');
+		my $line = $client->string('PLUGIN_SQUEEZEDSP_CHOSEN_BANDS');
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 
 		# Refresh the Jive main menu
@@ -3267,7 +3261,7 @@ sub setvalCommand
 		# To find something appropriate to display, we could look up the $prf
 		# in the main menu's items (yuk!).  But easier just to say "ok, got it".
 
-		my $line = $client->string('PLUGIN_INGUZEQ_CHOSEN_VALUE');
+		my $line = $client->string('PLUGIN_SQUEEZEDSP_CHOSEN_VALUE');
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 1 } );
 	}
 	$request->setStatusDone();
@@ -3282,7 +3276,7 @@ sub setFilterValue( $client, $prf, $val )
 	{
 		# that's OK
 		setPref( $client, $prf, $val );
-		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_INGUZEQ_CHOSEN_MATRIXFILTERNONE' : 'PLUGIN_INGUZEQ_CHOSEN_RCFILTERNONE';
+		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTERNONE' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTERNONE';
 		my $line = $client->string( $msg );
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 		return;
@@ -3298,7 +3292,7 @@ sub setFilterValue( $client, $prf, $val )
 	if( -f $path )
 	{
 		setPref( $client, $prf, $path );
-		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_INGUZEQ_CHOSEN_MATRIXFILTER' : 'PLUGIN_INGUZEQ_CHOSEN_RCFILTER';
+		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTER' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTER';
 		my $line = $client->string( $msg );
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 	}
@@ -3425,7 +3419,7 @@ sub saveasCommand
 	setPref( $client, 'preset', $file );
 	savePrefs( $client, $file );
 
-	my $line = $client->string('PLUGIN_INGUZEQ_PRESET_SAVED');
+	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED');
 	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 
 	$request->setStatusDone();

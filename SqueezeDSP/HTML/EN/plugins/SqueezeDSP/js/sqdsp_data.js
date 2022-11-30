@@ -58,7 +58,6 @@ function UpdateSqueezeDSPData(data)
 
 function SqueezeDSPGetList(callback)
 {
-	SilverlightPlugInHost.innerText = '';
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
 		asynchronous: true,
@@ -68,7 +67,7 @@ function SqueezeDSPGetList(callback)
 			params: [
 				getCurrentPlayer(), 
 				[
-					'SqueezeDSP.filters'
+					'squeezedsp.filters'
 				]
 			]
 		}),
@@ -87,6 +86,7 @@ function SqueezeDSPGetList(callback)
 
 function SqueezeDSPGetSettings(callback)
 {
+	//alert ('Getting Settings');
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
 		asynchronous: true,
@@ -97,7 +97,7 @@ function SqueezeDSPGetSettings(callback)
 			params: [
 				getCurrentPlayer(), 
 				[
-					'SqueezeDSP.current'
+					'squeezedsp.current'
 				]
 			]
 		}),
@@ -128,7 +128,7 @@ function SqueezeDSPSelectPreset()
 			params: [
 				getCurrentPlayer(), 
 				[
-					'SqueezeDSP.setval',
+					'squeezedsp.setval',
 					'key:'+myProperty,
 					'val:'+myVal
 				]
@@ -157,7 +157,7 @@ function SqueezeDSPSelectValue(myProperty, myVal, callback)
 			params: [
 				getCurrentPlayer(), 
 				[
-					'SqueezeDSP.setval',
+					'squeezedsp.setval',
 					'key:'+myProperty,
 					'val:'+myVal
 				]
@@ -178,7 +178,6 @@ function SqueezeDSPSavePreset(myVal, callback)
 {
 	
 	// Save this value (async)
-	alert ('Saving');
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
 		asynchronous: true,
@@ -188,7 +187,7 @@ function SqueezeDSPSavePreset(myVal, callback)
 			params: [
 				getCurrentPlayer(), 
 				[
-					'SqueezeDSP.saveas',
+					'squeezedsp.saveas',
 					'preset:' + myVal,
 				],
 			]
@@ -215,7 +214,7 @@ function SqueezeDSPSaveEQBand(myBand, myFreq, myGain)
 						params: [
 							getCurrentPlayer(), 
 							[
-								'SqueezeDSP.seteq',
+								'squeezedsp.seteq',
 								'band:'+myBand,
 								'freq:'+myFreq,
 								'gain:'+myGain

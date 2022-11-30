@@ -1,8 +1,9 @@
 
 /*---------------------------------------------------
 
-Inguz Display logic
+SqueezeDSP Display logic
 -----------------------------------------------------*/
+
 function LocalBuildLists(data)
 {
 		LocalBuildList ('Filter',data);
@@ -104,10 +105,11 @@ function LocalSetupRadio(myRadio, newValue )
 function LocalUpdateSettings (data)
 	{
 		// Write Data from REST response to Local cache
-		UpdateInguzData(data);
+		UpdateSqueezeDSPData(data);
 		
-		//Now We display the data from the cache				
-		LocalSetupRadio( 'val_Bands' , InguzData.Bands);	
+		//Now We display the data from the cache
+		
+		LocalSetupRadio( 'val_Bands' , SqueezeDSPData.Bands);	
 		LocalDisplayEQ();	
 		LocalDisplayVals();
 		ListenForSlide();
@@ -132,7 +134,7 @@ function DisplayAlert(FieldName, Message)
  
 {
 	var val = myEl.value;
-	InguzSavePreset(val, Initialise);
+	SqueezeDSPSavePreset(val, Initialise);
 	
 	DisplayAlert ('Preset','Saving')	
 		
@@ -143,7 +145,7 @@ function DisplayAlert(FieldName, Message)
 function LocalDisplayEQ()
 {
 	//alert ('LocalDisplayEQ');
-	var myEQ=InguzData.EQ_loop;
+	var myEQ=SqueezeDSPData.EQ_loop;
 
 	document.getElementById('control_EQ').innerHTML = LocalbuildEQ(myEQ, 'Slide');
 }
@@ -152,27 +154,27 @@ function LocalDisplayVals()
 {
 		
 		
-		//alert(document.getElementById('Skew').value +':'+  InguzData.Skew);
-		DisplayVal('Skew', InguzData.Skew);
-		DisplayVal('Flatness', InguzData.Flatness);
-		DisplayVal('Quietness', InguzData.Quietness);
-		DisplayVal('Balance', InguzData.Balance);
-		DisplayVal('Width', InguzData.Width);
-		DisplayVal('AmbRotateX',  InguzData.AmbRotateX); 
-		DisplayVal('AmbRotateY', InguzData.AmbRotateY ); 
-		DisplayVal('AmbRotateZ',InguzData.AmbRotateZ ); 
+		//alert(document.getElementById('Skew').value +':'+  SqueezeDSPData.Skew);
+		DisplayVal('Skew', SqueezeDSPData.Skew);
+		DisplayVal('Flatness', SqueezeDSPData.Flatness);
+		DisplayVal('Quietness', SqueezeDSPData.Quietness);
+		DisplayVal('Balance', SqueezeDSPData.Balance);
+		DisplayVal('Width', SqueezeDSPData.Width);
+		DisplayVal('AmbRotateX',  SqueezeDSPData.AmbRotateX); 
+		DisplayVal('AmbRotateY', SqueezeDSPData.AmbRotateY ); 
+		DisplayVal('AmbRotateZ',SqueezeDSPData.AmbRotateZ ); 
 		 
-		DisplayVal('AmbjW',InguzData.AmbjW ); 
-		DisplayVal('AmbAngle',InguzData.AmbAngle); 
-		DisplayVal('AmbDirect',InguzData.AmbDirect);
+		DisplayVal('AmbjW',SqueezeDSPData.AmbjW ); 
+		DisplayVal('AmbAngle',SqueezeDSPData.AmbAngle); 
+		DisplayVal('AmbDirect',SqueezeDSPData.AmbDirect);
 		
 		// Set the values for dropdowns
-		document.getElementById('sel_Matrix').value = InguzData.Matrix;
-		document.getElementById('sel_Filter').value = InguzData.Filter;
+		document.getElementById('sel_Matrix').value = SqueezeDSPData.Matrix;
+		document.getElementById('sel_Filter').value = SqueezeDSPData.Filter;
 		
 		//ambi filter is a bit mroe complex
 		var myEl = document.getElementById('sel_Amb');
-		myEl.value = InguzData.Amb;
+		myEl.value = SqueezeDSPData.Amb;
 		SetAmb( myEl);
 					
 }
@@ -202,7 +204,7 @@ function iSlideEQ (myObj){
 	var myBand = document.getElementById ('band_' + myObj.id ).value; 
 	document.getElementById(myObj.id + 'Bubble').style.display = 'none';
 		
-	InguzSaveEQBand(myBand, myFreq, myGain)	;	
+	SqueezeDSPSaveEQBand(myBand, myFreq, myGain)	;	
 	DisplayAlert (' EQ: ' + myFreq + ' Hz','Setting');	
 }
 
@@ -215,18 +217,18 @@ function NewFieldValue(FieldName, myEl, RefreshAfter)
 	
 	if (RefreshAfter == true)
 	 {
-		InguzSelectValue (FieldName, val, LocalUpdateSettings);
+		SqueezeDSPSelectValue (FieldName, val, LocalUpdateSettings);
 	 }
 	 else
 	 {
-		InguzSelectValue (FieldName, val);
+		SqueezeDSPSelectValue (FieldName, val);
 	 }
 	DisplayAlert (FieldName,'Setting');
 }
 
 function GetCurrentPlayerSettings()
 {
-	InguzSelectValue ('Preset', myPlayer.value, LocalUpdateSettings);
+	SqueezeDSPSelectValue ('Preset', myPlayer.value, LocalUpdateSettings);
 }
 
 
@@ -255,8 +257,16 @@ function SetAmb(myEl)
 
 function Initialise()
 {
-	InguzGetSettings(LocalUpdateSettings);
-	InguzGetList(LocalBuildLists);
+	
+	//get settings and callback to local update
+	SqueezeDSPGetSettings(LocalUpdateSettings);
+	SqueezeDSPGetList(LocalBuildLists);
+}
+
+function control_check()
+{
+		DisplayAlert('connecting to', 'control lib');
+		//alert ('control_library version:- ' + ControlLibVersion  ); 
 }
 
 //Bubble against sliders
