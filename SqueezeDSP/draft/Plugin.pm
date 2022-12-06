@@ -16,11 +16,10 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	
 	0.0.7 - Fox:
-			Using JSON files for config - that is app config and for the DSP/EQ settings.
-			fixed housekeeping issue
+			Using JSON files for config
 	0.0.5 - Fox:
 			This is a fully working initial version
-			All code has been migrated to refer to SqueezeDSP
+			All code has eben migrated to refer to SqueezeDSP
 			code relating to the signal generator has been removed.
 			code relating to the jive menu has been removed and moved into a separate pm file, which is not referenced or used.
 			At this point, I think it is unlikely that the Jive menus will be re-instated
@@ -35,8 +34,7 @@ use File::Path;
 use File::Copy;
 use FindBin qw($Bin);
 use XML::Simple;
-use JSON;
-#use JSON::XS qw(decode_json);
+use JSON::XS qw(decode_json);
 use Data::Dumper;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
@@ -59,7 +57,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.07";
+my $revision = "0.0.06";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -499,15 +497,10 @@ sub initPlugin
 	housekeeping();
 	#do any app config settings, simplifies handover to SqueezeDSP app
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'squeezeDSP_config.json');
-	
 	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	#needs updating to amend json...
-	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
-	# find folder for log file
-
-	my $logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
-
-	amendPluginConfig($appConfig, 'logFile',$logfile);
+	#amendPluginConfig($appConfig, 'soxExe', $soxbinary);
+	
 	# Subscribe to player connect/disconnect messages
 	Slim::Control::Request::subscribe(
 		\&clientEvent,
@@ -519,54 +512,53 @@ sub housekeeping
 {
 	# Clean up temp directory as it tends to get full. Only want to get rid of filters and some json files
 	unlink glob catdir ( $pluginTempDataDir, "/",  '*.filter');
-	# the grep step filters out files matching current.json pattern as these we want to keep!
-	unlink glob grep { !/\.current.json$/ } catdir ( $pluginTempDataDir , "/", '*.json');
+	unlink glob catdir ( $pluginTempDataDir , "/", '*.json');
 	
 }
 
-sub LoadJSONFile
-{
-	my $myinputJSONfile = shift;
-
-	my $txt = do {                             			# do block to read file into variable
-		local $/;                              			# slurp entire file
-		open my $fh, "<", $myinputJSONfile or die $!;  	# open for reading
-		<$fh>;                                 			# read and return file content
-	};
-	my $myoutputData = decode_json($txt);
-	#print Dumper $myoutputData;
-	return ($myoutputData);
-	
-}
-
-sub SaveJSONFile
-{
-	my $myinputData = shift;
-	my $myoutputJSONfile = shift;
-	
-	open my $fh, ">",$myoutputJSONfile;
-	#print $fh encode_json($myinputData);
-	#above works, but we want nice formatting - so
-	print $fh JSON->new->pretty->encode($myinputData);
-	close $fh;
-	return ;
-	
-}
-
-sub amendPluginConfig
+sub amendPluginConfig()
 {
 	#routine for adding a value to a key in the app config.
-	my $myJSONFile = shift;
+	my $myXML = shift;
 	my $myKey = shift;
 	my $myValue = shift;
-		
-	debug('Fox amend file: ' . $myJSONFile . ' for key =' . $myKey . ' value= ' . $myValue );
-	#load JSON -> Amend -> save
-	my $myConfig = LoadJSONFile ($myJSONFile);
-	$myConfig->{settings}->{$myKey}  = $myValue;
-	SaveJSONFile ($myConfig, $myJSONFile );
+	debug('Fox amend file: ' .  $myXML . ' for key =' . $myKey . ' value= ' . $myValue );
+	my  $simple = XMLin($myXML, ForceArray => 1,
+                         KeepRoot   => 1,
+                         KeyAttr    => [], );
+	my $found = 0;						
+
+	my $str = "";
+	#this returns the number of low values in the add array
+	my $Elements = @{$simple->{configuration}[0]->{appSettings}[0]->{add}} ;
+	# now loop through the structure and see if myKey exists
+	#I am sure this could be done more neatly, but it works!
+	my $count = 0;
+	for (my $count = 0 ; $count < $Elements  ; $count++)
+	{
+		#get the key
+		$str = $simple->{configuration}[0]->{appSettings}[0]->{add}[$count]->{key} ;
+		#compare to the key we want
+		if ($str eq $myKey)
+		{
+			debug (	$str . " value found " ) ;
+			#set value
+			$simple->{configuration}[0]->{appSettings}[0]->{add}[$count]->{value} = $myValue;
+			$found = 1;		
+		}
+	}
+	#ok we didn't find it, so we now push the value in.	
+    if ($found == 0) { 
+		debug ("Adding Key");
+		push @{ $simple->{configuration}[0]{appSettings}[0]{add} }, { key  => $myKey,
+                                                        value => $myValue,
+                                                      };
+		}
+	#now save the updated cml	
+	print XMLout($simple, KeepRoot => 1, OutputFile => $myXML, );
 
 }
+
 
 sub shutdown
 {
@@ -839,7 +831,7 @@ sub setPref
 
 		unless( $prefName eq 'mainmenu' || $prefName eq 'settingsmenu' || $prefName eq 'equalizationmenu' )
 		{
-			# write to {client}.settings.conf (as JSON, for easy consumption by the convolver)
+			# write to {client}.settings.conf (as XML, for easy consumption by the convolver)
 			my $file = getPrefFile( $client );
 			savePrefs( $client, $file );
 		}
@@ -860,7 +852,6 @@ sub savePrefs
 	my $mySOL = "\"";
 	my $myvalSep = "\" \: \"";
 	my $myEOL = "\",\n";
-	my $mylastEOL = "\"\n";
 	my $myFieldStart = "\" \: {\n";
 	my $myFieldEnd = "},\n";
 	
@@ -870,11 +861,13 @@ sub savePrefs
 	
 	print OUT "{\n";
 	print OUT " " . $mySOL ."Revision" .  $myvalSep . $revision . $myEOL ;	
-	print OUT " " . $mySOL . "Client" . $myFieldStart ;
+	#print OUT " \"Revision\" :\" " . $revision . "\",\n";
+	print OUT " " .  $mySOL . "Client" . $myFieldStart;
 	print OUT " " x 3 .  $mySOL . "ID" . $myvalSep . $client->id() . $myEOL	;
+	#print OUT " \"Client\" : \" " . $client->id() . "\",\n";
 	
 	#Special treatment for Ambisonic decode attributes
-	# ---------------Was in a separate function - easier to handle here
+	#---------------Was in a separate function - easier to handle here
 	print OUT " " x 3 .  $mySOL . "AmbisonicDecode" . $myFieldStart;
 
 	my $ambtype = getPref( $client, 'ambtype' );		# UHJ, Blumlein or Crossed
@@ -885,39 +878,45 @@ sub savePrefs
 	my $ambrotY = getPref( $client, 'band' . $AMBROTATEYKEY . "value" );	# Rotation about Y (tumble)
 	my $ambrotX = getPref( $client, 'band' . $AMBROTATEXKEY . "value" );	# Rotation about X (tilt)
 	print OUT " " x 4 .  $mySOL . "Type" . $myvalSep . $ambtype . $myEOL ;
+	#my $ret = "Type=\"" . $ambtype . "\" ";
 	if( $ambtype eq 'Crossed' )
 	{
 		print OUT " " x 5 .  $mySOL . "Cardioid" . $myvalSep . $ambdirect . $myEOL ;
 		print OUT " " x 5 .  $mySOL . "Angle" . $myvalSep . $ambangle . $myEOL ;
+		#$ret = $ret . ( "Cardioid=\"" . $ambdirect . "\" Angle=\"" . $ambangle . "\" " ); 
 	}
 	elsif( $ambtype eq 'Crossed+jW' )
 	{
 		print OUT " " x 5 .  $mySOL . "Cardioid" . $myvalSep . $ambdirect . $myEOL ;
 		print OUT " " x 5 .  $mySOL . "Angle" . $myvalSep . $ambangle . $myEOL ;
 		print OUT " " x 5 .  $mySOL . "jW" . $myvalSep . $ambjw . $myEOL ;
+		#$ret = $ret . ( "Cardioid=\"" . $ambdirect . "\" Angle=\"" . $ambangle . "\" jW=\"" . $ambjw . "\" " );
 	}
 	print OUT " " x 5 .  $mySOL . "RotateZ" . $myvalSep . $ambrotZ . $myEOL ;
 	print OUT " " x 5 .  $mySOL . "RotateY" . $myvalSep . $ambrotY . $myEOL ;
-	print OUT " " x 5 .  $mySOL . "RotateX" . $myvalSep . $ambrotX . $mylastEOL ;
-	print OUT " " x 3 .  $myFieldEnd;
-	# ----------------End of Ambisonic
-	print OUT " " x 3 .  $mySOL . "SignalGenerator" . $myFieldStart ;
-	print OUT " " x 5 .  $mySOL . "Type" . $myvalSep . "None" . $mylastEOL;	
+	print OUT " " x 5 .  $mySOL . "RotateX" . $myvalSep . $ambrotX . $myEOL ;
+		
+	#$ret = $ret . ( "RotateZ=\"" . $ambrotZ . "\" RotateY=\"" . $ambrotY . "\" RotateX=\"" . $ambrotX . "\" " );
+	
+	#print OUT "    <AmbisonicDecode " . AmbisonicAttributes( $client ) . " />\n";	
 	print OUT " " x 3 . $myFieldEnd;
-	
-	# where we have a windows path name we want to replace backslash \ with a forward slash /
-	my $myfile = Slim::Utils::Unicode::utf8encode( getPref( $client, 'matrix' ) || '' ) ;
-	
-	$myfile =~ s#\\#/#g;
-	print OUT " " x 3 .  $mySOL . "Matrix" . $myvalSep . $myfile . $myEOL ;
-	print OUT " " x 3 .  $mySOL . "Width" . $myvalSep . ( getPref( $client, 'band' . $WIDTHKEY . 'value' ) || 0 ) . $myEOL	;
-	print OUT " " x 3 .  $mySOL . "Balance" . $myvalSep . ( getPref( $client, 'band' . $BALANCEKEY . 'value' ) || 0 ) . $myEOL	;
-	print OUT " " x 3 .  $mySOL . "Skew" . $myvalSep . ( getPref( $client, 'band' . $SKEWKEY . 'value' ) || 0 ) . $myEOL	;
-	# where we have a windows path name we want to replace backslash \ with a forward slash /
-	$myfile = Slim::Utils::Unicode::utf8encode( getPref( $client, 'filter' ) || '' ) ;
-	$myfile =~ s#\\#/#g;
+	#----------------End of Ambisonic
+	print OUT " " x 3 .  $mySOL . "SignalGenerator" . $myFieldStart ;
+	print OUT " " x 5 .  $mySOL . "Type" . $myvalSep . "None" . $myEOL ;	
+	print OUT " " x 3 . $myFieldEnd;
+	#print OUT "    <SignalGenerator " . SigGenAttributes( $client ) . " />\n";
 
-	print OUT " " x 3 .  $mySOL . "Filter" . $myvalSep .  $myfile . $myEOL	;
+	print OUT " " x 3 .  $mySOL . "Matrix" . $myvalSep . Slim::Utils::Unicode::utf8encode( getPref( $client, 'matrix' ) || '' ) . $myEOL ;
+	#print OUT "    <Matrix>" . Slim::Utils::Unicode::utf8encode( getPref( $client, 'matrix' ) || '' ) . "</Matrix>\n";
+	print OUT " " x 3 .  $mySOL . "Width" . $myvalSep . ( getPref( $client, 'band' . $WIDTHKEY . 'value' ) || 0 ) . $myEOL	;
+	#print OUT "    <Width>" . ( getPref( $client, 'band' . $WIDTHKEY . 'value' ) || 0 ) . "</Width>\n";
+	print OUT " " x 3 .  $mySOL . "Balance" . $myvalSep . ( getPref( $client, 'band' . $BALANCEKEY . 'value' ) || 0 ) . $myEOL	;
+	#print OUT "    <Balance>" . ( getPref( $client, 'band' . $BALANCEKEY . 'value' ) || 0 ) . "</Balance>\n";
+	print OUT " " x 3 .  $mySOL . "Skew" . $myvalSep . ( getPref( $client, 'band' . $SKEWKEY . 'value' ) || 0 ) . $myEOL	;
+#	print OUT "    <Skew>" . ( getPref( $client, 'band' . $SKEWKEY . 'value' ) || 0 ) . "</Skew>\n";
+#	print OUT "    <Depth>" . ( getPref( $client, 'band' . $DEPTHKEY . 'value' ) || 0 ) . "</Depth>\n";
+	print OUT " " x 3 .  $mySOL . "Filter" . $myvalSep .  Slim::Utils::Unicode::utf8encode( getPref( $client, 'filter' ) || '' ) . $myEOL	;
+	#print OUT "    <Filter>" . Slim::Utils::Unicode::utf8encode( getPref( $client, 'filter' ) || '' ) . "</Filter>\n";
 	
 	# Now process EQ - bands and all
 	my $bandcount = getPref( $client, 'bands' );
@@ -925,7 +924,8 @@ sub savePrefs
 	print OUT " " x 3 .  $mySOL . "EQ" . $myFieldStart;
 	print OUT " " x 4 .  $mySOL . "Bands" . $myvalSep . $bandcount . $myEOL	;
 	print OUT " " x 4 .  $mySOL . "Band\" : [\n";
-
+	
+	#print OUT "    <EQ Bands=\"" . $bandcount . "\">\n";
 	for( my $n = 0; $n < $bandcount; $n++ )
 	{
 		print OUT " " x 4 .  "{\n";
@@ -933,34 +933,33 @@ sub savePrefs
 		my $v = getPref( $client, 'b' . $n . 'value' ) || 0;
 		print OUT " " x 5 .  $mySOL . "Freq" . $myvalSep .  $f . $myEOL	;
 		print OUT " " x 5 .  $mySOL . "Gain" . $myvalSep .  $v . $myEOL	;
-		print OUT " " x 5 .  $mySOL . "Q" . $myvalSep .  "1.41" . $mylastEOL	;
-		#formatting, ensure that there is a comma except for last record
-		if ($n+1==$bandcount  ) 
-			{print OUT " " x 4 .  "}\n";}
-		else
-			{{print OUT " " x 4 .  "},\n";}}
-		
+		print OUT " " x 5 .  $mySOL . "Q" . $myvalSep .  "1.41" . $myEOL	;
+		#print OUT "      <Band Freq=\"" . $f . "\">" . $v . "</Band>\n";
+		print OUT " " x 4 .  "}\n";
 	}
 	
-	print OUT " " x 4 . "]\n";
+	print OUT " " x 4 .  $mySOL . "]\n";
+	#print OUT "    </EQ>\n";
 	print OUT " " x 3 . $myFieldEnd ;
 	print OUT " " x 3 .  $mySOL . "Loudness" . $myvalSep .  ( getPref( $client, 'band' . $QUIETNESSKEY . 'value' ) || 0 ) . $myEOL	;
+	#print OUT "    <Quietness>" . ( getPref( $client, 'band' . $QUIETNESSKEY . 'value' ) || 0 ) . "</Quietness>\n";
 	my $fl = getPref( $client, 'band' . $FLATNESSKEY . 'value' );
-	print OUT " " x 3 .  $mySOL . "Flatness" . $myvalSep .  ( defined($fl) ? $fl : 10 ) . $mylastEOL ;
+	print OUT " " x 3 .  $mySOL . "Flatness" . $myvalSep .  ( defined($fl) ? $fl : 10 ) . $myEOL ;
 	
-	print OUT " "  . "}\n";
-	print OUT "}\n";
+	#print OUT "    <Flatness>" . ( defined($fl) ? $fl : 10 ) . "</Flatness>\n";
+	
+	print OUT " "  . $myFieldEnd ;
+	print OUT  $myFieldEnd;
 	
 	
 	close( OUT );
 	return 1;
 }
-sub loadPrefs
+sub loadPrefs_new
 {
 	#load from JSON file	
 	my ( $client, $file, $desc ) = @_;
 	debug( "loadPrefs " . $file );
-=pod
 	unless( -f $file )
 	{
 		oops( $client, $desc, "File $file not found." );
@@ -968,12 +967,9 @@ sub loadPrefs
 	}
 	my $xml = new XML::Simple( suppressempty => '' );
 	my $doc = $xml->XMLin( $file );
-=cut	
-	# get doc from JSON file
-	my $doc = LoadJSONFile ($file);
-
 
 	setPref( $client, 'preset', $file );
+	#setPref( $client, 'siggen', $doc->{Client}->{SignalGenerator} );
 	setPref( $client, 'ambtype', $doc->{Client}->{AmbisonicDecode}->{Type} );
 	setPref( $client, 'band' . $AMBANGLEKEY . 'value',  $doc->{Client}->{AmbisonicDecode}->{Angle} );
 	setPref( $client, 'band' . $AMBDIRECTKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{Cardioid} );
@@ -1005,7 +1001,7 @@ sub loadPrefs
 		setPref( $client, 'b' . $n . 'freq', $freqs[$n] );
 		setPref( $client, 'b' . $n . 'value', $values[$n] );
 	}
-	setPref( $client, 'band' . $QUIETNESSKEY . 'value', $doc->{Client}->{Loudness} );
+	setPref( $client, 'band' . $QUIETNESSKEY . 'value', $doc->{Client}->{Quietness} );
 	setPref( $client, 'band' . $FLATNESSKEY . 'value', $doc->{Client}->{Flatness} );
 	setPref( $client, 'band' . $WIDTHKEY . 'value', $doc->{Client}->{Width} );
 	setPref( $client, 'band' . $BALANCEKEY . 'value', $doc->{Client}->{Balance} );
@@ -1017,8 +1013,44 @@ sub loadPrefs
 	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_LOADED');
 	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 }
+sub savePrefs_old
+{
+	my $client = shift;
+	my $file = shift;
+	my ( $vol, $dir, $fil ) = splitpath( $file );
+	debug( "savePrefs " . $fil );
+	open( OUT, ">$file" ) or  do { oops( $client, undef, "Preferences could not be saved to $file." ); return 0; };
+	print OUT "<?xml version=\"1.0\"?>\n";
+	print OUT "<$settingstag Revision=\"" . $revision . "\">\n";
+	print OUT "  <Client ID=\"" . $client->id() . "\">\n";
+	#print OUT "  <Client ID=\"" . $client->id() . "\" PlayerName=\"" . $client->name . "\">\n";
+	print OUT "    <AmbisonicDecode " . AmbisonicAttributes( $client ) . " />\n";
+	#print OUT "    <SignalGenerator " . SigGenAttributes( $client ) . " />\n";
+	print OUT "    <Matrix>" . Slim::Utils::Unicode::utf8encode( getPref( $client, 'matrix' ) || '' ) . "</Matrix>\n";
+	print OUT "    <Width>" . ( getPref( $client, 'band' . $WIDTHKEY . 'value' ) || 0 ) . "</Width>\n";
+	print OUT "    <Balance>" . ( getPref( $client, 'band' . $BALANCEKEY . 'value' ) || 0 ) . "</Balance>\n";
+	print OUT "    <Skew>" . ( getPref( $client, 'band' . $SKEWKEY . 'value' ) || 0 ) . "</Skew>\n";
+#	print OUT "    <Depth>" . ( getPref( $client, 'band' . $DEPTHKEY . 'value' ) || 0 ) . "</Depth>\n";
+	print OUT "    <Filter>" . Slim::Utils::Unicode::utf8encode( getPref( $client, 'filter' ) || '' ) . "</Filter>\n";
+	my $bandcount = getPref( $client, 'bands' );
+	print OUT "    <EQ Bands=\"" . $bandcount . "\">\n";
+	for( my $n = 0; $n < $bandcount; $n++ )
+	{
+		my $f = getPref( $client, 'b' . $n . 'freq' ) || defaultFreq( $client, $n, $bandcount );
+		my $v = getPref( $client, 'b' . $n . 'value' ) || 0;
+		print OUT "      <Band Freq=\"" . $f . "\">" . $v . "</Band>\n";
+	}
+	print OUT "    </EQ>\n";
+	print OUT "    <Quietness>" . ( getPref( $client, 'band' . $QUIETNESSKEY . 'value' ) || 0 ) . "</Quietness>\n";
+	my $fl = getPref( $client, 'band' . $FLATNESSKEY . 'value' );
+	print OUT "    <Flatness>" . ( defined($fl) ? $fl : 10 ) . "</Flatness>\n";
+	print OUT "  </Client>\n";
+	print OUT "</$settingstag>\n";
+	close( OUT );
+	return 1;
+}
 
-sub loadPrefs_old
+sub loadPrefs
 {
 	my ( $client, $file, $desc ) = @_;
 	debug( "loadPrefs " . $file );
@@ -1150,6 +1182,99 @@ sub AmbisonicAttributes
 	$ret = $ret . ( "RotateZ=\"" . $ambrotZ . "\" RotateY=\"" . $ambrotY . "\" RotateX=\"" . $ambrotX . "\" " );
 	return $ret;
 }
+=pod no more sig gens
+sub SigGenAttributes
+{
+	my $client = shift;
+	my $siggen = getPref( $client, 'siggen' );
+	my $sigfreq = getPref( $client, 'sigfreq' ) || 1000;
+
+	if( $siggen eq 'Ident' )
+	{
+		return( "Type=\"Ident\" L=\"" . $client->string('PLUGIN_SQUEEZEDSP_SIGGEN_IDENT_L') . "\" R=\"" . $client->string('PLUGIN_SQUEEZEDSP_SIGGEN_IDENT_R') . "\"" ); 
+	}
+	if( $siggen eq 'Sweep' )
+	{
+		return( "Type=\"Sweep\" Length=\"" . "45" . "\"" ); 
+	}
+	if( $siggen eq 'SweepShort' )
+	{
+		return( "Type=\"Sweep\" Length=\"" . "20" . "\"" ); 
+	}
+	if( $siggen eq 'SweepEQL' )
+	{
+		return( "Type=\"Sweep\" Length=\"" . "45" . "\" UseEQ=\"L\"" ); 
+	}
+	if( $siggen eq 'SweepEQR' )
+	{
+		return( "Type=\"Sweep\" Length=\"" . "45" . "\" UseEQ=\"R\"" ); 
+	}
+	elsif( $siggen eq 'Pink' )
+	{
+		return( "Type=\"Pink\" Mono=\"true\"" ); 
+	}
+	elsif( $siggen eq 'PinkEQ' )
+	{
+		return( "Type=\"Pink\" Mono=\"true\" UseEQ=\"true\"" ); 
+	}
+	elsif( $siggen eq 'PinkSt' )
+	{
+		return( "Type=\"Pink\" Mono=\"false\"" ); 
+	}
+	elsif( $siggen eq 'PinkStEQ' )
+	{
+		return( "Type=\"Pink\" Mono=\"false\" UseEQ=\"true\"" ); 
+	}
+	elsif( $siggen eq 'White' )
+	{
+		return( "Type=\"White\"" ); 
+	}
+	elsif( $siggen eq 'Sine' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'Quad' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'Square' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'BLSquare' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'Triangle' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'BLTriangle' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'Sawtooth' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'BLSawtooth' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\"" ); 
+	}
+	elsif( $siggen eq 'Intermodulation' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq1=\"" . "19000" . "\" Freq2=\"" . "20000" . "\"" ); 
+	}
+	elsif( $siggen eq 'ShapedBurst' )
+	{
+		return( "Type=\"" . $siggen . "\" Freq=\"" . $sigfreq . "\" Cycles=\"" . "4" . "\""  ); 
+	}
+	else
+	{
+		return( "Type=\"None\"" ); 
+	}
+}
+=cut
 sub defaultPrefs
 {
 	my $client = shift;
@@ -1508,7 +1633,6 @@ sub setvalCommand
 
 sub setFilterValue( $client, $prf, $val )
 {
-	#amended path to replace backslash
 	my ( $client, $prf, $val ) = @_;
 	my $path;
 	if( $val eq '-' || $val eq '' )
@@ -1524,13 +1648,10 @@ sub setFilterValue( $client, $prf, $val )
 	if( $prf eq 'matrix' )
 	{
 		$path = catdir( $pluginMatrixDataDir, $val );
-		$path =~ s#\\#/#g;
-
 	}
 	else
 	{
 		$path = catdir( $pluginImpulsesDataDir, $val );
-		$path =~ s#\\#/#g;
 	}
 	if( -f $path )
 	{
@@ -1549,12 +1670,11 @@ sub setFilterValue( $client, $prf, $val )
 
 sub getPresetsListNoNone
 {
-	#amended to load json file
 	my $client = shift;
 	my $nopath = shift;
 	my %presets = ();
 
-	my $types = qr/\.(?:(preset\.json))$/i;
+	my $types = qr/\.(?:(preset\.conf))$/i;
 	if( opendir( DIR, $pluginSettingsDataDir ) )
 	{
 		for my $item ( readdir(DIR) )
@@ -1565,7 +1685,7 @@ sub getPresetsListNoNone
 			{
 				if( $item =~ $types )
 				{
-					$item =~ s/\.(?:(preset\.json))$//i;
+					$item =~ s/\.(?:(preset\.conf))$//i;
 					$presets{$nopath ? $itemPath : $fullPath} = $item;
 				}
 			}
@@ -1674,7 +1794,7 @@ sub saveasCommand
 
 	debug( "command: saveas($key)" );
 
-	my $file = catdir( $pluginSettingsDataDir, join('_', split(/:/, $key)) . '.preset.json' );
+	my $file = catdir( $pluginSettingsDataDir, join('_', split(/:/, $key)) . '.preset.conf' );
 	setPref( $client, 'preset', $file );
 	savePrefs( $client, $file );
 

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extension>
-  <name>PLUGIN_INGUZEQ_DISPLAYNAME</name>
-  <description>PLUGIN_INGUZEQ_MODULEDESC</description>
+  <name>PLUGIN_SQUEEZEDSP_DISPLAYNAME</name>
+  <description>PLUGIN_SQUEEZEDSP_MODULEDESC</description>
   <module>Plugins::SqueezeDSP::Plugin</module>
   <version>0.0.04</version>
 

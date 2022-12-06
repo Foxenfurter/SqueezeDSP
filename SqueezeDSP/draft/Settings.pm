@@ -1,6 +1,6 @@
 package Plugins::SqueezeDSP::Settings;
 # ----------------------------------------------------------------------------
-# SqueezeDSP\Settings.pm - player settings for SqueezeDSP plugin
+# SqueezeDSP	\Settings.pm - player settings for SqueezeDSP plugin
 # ----------------------------------------------------------------------------
 
 use strict;
@@ -9,7 +9,7 @@ use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 use Plugins::SqueezeDSP::Plugin;
 
-my $thistag = "SqueezeDSP";
+my $thistag = "squeezedsp";
 my $thisapp = "SqueezeDSP";
 
 my $log = logger('plugin.' . $thistag);

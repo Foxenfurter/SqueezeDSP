@@ -69,7 +69,7 @@
 		<TR  id="control_Preset">
 			<TD class="rowTitleLong"><Output class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_CHOOSE_PRESET" | string %]</a></Output></TD>
 			<TD class="rowBody">
-				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.conf',''); NewFieldValue('Preset', this, true); "  >
+				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.json',''); NewFieldValue('Preset', this, true); "  >
 					<option value="-">None</option>
 				</select>
 			</TD>
