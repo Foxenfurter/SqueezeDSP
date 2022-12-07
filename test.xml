@@ -4,15 +4,15 @@
     <title lang="EN">Squeeze-EQ</title>
   </details>
   <plugins>
-      <plugin name="SqueezeDSP" version="0.0.10" minTarget="7.7.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.0.10" minTarget="7.7.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server - provides EQ and DSP using JSON files, simplified code and needs less resources</desc>
+      <desc lang="EN">DSP for Squeezebox server - provides EQ and DSP. Now using JSON files, simplified code and needs less resources</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.10.zip</url>
-      <sha>941a97b3174c634f0487402609d20b583394dc1c</sha>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.11.zip</url>
+      <sha>6b5759bb64ed5ae65dd3a16260650abf04463149</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
-	  <changes>EQ and DSP working using JSON config files
+	  <changes>EQ and DSP working using JSON config files, better Housekeeping, Binary now .Net 7.0
 	  </changes>
     </plugin>
   </plugins>

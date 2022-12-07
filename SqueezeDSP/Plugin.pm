@@ -15,6 +15,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#Initial version
 	#
 	
+	0.0.11	Fox: removing Debug settings - ready for release
 	0.0.7 - Fox:
 			Using JSON files for config - that is app config and for the DSP/EQ settings.
 			fixed housekeeping issue
@@ -59,7 +60,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.07";
+my $revision = "0.0.11";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -176,7 +177,7 @@ sub debug
 	my $txt = shift;
 	$log->info( $thisapp .": " . $txt . "\n");
 	#Putting an error here for easier debug
-	$log->error( "Fox: " .  $txt . "\n" );
+	#$log->error( "Fox: " .  $txt . "\n" );
 }
 
 
@@ -519,9 +520,9 @@ sub housekeeping
 {
 	# Clean up temp directory as it tends to get full. Only want to get rid of filters and some json files
 	unlink glob catdir ( $pluginTempDataDir, "/",  '*.filter');
+	unlink glob catdir ( $pluginTempDataDir, "/",  '*.filter.wav');
 	# the grep step filters out files matching current.json pattern as these we want to keep!
-	unlink glob grep { !/\.current.json$/ } catdir ( $pluginTempDataDir , "/", '*.json');
-	
+	unlink grep { !/\current.json/ } glob catdir ( $pluginTempDataDir , "/", '*.json');
 }
 
 sub LoadJSONFile
