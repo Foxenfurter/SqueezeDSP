@@ -955,23 +955,21 @@ sub savePrefs
 	close( OUT );
 	return 1;
 }
+
 sub loadPrefs
 {
 	#load from JSON file	
 	my ( $client, $file, $desc ) = @_;
 	debug( "loadPrefs " . $file );
-=pod
+
 	unless( -f $file )
 	{
 		oops( $client, $desc, "File $file not found." );
 		return;
 	}
-	my $xml = new XML::Simple( suppressempty => '' );
-	my $doc = $xml->XMLin( $file );
-=cut	
+	
 	# get doc from JSON file
 	my $doc = LoadJSONFile ($file);
-
 
 	setPref( $client, 'preset', $file );
 	setPref( $client, 'ambtype', $doc->{Client}->{AmbisonicDecode}->{Type} );
@@ -989,10 +987,12 @@ sub loadPrefs
 	my $n = 0;
 	foreach $b (@{$doc->{Client}->{EQ}->{Band}})
 	{
+		#get Freq 
 		my $f = $b->{Freq}; $f += 0;
 		next if $f < 10;
 		next if $f > 22000;
-		my $v = $b->{content}; $v += 0;
+		#get gain
+		my $v = $b->{Gain}; $v += 0;
 		$h{$f} = $v;
 		$n++;
 		last if $n >= $bandcount;

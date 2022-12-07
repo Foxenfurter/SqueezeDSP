@@ -1,0 +1,10 @@
+{
+   "settings" : {
+      "dither" : "1",
+      "logFile" : "C:\\ProgramData\\Squeezebox\\Logs\\squeezedsp.log",
+      "soxExe" : "E:\\GitHub\\slimserver-win64\\Bin\\MSWin32-x64-multi-thread\\sox.exe",
+      "debug" : "true",
+      "partitions" : "2",
+      "gain" : "-16"
+   }
+}

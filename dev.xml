@@ -4,15 +4,15 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.0.04" minTarget="7.7.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.0.10" minTarget="7.7.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server based new development version. --NOT Yet working, DO NOT USE</desc>
+      <desc lang="EN">DSP for Squeezebox server - provides EQ and DSP using JSON files, simplified code and needs less resources</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.04.zip</url>
-      <sha>5fcc25096570708ecef557cc67d10e362a9f9b45</sha>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.10.zip</url>
+      <sha>941a97b3174c634f0487402609d20b583394dc1c</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
-	  <changes>Initial version copied and hacked in from my own InguzDSP - not yet working
+	  <changes>EQ and DSP working using JSON config files
 	  </changes>
     </plugin>
   </plugins>
