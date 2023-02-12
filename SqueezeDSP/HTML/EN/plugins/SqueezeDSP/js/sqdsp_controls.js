@@ -6,19 +6,19 @@ SqueezeDSP Display logic
 
 function LocalBuildLists(data)
 {
-		LocalBuildList ('Filter',data);
-		LocalBuildList ('Matrix',data);
+		LocalBuildList ('FIRWavFile',data);
+		//LocalBuildList ('MatrixFile',data);
 		LocalBuildList ('Preset',data);
 }
 
 
 function LocalBuildList (listType, data)
 {
-		// Get the dropdown Object e.g. sel_Matrix
+		// Get the dropdown Object e.g. sel_MatrixFile
 	    var select = document.getElementById("sel_" + listType);
 		// Reset the dropdown list so that only the first element is displayed.
 		select.options.length = 1;	
-		//loop through the data elements for the list type e.g. Matrix_loop
+		//loop through the data elements for the list type e.g. MatrixFile_loop
 		var loop = data.result[ listType + "_loop" ];
 		if( typeof loop=="object" )
 		{
@@ -37,44 +37,106 @@ function LocalBuildList (listType, data)
 		//return (listType);
 }
 
-
-
-function LocalbuildEQ(data, labeltype)
+function LocalbuildEQ(data, labeltype, bands)
 {
-	// we are going to build a set of slider controls from the data passed in
-	var myHTML = "";
-	var i = 0;
-	for(var i in data)
-	{
-		var lfg = data[i];
-		for(var j in lfg)
-		{
-			// F=frequency, g=gain
-			var f = parseFloat(j);
-			var g = parseFloat(lfg[j]);
-			if( !isNaN(f) && !isNaN(g) )
-			{
+	try{
+			// we are going to build a set of slider controls from the data passed in
+			// data = EQ_loop
+			var myHTML = "";
 
+			
+			//prefer the following as it is clearer
+			for ( let i = 0; i < data.length; i++ )
+			{
 				
-				//style="visibility:hidden"
-				myHTML = myHTML + '<TR  id="control_' +  labeltype + i + '" >';
-				myHTML = myHTML + '<TD class="rowTitle"><Output style="visibility:hidden; width: 1px;" id="band_' + labeltype + i + '" >' + i  
-				myHTML = myHTML + '</Output><Output id="freq_' + labeltype + i + '" >' + f + '</Output>'
-				myHTML = myHTML + '&nbsp;Hz</TD>';
-				myHTML = myHTML + '<TD class="Slide">';
-				myHTML = myHTML + '<input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="' + g +'" ' ;
-				myHTML = myHTML + 'onpointerdown="showBubble(this)" onchange="iSlideEQ(this)" id="' + labeltype + i + '" ></Input>';
-				myHTML = myHTML + '<output id="' + labeltype + i + 'Bubble" class="bubble" ></output></TD>';
-				myHTML = myHTML + '<TD class="rowSuffix"><Output id="val_' + labeltype + i + '">' + g + '</Output>&nbsp;dB</TD>';
-				myHTML = myHTML + '</TR>';
+				var fgq = data[i];
+				//get an element (key / value pair) where j is the key (frequency)
+				for(var j in fgq)
+				{
 				
-				i++;
-			}
+					// f=frequency, g=gain, q=q
+					var f = parseFloat(j);
+					!isNaN(f)
+					{
+						//gain and q are passed within a single | separated string
+						var gq = (fgq[j]);
+						var g = parseFloat(gq.split('|')[0]);
+						var q = parseFloat(gq.split('|')[1]);
+						// calculate the postion of the slider based off it's log value
+						var fp = log2LinearMapper(f);
+					}
+					
+					if( !isNaN(f) && !isNaN(g) )
+					{
+	  				
+      myHTML = myHTML + '<TABLE class="table-container"  id="control_' +  labeltype + i + '" style="background: #fff;"   > ';
+      myHTML = myHTML + '<TR><TD class="rowTitle"></TD><TD class="rowBody"> <input type ="number" readonly style="border: none;  visibility: hidden; width: 0 px; height: 0 px;"  id="band_' + labeltype + i + '"  value=' + i + ' ></Input> ';
+	  myHTML = myHTML + '<h4>Band ' + (i + 1 ) + '</h4></TD><TD class="rowSuffix"></TD></TR> ';
+	  
+      myHTML = myHTML + ' <TR><TD class="rowTitle">[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]</TD> ';
+      myHTML = myHTML + '  <TD class="Slide">';
+      myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="100" step=".01" value="' + fp +'"  ' ;
+      myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ';
+      myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.freq" ></Input> ';
+      myHTML = myHTML + '   <output id="' + labeltype + i + '.freqBubble" class="bubble" ></output>   </TD> ';
+      myHTML = myHTML + '  <TD class="rowSuffix"> ';
+      myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.freq" value="' + f +'"  ></Input> ';
+      myHTML = myHTML + '  </TD>  </TR> ';
+		if (i == 0 )
+		{
+			//alert (myHTML);
 		}
+      myHTML = myHTML + ' <TR><TD class="rowTitle">[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]</TD> ';  
+      myHTML = myHTML + '  <TD class="Slide"> ';
+      myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="' + g +'" ' ;
+      myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
+      myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.gain" ></Input> ';
+      myHTML = myHTML + '   <output id="' + labeltype + i + '.gainBubble" class="bubble" ></output>   </TD> ';
+      myHTML = myHTML + '  <TD class="rowSuffix"> ';
+      myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.gain" value="' + g +'"></Input> ';
+      myHTML = myHTML + '  </TD>  </TR> ';
+        
+      myHTML = myHTML + ' <TR><TD class="rowTitle"><div class="tooltip"  >Q<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]</span></div></TD> ';  
+      myHTML = myHTML + '  <TD class="Slide"> ';
+      myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="12" step="0.01" value="' + q +'" ' ;
+      myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
+      myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.q" ></Input> ';
+      myHTML = myHTML + '   <output id="' + labeltype + i + '.qBubble" class="bubble" ></output>   </TD> ';
+      myHTML = myHTML + '  <TD class="rowSuffix"> ';
+      myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.q" value="' + q +'"></Input> ';
+      myHTML = myHTML + '  </TD>  </TR>'; 
+
+      myHTML = myHTML + '</TABLE>';
+					
+
+					}
+				}
+				
+			}
+			
 	}
-	return (myHTML);
-	
+	catch
+	{
+		DefaultAlert("LocalbuildEQ", "Error building EQ profile");
+		
+	}
+	return myHTML;
 }	
+
+
+
+function replaceNull(ValueToCheck, DefaultValue)
+{	
+	if ( !ValueToCheck )
+	{
+		
+		return DefaultValue;
+	}
+	else
+	{
+		return ValueToCheck;
+	}
+}
 
 
 function LocalSetupRadio(myRadio, newValue )
@@ -85,7 +147,7 @@ function LocalSetupRadio(myRadio, newValue )
 	//	return;
 	
 	var radioLength = radioObj.length;
-	//alert ('processing radio length ' + radioLength);
+	//alert ('processing radio ' + myRadio + ' | ' + newValue );
 	if(radioLength == undefined) {
 		radioObj.checked = (radioObj.value == newValue.toString());
 		return;
@@ -97,21 +159,36 @@ function LocalSetupRadio(myRadio, newValue )
 			radioObj[i].checked = true;
 		}
 	}
-	
+	//ToggleControl(myRadio, 'control_Lowshelf' )
 }
-
-
 
 function LocalUpdateSettings (data)
 	{
 		// Write Data from REST response to Local cache
+	
 		UpdateSqueezeDSPData(data);
 		
 		//Now We display the data from the cache
+		LocalDisplayVals();	
+	
+		LocalSetupRadio( 'val_Bypass' , SqueezeDSPData.Bypass);
+		//LocalSetupRadio( 'val_EQBands' , SqueezeDSPData.EQBands);
+		LocalSetupRadio( 'val_Loudness.enabled' , replaceNull(SqueezeDSPData.Loudness_enabled,0));
+		LocalSetupRadio( 'val_Lowshelf.enabled' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
+		LocalSetupRadio( 'val_Highshelf.enabled' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
+		LocalSetupRadio( 'val_Highpass.enabled' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
+		LocalSetupRadio( 'val_Lowpass.enabled' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
 		
-		LocalSetupRadio( 'val_Bands' , SqueezeDSPData.Bands);	
+		ToggleControl(SqueezeDSPData.Bypass, 'DSP_container', true );
+
+		ToggleControl(SqueezeDSPData.Loudness_enabled, 'control_Loudness' , false );
+		ToggleControl(SqueezeDSPData.Highpass_enabled, 'control_Highpass' , false );
+		ToggleControl(SqueezeDSPData.Lowshelf_enabled, 'control_Lowshelf', false );
+		ToggleControl(SqueezeDSPData.Highshelf_enabled, 'control_Highshelf' , false );
+		ToggleControl(SqueezeDSPData.Lowpass_enabled, 'control_Lowpass' , false );
+		
 		LocalDisplayEQ();	
-		LocalDisplayVals();
+		
 		ListenForSlide();
 	}
 
@@ -120,6 +197,14 @@ function HideAlert()
 {
 	myMessage.className ="bubble";
 	myMessage.innerText = '';
+}
+function DebugAlert(FieldName, Message)
+{
+	// todo: add in some amendments so this only fires when debug is set
+	
+	myMessage.className  = "localAlert";
+	myMessage.innerText = Message + ' ' + FieldName + " ...";
+	setTimeout(function(){ 	HideAlert(); }, 1000);	
 }
 
 function DisplayAlert(FieldName, Message)
@@ -134,79 +219,286 @@ function DisplayAlert(FieldName, Message)
  
 {
 	var val = myEl.value;
-	SqueezeDSPSavePreset(val, Initialise);
-	
+	SqueezeDSPSavePreset(val, Initialise);	
 	DisplayAlert ('Preset','Saving')	
 		
 }
 
 
-
 function LocalDisplayEQ()
 {
-	//alert ('LocalDisplayEQ');
+	
+	
 	var myEQ=SqueezeDSPData.EQ_loop;
-
-	document.getElementById('control_EQ').innerHTML = LocalbuildEQ(myEQ, 'Slide');
+	var myBands=SqueezeDSPData.EQBands;
+	if (myBands> 0 )
+	{
+		var mytempHTML = LocalbuildEQ(myEQ, 'Slide', myBands);
+		document.getElementById('control_EQ').innerHTML = mytempHTML;
+	}	
 }
 
 function LocalDisplayVals()
 {
-		
-		
-		//alert(document.getElementById('Skew').value +':'+  SqueezeDSPData.Skew);
-		DisplayVal('Skew', SqueezeDSPData.Skew);
-		DisplayVal('Flatness', SqueezeDSPData.Flatness);
-		DisplayVal('Quietness', SqueezeDSPData.Quietness);
+
+		DisplayVal('Delay.delay', SqueezeDSPData.Delay_delay);
+		//DisplayVal('Flatness', SqueezeDSPData.Flatness);
+		//DisplayVal('Loudness.enabled', SqueezeDSPData.Loudness_enabled);
 		DisplayVal('Balance', SqueezeDSPData.Balance);
-		DisplayVal('Width', SqueezeDSPData.Width);
-		DisplayVal('AmbRotateX',  SqueezeDSPData.AmbRotateX); 
-		DisplayVal('AmbRotateY', SqueezeDSPData.AmbRotateY ); 
-		DisplayVal('AmbRotateZ',SqueezeDSPData.AmbRotateZ ); 
-		 
-		DisplayVal('AmbjW',SqueezeDSPData.AmbjW ); 
-		DisplayVal('AmbAngle',SqueezeDSPData.AmbAngle); 
-		DisplayVal('AmbDirect',SqueezeDSPData.AmbDirect);
+		DisplayVal('Preamp', SqueezeDSPData.Preamp);
+		
+		// defaults selected such that the gain needs to be applied
+		// defaults are now being applied in the server end so this is not really necessary
+		DisplayVal('Lowshelf.gain', replaceNull( SqueezeDSPData.Lowshelf_gain,0));
+		DisplayVal('Lowshelf.slope', replaceNull(SqueezeDSPData.Lowshelf_slope, 12));
+		DisplayVal('Lowshelf.freq', replaceNull(SqueezeDSPData.Lowshelf_freq, 300));
+		
+		// defaults selected such that the gain needs to be applied
+		DisplayVal('Highshelf.gain', replaceNull(SqueezeDSPData.Highshelf_gain,0));
+		DisplayVal('Highshelf.slope', replaceNull(SqueezeDSPData.Highshelf_slope, 12));
+		DisplayVal('Highshelf.freq', replaceNull(SqueezeDSPData.Highshelf_freq, 8000));
+					
+		DisplayVal('Highpass.q', SqueezeDSPData.Highpass_q);
+		DisplayVal('Highpass.freq', SqueezeDSPData.Highpass_freq);
+		
+		DisplayVal('Lowpass.q', SqueezeDSPData.Lowpass_q);
+		DisplayVal('Lowpass.freq', SqueezeDSPData.Lowpass_freq);
+				
+		document.getElementById('ClientName').value = SqueezeDSPData.ClientName ;
+		
+		document.getElementById('val_EQBands').value = SqueezeDSPData.EQBands;
 		
 		// Set the values for dropdowns
-		document.getElementById('sel_Matrix').value = SqueezeDSPData.Matrix;
-		document.getElementById('sel_Filter').value = SqueezeDSPData.Filter;
+		//document.getElementById('sel_MatrixFile').value = SqueezeDSPData.MatrixFile;
+		document.getElementById('sel_FIRWavFile').value = SqueezeDSPData.FIRWavFile;
 		
-		//ambi filter is a bit mroe complex
-		var myEl = document.getElementById('sel_Amb');
-		myEl.value = SqueezeDSPData.Amb;
-		SetAmb( myEl);
-					
+		// Sliders for frequencies are mapped to a log scale 
+		positionFreqSlider('Highpass.freq',  SqueezeDSPData.Highpass_freq);
+		positionFreqSlider('Lowshelf.freq',  SqueezeDSPData.Lowshelf_freq);
+		positionFreqSlider('Highshelf.freq',  SqueezeDSPData.Highshelf_freq);
+		positionFreqSlider('Lowpass.freq',  SqueezeDSPData.Lowpass_freq);
+		
+
 }
 
 
 function DisplayVal(ElName, MyVal)
 {
+	try
+	{
 		document.getElementById(ElName).value = MyVal;
 		document.getElementById('val_' + ElName ).value = MyVal;
+	}
+	catch
+	{
+		DebugAlert	( ElName, "Function DisplayVal failing for:"  );
+	}
 }
 
 
 function iSlide (myObj){
 	
 	myVal = document.getElementById ('val_' + myObj.id );
-	myVal.value = myObj.value;
+	var mySlideName = myObj.id;
+	if ( mySlideName.endsWith("freq")  	)
+	{
+		myVal.value = logScaleMapper(myObj.value); 	
+		//myObj.value = myVal.value			
+	}
+	else
+	{
+		myVal.value = myObj.value;		
+	}	
+	
+	
 	document.getElementById(myObj.id + 'Bubble').style.display = 'none';	
-	NewFieldValue(myObj.id, myObj, false);
+	NewFieldValue(myObj.id, myVal, false);
+	
+}
+
+function SliderReset (){
+	try {
+			this.value = 0;
+			myVal = document.getElementById ('val_' + this.id );
+			myVal.value = this.value;
+			NewFieldValue(this.id, myVal, false);
+	}
+	catch{
+		alert('Error on SliderReset');
+	}
+	
+}
+
+function EQReset()
+{
+	try {
+	
+	myObj = this.id;
+	//Set gain to zero for EQ Slider. Other values not affected
+	this.value = 0; 
+	document.getElementById ('val_' + myObj ).value = this.value;
+	
+	var myBand = document.getElementById ('band_' + myObj ).value;
+	var myGain = document.getElementById ('val_' + myObj ).value;
+	var myFreq = document.getElementById ('freq_' + myObj ).value; 
+	
+	var myQ = document.getElementById ('q_' + myObj ).value;
+	//document.getElementById(this + 'Bubble').style.display = 'none';
+			
+	SqueezeDSPSaveEQBand(myBand, myFreq, myGain, myQ)	;	
+	DisplayAlert (' EQ: ' + myFreq + ' Hz ','Setting' );	
+	}
+	catch{
+		alert('Error on EQReset');
+	}
 	
 }
 
 
 function iSlideEQ (myObj){
-	document.getElementById ('val_' + myObj.id ).value = myObj.value;
-	var myGain = document.getElementById ('val_' + myObj.id ).value;
-	var myFreq = document.getElementById ('freq_' + myObj.id ).value; 
-	var myBand = document.getElementById ('band_' + myObj.id ).value; 
-	document.getElementById(myObj.id + 'Bubble').style.display = 'none';
-		
-	SqueezeDSPSaveEQBand(myBand, myFreq, myGain)	;	
-	DisplayAlert (' EQ: ' + myFreq + ' Hz','Setting');	
+	//myObj is name of an object, namely the EQ Slider
+	// use log scale for frequency
+	document.getElementById('val_' + myObj + '.freq' ).value = logScaleMapper(document.getElementById( myObj + '.freq' ).value);
+	document.getElementById('val_' + myObj + '.q' ).value = document.getElementById( myObj + '.q' ).value;
+	document.getElementById('val_' + myObj + '.gain' ).value = document.getElementById( myObj + '.gain' ).value;
+	//could add in some validation here to stop bad values from being saved.
+	var myBand = document.getElementById ('band_' + myObj ).value;
+
+	var myGain = document.getElementById ('val_' + myObj  + '.gain' ).value;
+	var myFreq = document.getElementById ('val_' + myObj + '.freq' ).value; 
+	var myQ = document.getElementById ('val_' + myObj  + '.q').value;
+			
+	SqueezeDSPSaveEQBand(myBand, myFreq, myGain, myQ)	;	
+	DisplayAlert (' EQ: ' + myFreq + ' Hz ','Setting' );
+	
+	document.getElementById(myObj + '.freqBubble').style.display = 'none';
+	document.getElementById(myObj + '.qBubble').style.display = 'none';
+	document.getElementById(myObj + '.gainBubble').style.display = 'none';
 }
+
+function ToggleControl(myInputValue, myControltoToggle, InvertToggle = false )
+{
+//toggle the relevant control on or off depending on field value 
+
+	var myValue = myInputValue;
+	//alert ('Control: ' + myControltoToggle + ' value: ' + myValue + ' isInverted: ' + InvertToggle );
+	if (InvertToggle)
+	{
+		if ( myValue == 1 )
+			{
+				document.getElementById(myControltoToggle).style.display = 'none';
+			}
+		else
+			{
+				document.getElementById(myControltoToggle).style.display = '';
+			}
+
+	}
+	else
+	{
+		if ( myValue == 0 )
+		{
+			document.getElementById(myControltoToggle).style.display = 'none';
+		}
+		else
+		{
+			document.getElementById(myControltoToggle).style.display = '';
+		}
+
+	}
+}
+
+function roundToNearest(numIn, roundto = 5) {
+  // Allows the round target to be defined
+  return Math.round(numIn / roundto) * roundto;
+}
+
+
+// use this for non linear sliders - frequencey
+function logScaleMapper(value) {
+  const minLinear = 0;
+  const maxLinear = 100;
+  const minLog = Math.log10(20);
+  const maxLog = Math.log10(20000);
+  var retval;
+
+  // Calculate the logarithmic value
+
+  const logValue = ( maxLog - minLog ) / (maxLinear - minLinear) * (value - minLinear) + minLog;
+  // Convert the logarithmic value back to a linear scale and round
+  retval = Math.round( Math.pow(10, logValue) );
+  
+  // now we want nice numbers e.g. 11000 not 11021
+  if (retval > 12000 )
+	//increment by 1000 
+	{retval = roundToNearest(retval, 1000); }
+  else if ( retval >= 5000 && retval < 12000 )
+	{retval = roundToNearest(retval, 100); }
+  else if ( retval >= 1000 && retval < 5000 )
+	{retval = roundToNearest(retval, 10); }
+  else if ( retval > 30 && retval < 1000 )
+	//increment by 5 
+	{ retval = roundToNearest(retval, 5); }
+  // less than 30 we don't apply rounding	
+  return retval;
+}
+
+function log2LinearMapper(value)
+{
+  const minLog = Math.log10(20);
+  const maxLog = Math.log10(20000);
+
+  // Get the minimum and maximum values of the slider control
+  const minLinear = 0;
+  const maxLinear = 100;
+  // Calculate the logarithmic value of the input number
+  
+  const logValue = ( Math.log10(value) - minLog ) / ( maxLog - minLog );
+  
+  // Calculate the slider position based on the logarithmic value
+  const sliderPosition = minLinear + ( logValue * (maxLinear - minLinear)) ;
+  
+  return sliderPosition;
+}
+
+
+function positionFreqSlider(elementname,value) {
+  // function maps the logarithmic values back to the slider scale.
+  var myObj = document.getElementById(elementname);
+
+
+  myObj.value = log2LinearMapper(value);
+ 
+}
+
+function AddEQBand()
+{
+	/* Add a new band unless max of 31 reached */
+	var myObj= document.getElementById('val_EQBands');
+	var myObjvalue = Number(myObj.value);
+	if ( myObjvalue < 31 )
+	{
+		myObj.value = myObjvalue + 1;
+		NewFieldValue ('EQBands', myObj ,  true);
+		ToggleControl(myObj.value, 'control_EQ' )
+	}
+}
+
+function DelEQBand()
+{
+	/* delete a  band unless min of 0 reached */
+	var myObj= document.getElementById('val_EQBands');
+	var myObjvalue = parseInt(myObj.value,10);
+
+	if ( myObjvalue > 0 )
+	{
+		myObj.value = myObjvalue - 1;
+		NewFieldValue ('EQBands', myObj ,  true);
+		ToggleControl(myObj.value, 'control_EQ' )
+	}
+}
+
+
 
 
 function NewFieldValue(FieldName, myEl, RefreshAfter)
@@ -214,7 +506,7 @@ function NewFieldValue(FieldName, myEl, RefreshAfter)
 	//var myHost = myEl.parentNode.parentNode;
 	
 	var val = myEl.value;
-	
+	//alert (val);
 	if (RefreshAfter == true)
 	 {
 		SqueezeDSPSelectValue (FieldName, val, LocalUpdateSettings);
@@ -228,7 +520,10 @@ function NewFieldValue(FieldName, myEl, RefreshAfter)
 
 function GetCurrentPlayerSettings()
 {
-	SqueezeDSPSelectValue ('Preset', myPlayer.value, LocalUpdateSettings);
+	var myplayerconfigfile = myPlayer.value + '.settings.json' ;
+	//now replace the :
+	myplayerconfigfile = myplayerconfigfile.replaceAll(":", "_"); 
+	SqueezeDSPSelectValue ('Preset', myplayerconfigfile , LocalUpdateSettings);
 }
 
 
@@ -259,8 +554,10 @@ function Initialise()
 {
 	
 	//get settings and callback to local update
-	SqueezeDSPGetSettings(LocalUpdateSettings);
+	DisplayAlert('All Fields', 'Intialise');
 	SqueezeDSPGetList(LocalBuildLists);
+	SqueezeDSPGetSettings(LocalUpdateSettings);
+
 }
 
 function control_check()
@@ -293,7 +590,16 @@ function setBubble(range, bubble) {
   const min = range.min ? range.min : 0;
   const max = range.max ? range.max : 100;
 
-  bubble.innerHTML = val; 		
+
+  var mySlideName = range.id;
+  if ( mySlideName.endsWith("freq")  	)
+  {
+  	bubble.innerHTML = logScaleMapper(val); 		
+  }
+  else
+  {
+	bubble.innerHTML = val; 		
+  }	
   
   // get the width of the range slider and multiply by the value as a fraction of the total range
  
@@ -311,5 +617,11 @@ function showBubble(myObj)
 		// now make it visible
 		myBubble.style.display = 'block';
 }
+
+function hideBubble(myObj)
+{
+	document.getElementById(myObj.id + 'Bubble').style.display = 'none';
+}
+
 
 //End of Bubble

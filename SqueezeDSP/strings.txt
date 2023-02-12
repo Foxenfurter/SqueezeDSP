@@ -28,29 +28,92 @@ PLUGIN_SQUEEZEDSP_EQ_FLAT
 PLUGIN_SQUEEZEDSP_BANDCENTER
 	EN	Band center frequency:
 
-PLUGIN_SQUEEZEDSP_QUIETNESS
-	EN	Quietness
+PLUGIN_SQUEEZEDSP_BYPASS
+	EN	DSP (On/Off)
+	
+PLUGIN_SQUEEZEDSP_BYPASS_HELP
+	EN	DSP On/Off - Selecting On will enable DSP processing and selecting Off will bypass all DSP processing. This may be useful if you have multiple players and only want SqueezeDSP active on some of them.
 
-PLUGIN_SQUEEZEDSP_QUIETNESS_OFF
+PLUGIN_SQUEEZEDSP_LOUDNESS
+	EN	Loudness
+	
+PLUGIN_SQUEEZEDSP_LOUDNESS_HELP
+	EN	Loudness - Switching this on will boost Bass and Treble when playing at lower volumes.
+
+PLUGIN_SQUEEZEDSP_LOUDNESS_OFF
 	EN	(Off)
 
-PLUGIN_SQUEEZEDSP_FLATNESS
-	EN	Flatness
+PLUGIN_SQUEEZEDSP_PREAMP
+	EN	Preamp (dB)
+
+PLUGIN_SQUEEZEDSP_PREAMP_HELP
+	EN	Preamp (dB) - The Preamp is used to reduce gain when DSP is being used. This is important because the applying corrections can boost gain levels significantly at certain frequencies and introduce Clipping into the signal. 
 
 PLUGIN_SQUEEZEDSP_FLATNESS_FLAT
 	EN	(Flat)
 
-PLUGIN_SQUEEZEDSP_WIDTH
-	EN	Width
+PLUGIN_SQUEEZEDSP_FREQ
+	EN	Freq (HZ)
+
+PLUGIN_SQUEEZEDSP_GAIN
+	EN	Gain (dB)
+
+PLUGIN_SQUEEZEDSP_SLOPE
+	EN	Slope (dB per Oct)
+
+PLUGIN_SQUEEZEDSP_SLOPE_HELP
+	EN	Slope - represents the rate of change between normal gain & shelf gain, it is measured in decibels per Octave with 3 being shallow and 24 a steep slope.
+
+PLUGIN_SQUEEZEDSP_Q_HELP
+	EN	Q - represents the bandwidth of a filter. A low Q e.g. < 1 will be a wide filter and a high Q will be a narrow (notch/peak) filter.
+
+PLUGIN_SQUEEZEDSP_GAIN
+	EN	Gain (dB)
 
 PLUGIN_SQUEEZEDSP_BALANCE
 	EN	Balance
 
-PLUGIN_SQUEEZEDSP_SKEW
-	EN	Skew
+PLUGIN_SQUEEZEDSP_BALANCE_HELP
+	EN	Balance -  Moving the slider left of centre decreases left channel gain and right decreases the right channel. Double-click to recentre the slider. 
+
+PLUGIN_SQUEEZEDSP_DELAY
+	EN	Delay (ms)
+
+PLUGIN_SQUEEZEDSP_DELAY_HELP
+	EN	Delay milliseconds(ms) -  0.1 ms is the equivalent of 3.43 cm or 1.372 inches. Moving the slider left of centre delays the left channel and right delays the right channel. Double-click to recentre the slider. 
 
 PLUGIN_SQUEEZEDSP_DEPTH
 	EN	Depth
+
+PLUGIN_SQUEEZEDSP_HIGHSHELF
+	EN	High Shelf
+	
+PLUGIN_SQUEEZEDSP_HIGHSHELF_HELP
+	EN	High Shelf - Allows you to increase or decrease the level of high frequencies above a certain point, or "shelf." Use the sliders to select the shelf frequency, gain and slope
+	
+PLUGIN_SQUEEZEDSP_LOWSHELF
+	EN	Low Shelf
+	
+PLUGIN_SQUEEZEDSP_LOWSHELF_HELP
+	EN	Low Shelf - Allows you to increase or decrease the level of low frequencies below a certain point, or "shelf." Use the sliders to select the shelf frequency, gain and slope
+	
+PLUGIN_SQUEEZEDSP_LOWPASS
+	EN	Low Pass
+	
+PLUGIN_SQUEEZEDSP_LOWPASS_HELP
+	EN	Low Pass - Any frequency lower than the cutoff frequency will pass through the filter unaffected, while higher frequencies will be reduced or blocked. Use the sliders to select the frequency and steepness of the filter (Q).
+	
+PLUGIN_SQUEEZEDSP_LOWPASSFREQ
+	EN	Pass Frequencies below:
+
+PLUGIN_SQUEEZEDSP_HIGHPASS
+	EN	High Pass
+	
+PLUGIN_SQUEEZEDSP_HIGHPASS_HELP
+	EN	High Pass - Any frequency higher than the cutoff frequency will pass through the filter unaffected, while lower frequencies will be reduced or blocked.	Use the sliders to select the frequency and steepness of the filter (Q).	
+	
+PLUGIN_SQUEEZEDSP_HIGHPASSFREQ
+	EN	Pass Frequencies above:
 
 PLUGIN_SQUEEZEDSP_CHOSEN_VALUE
 	EN	Set.
@@ -62,10 +125,10 @@ PLUGIN_SQUEEZEDSP_PRESETS
 	EN	Presets...
 
 PLUGIN_SQUEEZEDSP_CHOOSE_PRESET
-	EN	Load a preset:
+	EN	Load preset:
 
 PLUGIN_SQUEEZEDSP_SAVEPRESETAS
-	EN	Save current settings...
+	EN	Save settings:
 
 PLUGIN_SQUEEZEDSP_FILECHARS
 	EN	abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ -_0123456789
@@ -74,17 +137,20 @@ PLUGIN_SQUEEZEDSP_PRESET_SAVED
 	EN	Preset saved.
 
 PLUGIN_SQUEEZEDSP_PRESET_HELP
-	EN	Use the scroll wheel to change letters, then press the center button to select that letter. Press the center button again to save the preset.
+	EN	Select the preset name in the dropdown and it will automatically load. In order to save the existing settings as a new preset, enter a suitable name for the preset and press Save.	
 
 PLUGIN_SQUEEZEDSP_PRESET_LOADED
 	EN	Preset loaded.
 
 PLUGIN_SQUEEZEDSP_SAVEPRESETFILE
-	EN	Save current settings as:
+	EN	Save preset:
 
 PLUGIN_SQUEEZEDSP_ROOMCORR
-	EN	Room Correction...
-
+	EN	Load Impulse File:
+	
+PLUGIN_SQUEEZEDSP_ROOMCORR_HELP
+	EN	Load Impulse File - Room correction is automatically applied if an Impulse file is selected. Impulse files should be wav files in mono or stereo and should be saved into the Impulse folder. It is recommended that you save your impulse files at a sampling rate of 44.1K (CD Quality)
+	
 PLUGIN_SQUEEZEDSP_CHOOSE_RCFILTER
 	EN	Select filter:
 
@@ -116,7 +182,10 @@ PLUGIN_SQUEEZEDSP_CHOOSE_EQSETTINGS
 	EN	Select equalizer type:
 
 PLUGIN_SQUEEZEDSP_EQUALIZER
-	EN	Equalizer type...
+	EN	PEQ Bands:
+
+PLUGIN_SQUEEZEDSP_EQUALIZER_HELP
+	EN	Parametric EQ - allows you to adjust the frequency, gain, and bandwidth (Q) of the equalization, giving you more fine-tuned control over the sound. 
 
 PLUGIN_SQUEEZEDSP_2BAND
 	EN	2-band (bass, treble)
@@ -274,8 +343,8 @@ PLUGIN_SQUEEZEDSP_AMBI_ROTATION_Z
 PLUGIN_SQUEEZEDSP_DEGREES
 	EN	degrees
 
-PLUGIN_SQUEEZEDSP_SAMPLES
-	EN	samples
+PLUGIN_SQUEEZEDSP_DELAY_UNITS
+	EN	ms
 
 PLUGIN_SQUEEZEDSP_HERTZ
 	EN	Hz
@@ -286,6 +355,8 @@ PLUGIN_SQUEEZEDSP_KILOHERTZ
 PLUGIN_SQUEEZEDSP_DECIBELS
 	EN	dB
 
+PLUGIN_SQUEEZEDSP_DECIBELSPEROCTAVE
+	EN	dB/Oct
 
 # Web-page strings
 

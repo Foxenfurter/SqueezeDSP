@@ -10,46 +10,73 @@ SqueezeDSPData = function()
     
 	this._EQ_loop = {};
 
-	// Dictionary of lists (rc & matrix filters, presets)
+	// Dictionary of lists (rc & MatrixFile filters, presets)
+	// where the object model is nested - e.g. Loudness->enabled
+	// we are using the convention as . = -> in a string and 
+	// in object variables as _ = ->
+	// the defaults below, will not actually be used as they are set at the server end and subsequently get overwritten
+	this.Bypass = 0;
 	this.Lists = {};
-	this.Matrix = "";
-	this.Filter = "";
+	this.MatrixFile = "";
+	this.FIRWavFile = "";
 	this.Preset = "";
-	this.AmbRotateX = "12";
-	this.AmbRotateY = 0;
-	this.AmbRotateZ = 0;
-	this.Amb = 0;
-	this.AmbjW = 0;
-	this.AmbAngle = 0;
-	this.AmbDirect = 0;
-	this.Bands = 2;
-	this.Balance = 0 ;
-	this.Skew = 0;
+	this.EQBands = 2;
+	this.Balance = 0.0 ;
+	this.Delay_delay = 0.0;
 	this.Flatness= 10 ;
-	this.Quietness = 0;
-
+	this.Loudness_enabled = 0;
+	this.Preamp = -12.0;
+	this.Highpass_enabled =  0;
+	this.Highpass_freq =  40;
+	this.Highpass_q =  1.3;
+	this.Highshelf_enabled =  0;
+	this.Highshelf_freq =  8000;
+	this.Highshelf_gain =  3.0;
+	this.Highshelf_slope =  6.0;
+	this.Lowpass_enabled =  0;
+	this.Lowpass_freq =  20000;
+	this.Lowpass_q =  1.0;
+	this.Lowshelf_enabled =  0;
+	this.Lowshelf_freq =  300;
+	this.Lowshelf_gain =  6.0;
+	this.Lowshelf_slope =  6.0;
+	this.ClientName = "";
 }
 
 function UpdateSqueezeDSPData(data)
 {
-		SqueezeDSPData.AmbRotateX = data.result['AmbRotateX'];
-		SqueezeDSPData.AmbRotateY =  data.result['AmbRotateY'];
-		SqueezeDSPData.AmbRotateZ =   data.result['AmbRotateZ'];
-		SqueezeDSPData.Amb =   data.result['Amb'];
-		SqueezeDSPData.AmbjW =   data.result['AmbjW'];
-		SqueezeDSPData.AmbAngle =   data.result['AmbAngle'];
-		SqueezeDSPData.AmbDirect =   data.result['AmbDirect'];
-		SqueezeDSPData.Bands =   data.result['Bands'];
+		SqueezeDSPData.Bypass = data.result['Bypass'];
+		SqueezeDSPData.ClientName = data.result['ClientName'];
+		SqueezeDSPData.EQBands =   data.result['EQBands'];
 		SqueezeDSPData.Balance =   data.result['Balance'];
-		SqueezeDSPData.Skew =   data.result['Skew'];
-		SqueezeDSPData.Flatness =   data.result['Flatness'];
-		SqueezeDSPData.Quietness =   data.result['Quietness'];
-		SqueezeDSPData.Width =   data.result['Width'];
+		SqueezeDSPData.Delay_delay =   data.result['Delay.delay'];
+		//SqueezeDSPData.Flatness =   data.result['Flatness'];
+		SqueezeDSPData.Loudness_enabled =   data.result['Loudness.enabled'];
+		//SqueezeDSPData.Width =   data.result['Width'];
 		
-		SqueezeDSPData.Matrix = data.result['Matrix'];
-		SqueezeDSPData.Filter = data.result['Filter'];
+		SqueezeDSPData.MatrixFile = data.result['MatrixFile'];
+		SqueezeDSPData.FIRWavFile = data.result['FIRWavFile'];
 		SqueezeDSPData.Preset = data.result['Preset'];
+		SqueezeDSPData.Preamp = data.result['Preamp'];
 		
+		SqueezeDSPData.Highpass_enabled =   data.result['Highpass.enabled'];
+		SqueezeDSPData.Highpass_freq =   data.result['Highpass.freq'];
+		SqueezeDSPData.Highpass_q =   data.result['Highpass.q'];
+		
+		SqueezeDSPData.Highshelf_enabled =   data.result['Highshelf.enabled'];
+		SqueezeDSPData.Highshelf_freq =   data.result['Highshelf.freq'];
+		SqueezeDSPData.Highshelf_gain =   data.result['Highshelf.gain'];
+		SqueezeDSPData.Highshelf_slope =   data.result['Highshelf.slope'];
+		
+		SqueezeDSPData.Lowpass_enabled =   data.result['Lowpass.enabled'];
+		SqueezeDSPData.Lowpass_freq =   data.result['Lowpass.freq'];
+		SqueezeDSPData.Lowpass_q =   data.result['Lowpass.q'];
+		
+		SqueezeDSPData.Lowshelf_enabled =   data.result['Lowshelf.enabled'];
+		SqueezeDSPData.Lowshelf_freq =   data.result['Lowshelf.freq'];
+		SqueezeDSPData.Lowshelf_gain =   data.result['Lowshelf.gain'];
+		SqueezeDSPData.Lowshelf_slope =   data.result['Lowshelf.slope'];
+
 		// Copy EQ_loop
 		SqueezeDSPData.EQ_loop = data.result.EQ_loop;
 
@@ -58,6 +85,7 @@ function UpdateSqueezeDSPData(data)
 
 function SqueezeDSPGetList(callback)
 {
+	// calls plugin filtersQuery
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
 		asynchronous: true,
@@ -87,6 +115,7 @@ function SqueezeDSPGetList(callback)
 function SqueezeDSPGetSettings(callback)
 {
 	//alert ('Getting Settings');
+	// calls plugin currentQuery
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
 		asynchronous: true,
@@ -117,6 +146,7 @@ function SqueezeDSPGetSettings(callback)
 function SqueezeDSPSelectPreset()
 {
 	// Save this value (async)
+	// calls plugin setvalCommand - should drop through to loading preset
 	var myProperty='Preset';
 	var myVal = 'Joxy.preset.conf';
 	new Ajax.Request('/jsonrpc.js', {
@@ -144,9 +174,9 @@ function SqueezeDSPSelectPreset()
 
 function SqueezeDSPSelectValue(myProperty, myVal, callback)
 {
+	// calls plugin setvalCommand - should drop through to setpref command
 	// Save this value (async)
-	//var myProperty='Preset';
-	//var myVal = 'Joxy.preset.conf';
+
 	//alert (myProperty);
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
@@ -176,7 +206,7 @@ function SqueezeDSPSelectValue(myProperty, myVal, callback)
 
 function SqueezeDSPSavePreset(myVal, callback)
 {
-	
+	// calls plugin saveasCommand
 	// Save this value (async)
 	new Ajax.Request('/jsonrpc.js', {
 		method: 'post',
@@ -202,9 +232,9 @@ function SqueezeDSPSavePreset(myVal, callback)
 		}	});
 }
 
-function SqueezeDSPSaveEQBand(myBand, myFreq, myGain)
+function SqueezeDSPSaveEQBand(myBand, myFreq, myGain, myQ)
 {
-				
+				//calls plugin seteqCommand
 				new Ajax.Request('/jsonrpc.js', {
 					method: 'post',
 					asynchronous: true,
@@ -217,7 +247,8 @@ function SqueezeDSPSaveEQBand(myBand, myFreq, myGain)
 								'squeezedsp.seteq',
 								'band:'+myBand,
 								'freq:'+myFreq,
-								'gain:'+myGain
+								'gain:'+myGain,
+								'q:'+myQ
 							]
 						]
 					}),

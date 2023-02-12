@@ -84,7 +84,7 @@ my $modeEqualization = "PLUGIN.SqueezeDSP.Equalization";
 my $modeRoomCorr     = "PLUGIN.SqueezeDSP.RoomCorrection";
 my $modeMatrix       = "PLUGIN.SqueezeDSP.Matrix";
 #my $modeSigGen       = "PLUGIN.SqueezeDSP.SignalGenerator";
-my $modeAmbisonic    = "PLUGIN.SqueezeDSP.Ambisonic";
+#my $modeAmbisonic    = "PLUGIN.SqueezeDSP.Ambisonic";
 
 my $log = Slim::Utils::Log->addLogCategory({ 'category' => 'plugin.' . $thistag, 'defaultLevel' => 'WARN', 'description'  => $thisapp });
 
@@ -92,21 +92,25 @@ my $prefs = preferences('plugin.' . $thistag);
 
 # these sort alphabetically
 my $BALANCEKEY = 'B';   # balance (left/right amplitude alignment)
-my $WIDTHKEY = 'W';     # width   (mid/side amplitude alignment)
-my $SKEWKEY = 'S';      # skew    (left/right time alignment, under "settings")
-my $DEPTHKEY = 'D';     # depth   (matrix filter time alignment, under "settings")
-my $QUIETNESSKEY = 'L';
-my $FLATNESSKEY = 'F';
+my $DELAYKEY = 'S';      # skew    (left/right time alignment, under "settings")
+my $LOUDNESSKEY = 'L';
+
+
 my $SETTINGSKEY = "-s-";
 my $PRESETSKEY = "-p-";
 my $ERRORKEY = "-";
+=pod no ambi stuff
+my $FLATNESSKEY = 'F';
+my $DEPTHKEY = 'D';     # depth   (matrix filter time alignment, under "settings")
+my $WIDTHKEY = 'W';     # width   (mid/side amplitude alignment)
+
 my $AMBANGLEKEY = "X1";
 my $AMBDIRECTKEY = "X2";
 my $AMBJWKEY = "X3";
 my $AMBROTATEZKEY = "XR1";
 my $AMBROTATEYKEY = "XR2";
 my $AMBROTATEXKEY = "XR3";
-
+=cut
 # the usual convolver controlled by this plugin is called SqueezeDSP - this is
 # the command inserted in custom-convert.conf
 #
@@ -138,6 +142,8 @@ my $myconfigrevision = get_config_revision();
 #
 
 # Lists of center frequencies for each mode
+my @fq0 = ( 0 );
+# original values
 my @fq1 = ( 960 );
 my @fq2 = ( 60, 15360 );
 my @fq3 = ( 60, 960, 15360 );
@@ -158,7 +164,8 @@ my $pluginDataDir;            # <appdata>\squeezedsp
 my $pluginSettingsDataDir;    # <appdata>\squeezedsp\Settings     used for settings and presets
 my $pluginImpulsesDataDir;    # <appdata>\squeezedsp\Impulses     used for room correction impulse filters
 my $pluginMatrixDataDir;      # <appdata>\squeezedsp\Matrix       used for cross-feed matrix impulse filters
-my $pluginMeasurementDataDir; # <appdata>\squeezedsp\Measurement  used for measurement sweeps and noise samples
+#no measurements made
+#my $pluginMeasurementDataDir; # <appdata>\squeezedsp\Measurement  used for measurement sweeps and noise samples
 my $pluginTempDataDir;        # <appdata>\squeezedsp\Temp         used for any temporary stuff
 my @presetsMenuChoices;
 my @presetsMenuValues;
@@ -206,47 +213,22 @@ sub valuelabel
 	my $labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_DECIBELS' );
 	my $sign = ( $valu > 0 ) ? '+' : '';
 	my $extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_EQ_FLAT' ) : '';
-	if( $item eq $QUIETNESSKEY )
+	if( $item eq $LOUDNESSKEY )
 	{
 		$sign = '';
 		$labl = '';
-		$extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_QUIETNESS_OFF' ) : '';
+		$extra = ( $valu == 0 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_LOUDNESS_OFF' ) : '';
 	}
-	elsif( $item eq $FLATNESSKEY )
-	{
-		$sign = '';
-		$labl = '';
-		$extra = ( $valu == 10 ) ? ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_FLATNESS_FLAT' ) : '';
-	}
-	elsif( ($item eq $SKEWKEY) || ($item eq $DEPTHKEY) )
+	
+
+	
+	elsif( ($item eq $DELAYKEY)) # || ($item eq $DEPTHKEY) )
 	{
 		$labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_SAMPLES' );
 		$extra = '';
 	}
-	elsif( ($item eq $AMBANGLEKEY) || ($item eq $AMBROTATEZKEY) || ($item eq $AMBROTATEYKEY) || ($item eq $AMBROTATEXKEY) )
-	{
-		$sign = '';
-		$labl = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_DEGREES' );
-		$extra = '';
-	}
-	elsif( $item eq $AMBDIRECTKEY )
-	{
-		$sign = '';
-		$labl = '';
-		# hypercardioid is 0.3333 (1/3)
-		# supercardioid is 0.5773 (sqrt3/3)
-		if( $valu==0 )    { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_FIGURE8' ); }
-		if( $valu==0.33 ) { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_HYPERCARDIOID' ); }
-		if( $valu==0.58 ) { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_SUPERCARDIOID' ); }
-		if( $valu==1 )    { $extra = ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_AMBI_DIRECT_CARDIOID' ); }
-	}
-	elsif( $item eq $AMBJWKEY )
-	{
-		$sign = '';
-		$labl = '';
-		$extra = '';
-	}
-	return $sign . $valu . $labl . $extra;
+	
+	return  $valu . $labl . $extra;
 }
 
 # Format a frequency/band
@@ -254,7 +236,7 @@ sub freqlabel
 {
 	my $client = shift;
 	my $item = shift;
-	my $bandcount = getPref( $client, 'bands' );
+	my $bandcount = getPref( $client, 'EQBands' );
 	my $freq = getPref( $client, 'b' . $item . 'freq' ) || defaultFreq( $client, $item, $bandcount );
 	my $labl = undef;
 	if( $item =~ /^\d*$/ )
@@ -288,7 +270,7 @@ sub defaultFreq
 {
 	my $client = shift;
 	my $item = shift;
-	my $bandcount = shift || getPref( $client, 'bands' );
+	my $bandcount = shift || getPref( $client, 'EQBands' );
 	my @bandfreqs = defaultFreqs( $client, $bandcount );
 	return $bandfreqs[$item];
 }
@@ -296,9 +278,15 @@ sub defaultFreq
 sub defaultFreqs
 {
 	my $client = shift;
-	my $bandcount = shift || getPref( $client, 'bands' ) || 2;
+	# re-use the existing defaults but fill in the gaps by using the next highest default set
+	# easier than re-writing or putting a full set of defaults in that no-one will use
+	my $bandcount = shift || getPref( $client, 'EQBands' ) || 2;
 	my @bandfreqs = @fq2;
-	if( $bandcount==2 )
+	if( $bandcount==0 )
+	{
+		@bandfreqs = @fq0;
+	}
+	elsif($bandcount<=2 )
 	{
 		@bandfreqs = @fq2;
 	}
@@ -306,24 +294,25 @@ sub defaultFreqs
 	{
 		@bandfreqs = @fq3;
 	}
-	elsif( $bandcount==5 )
+	elsif( $bandcount<=5 )
 	{
 		@bandfreqs = @fq5;
 	}
-	elsif( $bandcount==9 )
+	elsif( $bandcount<=9 )
 	{
 		@bandfreqs = @fq9;
 	}
-	elsif( $bandcount==15 )
+	elsif( $bandcount<=15 )
 	{
 		@bandfreqs = @fq15;
 	}
-	elsif( $bandcount==31 )
+	elsif( $bandcount<=31 )
 	{
 		@bandfreqs = @fq31;
 	}
 	else
 	{
+		@bandfreqs = @fq31;
 		# Some silly number of bands.
 		# Divide up the range from 60 to 15360 anyway.  TBD
 	}
@@ -423,8 +412,8 @@ sub initPlugin
 	debug( "plugin " . $revision . " enabled" );
 	
 	# AMB and UHJ file types really are WAV
-	Slim::Formats::Playlists->registerParser('amb', 'Slim::Formats::Wav');
-	Slim::Formats::Playlists->registerParser('uhj', 'Slim::Formats::Wav');
+	#Slim::Formats::Playlists->registerParser('amb', 'Slim::Formats::Wav');
+	#Slim::Formats::Playlists->registerParser('uhj', 'Slim::Formats::Wav');
 
 	# Register json/CLI functions
 	#                                                                                         |requires Client
@@ -461,14 +450,17 @@ sub initPlugin
 	$pluginMatrixDataDir = catdir( $pluginDataDir, 'MatrixImpulses' );
 	mkdir( $pluginMatrixDataDir );
 
-	$pluginMeasurementDataDir = catdir( $pluginDataDir, 'Measurement' );
-	mkdir( $pluginMeasurementDataDir );
+#	$pluginMeasurementDataDir = catdir( $pluginDataDir, 'Measurement' );
+#	mkdir( $pluginMeasurementDataDir );
 
 	$pluginTempDataDir = catdir( $pluginDataDir, 'Temp' );
 	mkdir( $pluginTempDataDir );
 		
 	my $bin = $class->binaries;
+	
 	debug( "Fox plugin path: " . $bin . " binary" );
+	
+	
 	my $exec = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $bin);
 	debug( "Fox plugin path: " . $exec . " exec" );
 	#extension is only used for windows
@@ -483,15 +475,28 @@ sub initPlugin
 	}
 	#derive standard binary path
 	$bin = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $convolver . $binExtension);
+	#need to copy camilladsp exe too.
+	#my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $bin);
+	
+	my $camilladsp = "camilladsp";
+	#rather than try and work out paths agin lets just re-use this for CamillaDSP
+	my $cambinsrc = $class->binaries;
+	$cambinsrc =~ s/$thisapp/$camilladsp/;
+	my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $cambinsrc);
+	
+	my $cambinout = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $camilladsp . $binExtension);;
+	debug('camilla binary source path: ' . $cambinsrc . ' and target path: ' .  $cambinout );
 	debug('standard binary path: ' . $bin);
 	# copy correct binary into bin folder unless it already exists
 	unless (-e $bin) {
 		debug('copying binary' . $exec );
 		copy( $exec , $bin)  or die "copy failed: $!";
+		copy( $cambinsrc , $cambinout)  or die "copy failed: $!";
 		#we know only windows has an extension, now set the binary
 		if ( $binExtension == "") {
 				debug('executable not having \'x\' permission, correcting');
 				chmod (0555, $bin);
+				chmod (0555, $cambinout);
 				
 		}	
 	}
@@ -533,9 +538,11 @@ sub LoadJSONFile
 		local $/;                              			# slurp entire file
 		open my $fh, "<", $myinputJSONfile or die $!;  	# open for reading
 		<$fh>;                                 			# read and return file content
+		
 	};
 	my $myoutputData = decode_json($txt);
 	#print Dumper $myoutputData;
+	
 	return ($myoutputData);
 	
 }
@@ -585,7 +592,6 @@ sub clientEvent {
 	initConfiguration( $client );
 	
 	
-=pod remove Jive stuff as we are not using it
 	if( !$doneJiveInit )
 	{
 		# Register the top-level jive "EQ" node (client-independent)
@@ -600,9 +606,9 @@ sub clientEvent {
 		$doneJiveInit = 1;
 	}
 
-	my @menuItems = jiveTopMenu( $client );
-	Slim::Control::Jive::registerPluginMenu( \@menuItems, $thistag, $client );
-=cut 
+	#my @menuItems = jiveTopMenu( $client );
+	#Slim::Control::Jive::registerPluginMenu( \@menuItems, $thistag, $client );
+
 }
 
 
@@ -772,13 +778,20 @@ sub initConfiguration
 sub webPages
 {
 	my $class = shift;
-
+	
+		
+	
 	if( Slim::Utils::PluginManager->isEnabled("Plugins::SqueezeDSP::Plugin") )
 	{
 		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/index.html", \&handleWebIndex);
-		Slim::Web::Pages->addPageFunction("plugins/SqueezeDSP/squeezedsp.png", \&handleWebStatic);
 		Slim::Web::Pages->addPageLinks("plugins", { $class->getDisplayName => 'plugins/SqueezeDSP/index.html' });
-		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => 'plugins/SqueezeDSP/squeezedsp.png' });
+		
+		
+		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/plugins/SqueezeDSP/images/SqueezeDSP_svg.png' });
+		#Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/plugins/SqueezeDSP/images/squeezedsp_col_svg.png' });
+		
+		#Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/Plugins/SqueezeDSP/SqueezeDSP.png' });
+		
 	}
 	else
 	{
@@ -816,20 +829,123 @@ sub handleWebStatic
 
 sub getPrefFile
 {
+	#get the config file for the current player (client)
 	my $client = shift;
+	
 	#return catdir( $pluginSettingsDataDir, join('_', split(/:/, $client->id())) . '.settings.conf' );
-	return catdir( $pluginSettingsDataDir, join('_', split(/:/, $client->id())) . '.settings.json' );
+	my $file = catdir( $pluginSettingsDataDir, join('_', split(/:/, $client->id())) . ".settings.json" );
+		
+	return $file
 }
 
 
 sub getPref
 {
+	#get the value of the named pref for the player (client)
+	#not very efficient, only using for defaults if I can
+
 	my ( $client, $prefName ) = @_;
-	return $prefs->client( $client )->get( $prefName );
+	
+	my $file = getPrefFile( $client );
+	my $myConfig = LoadJSONFile ($file);
+	#return $myConfig->{Client}->{$prefName};
+	#return $myConfig->client( $client )->get( $prefName );
+	#====Added because of greater data complexity
+	my $returnval;
+			if ( $prefName eq "Delay.delay" ) { $returnval =  $myConfig->{Client}->{Delay}->{delay}  ; }
+		elsif  ( $prefName eq  "Loudness.enabled" ) { $returnval =  $myConfig->{Client}->{Loudness}->{enabled}  ; }
+		elsif  ( $prefName eq  "Loudness.low_boost" ) { $returnval =  $myConfig->{Client}->{Loudness}->{low_boost}  ; }
+		elsif  ( $prefName eq  "Loudness.high_boost" ) { $returnval =  $myConfig->{Client}->{Loudness}->{high_boost}  ; }
+		elsif  ( $prefName eq  "Loudness.reference_level" ) { $returnval =  $myConfig->{Client}->{Loudness}->{reference_level}  ;}
+		elsif  ( $prefName eq  "Loudness.ramp_time" ) { $returnval =  $myConfig->{Client}->{Loudness}->{ramp_time}  ; }
+		elsif  ( $prefName eq  "Highpass.enabled"  )   {    $returnval =  $myConfig->{Client}->{Highpass}->{enabled}  ;      }
+		elsif  ( $prefName eq  "Highpass.freq"  )   {    $returnval =  $myConfig->{Client}->{Highpass}->{freq}  ;      }
+		elsif  ( $prefName eq  "Highpass.q"  )   {    $returnval =  $myConfig->{Client}->{Highpass}->{q}  ;      }
+		elsif  ( $prefName eq  "Highshelf.enabled"  )   {    $returnval =  $myConfig->{Client}->{Highshelf}->{enabled}  ;      }
+		elsif  ( $prefName eq  "Highshelf.freq"  )   {    $returnval =  $myConfig->{Client}->{Highshelf}->{freq}  ;      }
+		elsif  ( $prefName eq  "Highshelf.gain"  )   {    $returnval =  $myConfig->{Client}->{Highshelf}->{gain}  ;      }
+		elsif  ( $prefName eq  "Highshelf.slope"  )   {    $returnval =  $myConfig->{Client}->{Highshelf}->{slope}  ;      }
+		elsif  ( $prefName eq  "Lowpass.enabled"  )   {    $returnval =  $myConfig->{Client}->{Lowpass}->{enabled}  ;      }
+		elsif  ( $prefName eq  "Lowpass.freq"  )   {    $returnval =  $myConfig->{Client}->{Lowpass}->{freq}  ;      }
+		elsif  ( $prefName eq  "Lowpass.q"  )   {    $returnval =  $myConfig->{Client}->{Lowpass}->{q}  ;      }
+		elsif  ( $prefName eq  "Lowshelf.enabled"  )   {    $returnval =  $myConfig->{Client}->{Lowshelf}->{enabled}  ;      }
+		elsif  ( $prefName eq  "Lowshelf.freq"  )   {    $returnval =  $myConfig->{Client}->{Lowshelf}->{freq}  ;      }
+		elsif  ( $prefName eq  "Lowshelf.gain"  )   {    $returnval =  $myConfig->{Client}->{Lowshelf}->{gain}  ;      }
+		elsif  ( $prefName eq  "Lowshelf.slope"  )   {    $returnval =  $myConfig->{Client}->{Lowshelf}->{slope}  ;      }
+	    	else
+		{	
+			 $returnval =  $myConfig->{Client}->{$prefName}  ;
+		}
+		return $returnval ;
+	
+	
 }
 
 sub setPref
 {
+	# set the named preference and value for the named player(client)
+	# set the server maintained value and re-write the pref file if the value is different
+	my ( $client, $prefName, $prefValue ) = @_;
+	my $file = getPrefFile( $client );
+	my $myConfig = LoadJSONFile ($file);
+	debug( "setPref " . $prefName . "=" . $prefValue );
+	# Control structure is not flat!
+		if ( $prefName eq "Delay.delay" )
+		{
+			debug( "setPref in Delay Delay " . $prefName . " = " . $prefValue );
+			$myConfig->{Client}->{Delay}->{delay} = $prefValue ;
+		}
+		elsif  ( $prefName eq  "Loudness.enabled" )
+		{
+			$myConfig->{Client}->{Loudness}->{enabled} = $prefValue ;			
+		}
+		elsif  ( $prefName eq  "Loudness.low_boost" )
+		{
+			$myConfig->{Client}->{Loudness}->{low_boost} = $prefValue ;			
+		}
+		elsif  ( $prefName eq  "Loudness.high_boost" )
+		{
+			$myConfig->{Client}->{Loudness}->{high_boost} = $prefValue ;			
+		}
+		elsif  ( $prefName eq  "Loudness.reference_level" )
+		{
+			$myConfig->{Client}->{Loudness}->{reference_level} = $prefValue ;			
+		}
+		elsif  ( $prefName eq  "Loudness.ramp_time" )
+		{
+			$myConfig->{Client}->{Loudness}->{ramp_time} = $prefValue ;			
+		}
+		elsif  ( $prefName eq  "Highpass.enabled"  )   {    $myConfig->{Client}->{Highpass}->{enabled} = $prefValue ;      }
+		elsif  ( $prefName eq  "Highpass.freq"  )   {    $myConfig->{Client}->{Highpass}->{freq} = $prefValue ;      }
+		elsif  ( $prefName eq  "Highpass.q"  )   {    $myConfig->{Client}->{Highpass}->{q} = $prefValue ;      }
+		elsif  ( $prefName eq  "Highshelf.enabled"  )   {    $myConfig->{Client}->{Highshelf}->{enabled} = $prefValue ;      }
+		elsif  ( $prefName eq  "Highshelf.freq"  )   {    $myConfig->{Client}->{Highshelf}->{freq} = $prefValue ;      }
+		elsif  ( $prefName eq  "Highshelf.gain"  )   {    $myConfig->{Client}->{Highshelf}->{gain} = $prefValue ;      }
+		elsif  ( $prefName eq  "Highshelf.slope"  )   {    $myConfig->{Client}->{Highshelf}->{slope} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowpass.enabled"  )   {    $myConfig->{Client}->{Lowpass}->{enabled} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowpass.freq"  )   {    $myConfig->{Client}->{Lowpass}->{freq} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowpass.q"  )   {    $myConfig->{Client}->{Lowpass}->{q} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowshelf.enabled"  )   {    $myConfig->{Client}->{Lowshelf}->{enabled} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowshelf.freq"  )   {    $myConfig->{Client}->{Lowshelf}->{freq} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowshelf.gain"  )   {    $myConfig->{Client}->{Lowshelf}->{gain} = $prefValue ;      }
+		elsif  ( $prefName eq  "Lowshelf.slope"  )   {    $myConfig->{Client}->{Lowshelf}->{slope} = $prefValue ;      }
+
+		
+    	else
+		{	
+			$myConfig->{Client}->{$prefName} = $prefValue ;
+		}
+
+	
+	SaveJSONFile ( $myConfig, $file );
+}
+
+=pod commenting out
+sub setPref_old
+{
+# set the named preference and value for the named player(client)
+# set the server maintained value and re-write the pref file if the value is different
+
 	my ( $client, $prefName, $prefValue ) = @_;
 	my $prev = $prefs->client( $client )->get( $prefName );
 	$prefs->client( $client )->set( $prefName, $prefValue );
@@ -846,120 +962,66 @@ sub setPref
 		}
 	}
 }
+=cut
+
 
 sub delPref
 {
+	#remove the named preference for the player (client)
+
 	my ( $client, $prefName ) = @_;
 	$prefs->client( $client )->remove( $prefName ) if $prefs->client( $client )->exists( $prefName );
 }
-sub savePrefs
-#write to JSON file
+
+sub savePreset
 {
+	#much easier to simply copy the existing config to the preset location.
+
 	my $client = shift;
-	my $file = shift;
+	my $myPresetFile = shift;
+	my $SourceFile = getPrefFile( $client );
+	copy($SourceFile, $myPresetFile) or  do { oops( $client, undef, "Preferences could not be saved to $myPresetFile." ); return 0; };
+	
+}
+
+
+sub savePrefs
+{
+#write to JSON file
+#amended so that it will only save to a selected preset file
+#the client specific file should be dynamic and is now the source for this call.
+
+	my $client = shift;
+	my $myJSONFile = shift;
 	#set variable to hold, start, seperator  end of line as they are all the same in json
-	my $mySOL = "\"";
-	my $myvalSep = "\" \: \"";
-	my $myEOL = "\",\n";
-	my $mylastEOL = "\"\n";
-	my $myFieldStart = "\" \: {\n";
-	my $myFieldEnd = "},\n";
+	my ( $vol, $dir, $fil ) = splitpath($myJSONFile);
+	my $myTargetConfig = LoadJSONFile ($myJSONFile);
+	my $SourceFile = getPrefFile( $client );
+	my $mySourceConfig = LoadJSONFile ($SourceFile);
 	
-	my ( $vol, $dir, $fil ) = splitpath( $file );
+	
 	debug( "savePrefs " . $fil );
-	open( OUT, ">$file" ) or  do { oops( $client, undef, "Preferences could not be saved to $file." ); return 0; };
 	
-	print OUT "{\n";
-	print OUT " " . $mySOL ."Revision" .  $myvalSep . $revision . $myEOL ;	
-	print OUT " " . $mySOL . "Client" . $myFieldStart ;
-	print OUT " " x 3 .  $mySOL . "ID" . $myvalSep . $client->id() . $myEOL	;
+	#=============The Writing bit
 	
-	#Special treatment for Ambisonic decode attributes
-	# ---------------Was in a separate function - easier to handle here
-	print OUT " " x 3 .  $mySOL . "AmbisonicDecode" . $myFieldStart;
-
-	my $ambtype = getPref( $client, 'ambtype' );		# UHJ, Blumlein or Crossed
-	my $ambangle = getPref( $client, 'band' . $AMBANGLEKEY . "value" );	# Angle for cardioid-type
-	my $ambdirect = getPref( $client, 'band' . $AMBDIRECTKEY . "value" );	# Directivity for cardioid-type
-	my $ambjw = getPref( $client, 'band' . $AMBJWKEY . "value" );		# jW mix for for metacardioid-type
-	my $ambrotZ = getPref( $client, 'band' . $AMBROTATEZKEY . "value" );	# Rotation about Z (rotate)
-	my $ambrotY = getPref( $client, 'band' . $AMBROTATEYKEY . "value" );	# Rotation about Y (tumble)
-	my $ambrotX = getPref( $client, 'band' . $AMBROTATEXKEY . "value" );	# Rotation about X (tilt)
-	print OUT " " x 4 .  $mySOL . "Type" . $myvalSep . $ambtype . $myEOL ;
-	if( $ambtype eq 'Crossed' )
-	{
-		print OUT " " x 5 .  $mySOL . "Cardioid" . $myvalSep . $ambdirect . $myEOL ;
-		print OUT " " x 5 .  $mySOL . "Angle" . $myvalSep . $ambangle . $myEOL ;
-	}
-	elsif( $ambtype eq 'Crossed+jW' )
-	{
-		print OUT " " x 5 .  $mySOL . "Cardioid" . $myvalSep . $ambdirect . $myEOL ;
-		print OUT " " x 5 .  $mySOL . "Angle" . $myvalSep . $ambangle . $myEOL ;
-		print OUT " " x 5 .  $mySOL . "jW" . $myvalSep . $ambjw . $myEOL ;
-	}
-	print OUT " " x 5 .  $mySOL . "RotateZ" . $myvalSep . $ambrotZ . $myEOL ;
-	print OUT " " x 5 .  $mySOL . "RotateY" . $myvalSep . $ambrotY . $myEOL ;
-	print OUT " " x 5 .  $mySOL . "RotateX" . $myvalSep . $ambrotX . $mylastEOL ;
-	print OUT " " x 3 .  $myFieldEnd;
-	# ----------------End of Ambisonic
-	print OUT " " x 3 .  $mySOL . "SignalGenerator" . $myFieldStart ;
-	print OUT " " x 5 .  $mySOL . "Type" . $myvalSep . "None" . $mylastEOL;	
-	print OUT " " x 3 . $myFieldEnd;
+	$myTargetConfig->{Revision} = $revision;
+	# The same routine is used for client specific as well as presets
 	
-	# where we have a windows path name we want to replace backslash \ with a forward slash /
-	my $myfile = Slim::Utils::Unicode::utf8encode( getPref( $client, 'matrix' ) || '' ) ;
-	
-	$myfile =~ s#\\#/#g;
-	print OUT " " x 3 .  $mySOL . "Matrix" . $myvalSep . $myfile . $myEOL ;
-	print OUT " " x 3 .  $mySOL . "Width" . $myvalSep . ( getPref( $client, 'band' . $WIDTHKEY . 'value' ) || 0 ) . $myEOL	;
-	print OUT " " x 3 .  $mySOL . "Balance" . $myvalSep . ( getPref( $client, 'band' . $BALANCEKEY . 'value' ) || 0 ) . $myEOL	;
-	print OUT " " x 3 .  $mySOL . "Skew" . $myvalSep . ( getPref( $client, 'band' . $SKEWKEY . 'value' ) || 0 ) . $myEOL	;
-	# where we have a windows path name we want to replace backslash \ with a forward slash /
-	$myfile = Slim::Utils::Unicode::utf8encode( getPref( $client, 'filter' ) || '' ) ;
-	$myfile =~ s#\\#/#g;
-
-	print OUT " " x 3 .  $mySOL . "Filter" . $myvalSep .  $myfile . $myEOL	;
-	
-	# Now process EQ - bands and all
-	my $bandcount = getPref( $client, 'bands' );
-	
-	print OUT " " x 3 .  $mySOL . "EQ" . $myFieldStart;
-	print OUT " " x 4 .  $mySOL . "Bands" . $myvalSep . $bandcount . $myEOL	;
-	print OUT " " x 4 .  $mySOL . "Band\" : [\n";
-
-	for( my $n = 0; $n < $bandcount; $n++ )
-	{
-		print OUT " " x 4 .  "{\n";
-		my $f = getPref( $client, 'b' . $n . 'freq' ) || defaultFreq( $client, $n, $bandcount );
-		my $v = getPref( $client, 'b' . $n . 'value' ) || 0;
-		print OUT " " x 5 .  $mySOL . "Freq" . $myvalSep .  $f . $myEOL	;
-		print OUT " " x 5 .  $mySOL . "Gain" . $myvalSep .  $v . $myEOL	;
-		print OUT " " x 5 .  $mySOL . "Q" . $myvalSep .  "1.41" . $mylastEOL	;
-		#formatting, ensure that there is a comma except for last record
-		if ($n+1==$bandcount  ) 
-			{print OUT " " x 4 .  "}\n";}
-		else
-			{{print OUT " " x 4 .  "},\n";}}
+	#$myConfig->{Client}->{ID}  = $client->id();
+	#$myConfig->{Client}->{Name}  = $client->name;
 		
-	}
+	#$myTargetConfig->{Client}->{LeftBalance}->{parameters}->{gain}  = '-8';
 	
-	print OUT " " x 4 . "]\n";
-	print OUT " " x 3 . $myFieldEnd ;
-	print OUT " " x 3 .  $mySOL . "Loudness" . $myvalSep .  ( getPref( $client, 'band' . $QUIETNESSKEY . 'value' ) || 0 ) . $myEOL	;
-	my $fl = getPref( $client, 'band' . $FLATNESSKEY . 'value' );
-	print OUT " " x 3 .  $mySOL . "Flatness" . $myvalSep .  ( defined($fl) ? $fl : 10 ) . $mylastEOL ;
-	
-	print OUT " "  . "}\n";
-	print OUT "}\n";
-	
-	
-	close( OUT );
+	#============Now save to file
+	SaveJSONFile ($myTargetConfig, $myJSONFile );
+
 	return 1;
 }
 
 sub loadPrefs
 {
-	#load from JSON file	
+	# load from a selected JSON file into the client json file
+    # getting rid of server cache and just using client json file. Simpler and more robust.
 	my ( $client, $file, $desc ) = @_;
 	debug( "loadPrefs " . $file );
 
@@ -971,111 +1033,72 @@ sub loadPrefs
 	
 	# get doc from JSON file
 	my $doc = LoadJSONFile ($file);
+	#client config file
+	my $myJSONFile = getPrefFile( $client );
+	my $myConfig = LoadJSONFile ($myJSONFile);
+	
+	$myConfig->{Revision} = $revision;
+	$myConfig->{Client}->{ID} = $client->id();
+	$myConfig->{Client}->{Name} = $client->name;
+	$myConfig->{Client}->{Preset} = $file;
+	$myConfig->{Client}->{FIRWavFile} = $doc->{Client}->{FIRWavFile};
+	$myConfig->{Client}->{MatrixFile} = $doc->{Client}->{MatrixFile} ;
+	$myConfig->{Client}->{Preamp} = $doc->{Client}->{Preamp} ;
+	
+	$myConfig->{Client}->{Bypass} = $doc->{Client}->{Bypass} ;
+	$myConfig->{Client}->{Balance} = $doc->{Client}->{Balance} ;
+	$myConfig->{Client}->{Delay}->{delay} = $doc->{Client}->{Delay}->{delay} ;
+	$myConfig->{Client}->{Delay}->{units} = $doc->{Client}->{Delay}->{units} ;
+	$myConfig->{Client}->{EQBands} = $doc->{Client}->{EQBands};
+	$myConfig->{Client}->{Loudness}->{enabled} = $doc->{Client}->{Loudness}->{enabled} ;
+	$myConfig->{Client}->{Loudness}->{low_boost} =$doc->{Client}->{Loudness}->{low_boost} ;	
+	$myConfig->{Client}->{Loudness}->{low_boost} =$doc->{Client}->{Loudness}->{low_boost} ;			
+	$myConfig->{Client}->{Loudness}->{high_boost} = $doc->{Client}->{Loudness}->{high_boost} ;
+	$myConfig->{Client}->{Loudness}->{reference_level} = $doc->{Client}->{Loudness}->{reference_level} ;			
+	$myConfig->{Client}->{Loudness}->{ramp_time} = $doc->{Client}->{Loudness}->{ramp_time} ;	
+	
+	$myConfig->{Client}->{Highpass}->{enabled} = $doc->{Client}->{Highpass}->{enabled} ;
+	$myConfig->{Client}->{Highpass}->{freq} = $doc->{Client}->{Highpass}->{freq} ;
+	$myConfig->{Client}->{Highpass}->{q} = $doc->{Client}->{Highpass}->{q} ;
+	$myConfig->{Client}->{Highshelf}->{enabled} = $doc->{Client}->{Highshelf}->{enabled} ;
+	$myConfig->{Client}->{Highshelf}->{freq} = $doc->{Client}->{Highshelf}->{freq} ;
+	$myConfig->{Client}->{Highshelf}->{gain} = $doc->{Client}->{Highshelf}->{gain} ;
+	$myConfig->{Client}->{Highshelf}->{slope} = $doc->{Client}->{Highshelf}->{slope} ;
+	$myConfig->{Client}->{Lowpass}->{enabled} = $doc->{Client}->{Lowpass}->{enabled} ;
+	$myConfig->{Client}->{Lowpass}->{freq} = $doc->{Client}->{Lowpass}->{freq} ;
+	$myConfig->{Client}->{Lowpass}->{q} = $doc->{Client}->{Lowpass}->{q} ;
+	$myConfig->{Client}->{Lowshelf}->{enabled} = $doc->{Client}->{Lowshelf}->{enabled} ;
+	$myConfig->{Client}->{Lowshelf}->{freq} = $doc->{Client}->{Lowshelf}->{freq} ;
+	$myConfig->{Client}->{Lowshelf}->{gain} = $doc->{Client}->{Lowshelf}->{gain} ;
+	$myConfig->{Client}->{Lowshelf}->{slope} = $doc->{Client}->{Lowshelf}->{slope} ;
 
-	setPref( $client, 'preset', $file );
-	setPref( $client, 'ambtype', $doc->{Client}->{AmbisonicDecode}->{Type} );
-	setPref( $client, 'band' . $AMBANGLEKEY . 'value',  $doc->{Client}->{AmbisonicDecode}->{Angle} );
-	setPref( $client, 'band' . $AMBDIRECTKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{Cardioid} );
-	setPref( $client, 'band' . $AMBJWKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{jW} );
-	setPref( $client, 'band' . $AMBROTATEZKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{RotateZ} );
-	setPref( $client, 'band' . $AMBROTATEYKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{RotateY} );
-	setPref( $client, 'band' . $AMBROTATEXKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{RotateX} );
-	setPref( $client, 'filter', $doc->{Client}->{Filter} );
-	setPref( $client, 'matrix', $doc->{Client}->{Matrix} );
-	my $bandcount = $doc->{Client}->{EQ}->{Bands};
-	# Read bands from conf
-	my %h = ();
-	my $n = 0;
-	foreach $b (@{$doc->{Client}->{EQ}->{Band}})
-	{
-		#get Freq 
-		my $f = $b->{Freq}; $f += 0;
-		next if $f < 10;
-		next if $f > 22000;
-		#get gain
-		my $v = $b->{Gain}; $v += 0;
-		$h{$f} = $v;
-		$n++;
-		last if $n >= $bandcount;
-	}
-	my @freqs = sort { $a <=> $b } keys %h;
-	my @values = map $h{$_}, @freqs;
-	setBandCount( $client, scalar(@freqs) );
-	for( $n=0; $n<scalar(@freqs); $n++ )
-	{
-		setPref( $client, 'b' . $n . 'freq', $freqs[$n] );
-		setPref( $client, 'b' . $n . 'value', $values[$n] );
-	}
-	setPref( $client, 'band' . $QUIETNESSKEY . 'value', $doc->{Client}->{Loudness} );
-	setPref( $client, 'band' . $FLATNESSKEY . 'value', $doc->{Client}->{Flatness} );
-	setPref( $client, 'band' . $WIDTHKEY . 'value', $doc->{Client}->{Width} );
-	setPref( $client, 'band' . $BALANCEKEY . 'value', $doc->{Client}->{Balance} );
-	setPref( $client, 'band' . $SKEWKEY . 'value', $doc->{Client}->{Skew} );
-#	setPref( $client, 'band' . $DEPTHKEY . 'value', $doc->{Client}->{Depth} );
 
+	
+	
+	my $bandcount = $doc->{Client}->{EQBands};
+	# Read bands from conf, but clear them first
+	
+	my $myBand = "";
+	for ( my $n = 0; $n<=$bandcount; $n++ )
+	{
+		
+		$myBand = 'EQBand_' . $n;
+		$myConfig->{Client}->{$myBand}->{freq} = $doc->{Client}->{$myBand}->{freq};
+		$myConfig->{Client}->{$myBand}->{gain} = $doc->{Client}->{$myBand}->{gain};
+		$myConfig->{Client}->{$myBand}->{q} =  $doc->{Client}->{$myBand}->{q};
+	}
+	
+	#now write the file
+	SaveJSONFile ( $myConfig, $myJSONFile );
+	
+	# add anything that might be missing - should not overwrite
 	defaultPrefs( $client );
 
 	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_LOADED');
 	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
+		
 }
 
-sub loadPrefs_old
-{
-	my ( $client, $file, $desc ) = @_;
-	debug( "loadPrefs " . $file );
-	unless( -f $file )
-	{
-		oops( $client, $desc, "File $file not found." );
-		return;
-	}
-	my $xml = new XML::Simple( suppressempty => '' );
-	my $doc = $xml->XMLin( $file );
-
-	setPref( $client, 'preset', $file );
-	#setPref( $client, 'siggen', $doc->{Client}->{SignalGenerator} );
-	setPref( $client, 'ambtype', $doc->{Client}->{AmbisonicDecode}->{Type} );
-	setPref( $client, 'band' . $AMBANGLEKEY . 'value',  $doc->{Client}->{AmbisonicDecode}->{Angle} );
-	setPref( $client, 'band' . $AMBDIRECTKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{Cardioid} );
-	setPref( $client, 'band' . $AMBJWKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{jW} );
-	setPref( $client, 'band' . $AMBROTATEZKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{RotateZ} );
-	setPref( $client, 'band' . $AMBROTATEYKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{RotateY} );
-	setPref( $client, 'band' . $AMBROTATEXKEY . 'value', $doc->{Client}->{AmbisonicDecode}->{RotateX} );
-	setPref( $client, 'filter', $doc->{Client}->{Filter} );
-	setPref( $client, 'matrix', $doc->{Client}->{Matrix} );
-	my $bandcount = $doc->{Client}->{EQ}->{Bands};
-	# Read bands from conf
-	my %h = ();
-	my $n = 0;
-	foreach $b (@{$doc->{Client}->{EQ}->{Band}})
-	{
-		my $f = $b->{Freq}; $f += 0;
-		next if $f < 10;
-		next if $f > 22000;
-		my $v = $b->{content}; $v += 0;
-		$h{$f} = $v;
-		$n++;
-		last if $n >= $bandcount;
-	}
-	my @freqs = sort { $a <=> $b } keys %h;
-	my @values = map $h{$_}, @freqs;
-	setBandCount( $client, scalar(@freqs) );
-	for( $n=0; $n<scalar(@freqs); $n++ )
-	{
-		setPref( $client, 'b' . $n . 'freq', $freqs[$n] );
-		setPref( $client, 'b' . $n . 'value', $values[$n] );
-	}
-	setPref( $client, 'band' . $QUIETNESSKEY . 'value', $doc->{Client}->{Quietness} );
-	setPref( $client, 'band' . $FLATNESSKEY . 'value', $doc->{Client}->{Flatness} );
-	setPref( $client, 'band' . $WIDTHKEY . 'value', $doc->{Client}->{Width} );
-	setPref( $client, 'band' . $BALANCEKEY . 'value', $doc->{Client}->{Balance} );
-	setPref( $client, 'band' . $SKEWKEY . 'value', $doc->{Client}->{Skew} );
-#	setPref( $client, 'band' . $DEPTHKEY . 'value', $doc->{Client}->{Depth} );
-
-	defaultPrefs( $client );
-
-	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_LOADED');
-	$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
-}
 
 sub closestFreq
 {
@@ -1085,24 +1108,38 @@ sub closestFreq
 
 sub setBandCount
 {
+	#tries to map old eq values to current equailzer when band count changes
+	#only going to do the deletion for now
 	my $client = shift;
 	my $bandcount = shift;
-
 	$bandcount = int( $bandcount );
-	return if( $bandcount<2 );
-
-	my $prevcount = getPref( $client, 'bands' ) || 2;
+	# 0 is an allowable value
+	#return if( $bandcount<2 );
+	
+	# get doc from JSON file
+	#my $doc = LoadJSONFile ($file);
+	#client config file
+	my $myJSONFile = getPrefFile( $client );
+	my $myConfig = LoadJSONFile ($myJSONFile);
+	# the old routine tried to calculate gain for similar bands if the count changed.
+	# whilst useful, this is a lot of work and probably going to be changed anyway,
+	
+	my $prevcount = ( $myConfig->{Client}->{EQBands} || 0 );
 	debug( "setBandCount " . $bandcount . ", was " . $prevcount );
 	if( $bandcount != $prevcount )
 	{
 		# When the number of bands changes
-
+		my $myBand = "";
+		
 		# Make a hashtable of the current values/frequencies
 		my %h = ();
+		my %q = ();
 		for( my $n=0; $n<$prevcount; $n++ )
 		{
-			my $f = getPref( $client, 'b' . $n . 'freq' ) || defaultFreq( $client, $n, $prevcount );
-			$h{$f} = getPref( $client, 'b' . $n . 'value' ) || 0;
+			$myBand = 'EQBand_' . $n;
+			my $f  = $myConfig->{Client}->{$myBand}->{freq}  || defaultFreq( $client, $n, $prevcount );
+			$h{$f} = $myConfig->{Client}->{$myBand}->{gain} || 0;
+			$q{$f} = $myConfig->{Client}->{$myBand}->{q} || 1.41;
 		}
 
 		# Get an array of the default band frequencies we'll map to
@@ -1112,63 +1149,65 @@ sub setBandCount
 		for( my $n=0; $n<$bandcount; $n++ )
 		{
 			my $f = $freqs[$n];
+			
 			my $oldf = closestFreq($f,%h);
+			
 			my $oldv = $h{$oldf};
+			my $oldq = $q{$oldf};
+			$myBand = 'EQBand_' . $n;
+			
 			debug( "closest to $f is $oldf (=$oldv)" );
-			setPref( $client, 'b' . $n . 'freq', $f );
-			setPref( $client, 'b' . $n . 'value', $oldv || 0 );
+			# now that we can amend frequence we want the actual old value as saved
+			
+			#$myConfig->{Client}->{$myBand}->{freq} =  $f ;
+			$myConfig->{Client}->{$myBand}->{freq} =  $oldf ;
+			$myConfig->{Client}->{$myBand}->{gain} = $oldv || 0 ;
+			$myConfig->{Client}->{$myBand}->{q} = $oldq || 1.41 ;
 		}
 
 		# Delete any unused prefs
 		for( my $n=$bandcount; $n<$prevcount; $n++ )
 		{
-			delPref( $client, 'b' . $n . 'freq' );
-			delPref( $client, 'b' . $n . 'value' );
+			$myBand = 'EQBand_' . $n;
+			delete $myConfig->{Client}->{$myBand};
+			#delPref( $client, $myBand  );
+			#delPref( $client, 'b' . $n . 'gain' );
+			#delPref( $client, 'b' . $n . 'q' );
 		}
 	}
-	setPref( $client, 'bands', $bandcount );
+	$myConfig->{Client}->{EQBands} = $bandcount;
+	SaveJSONFile ($myConfig, $myJSONFile );
 }
 
-sub AmbisonicAttributes
-{
-	my $client = shift;
-	my $ambtype = getPref( $client, 'ambtype' );		# UHJ, Blumlein or Crossed
-	my $ambangle = getPref( $client, 'band' . $AMBANGLEKEY . "value" );	# Angle for cardioid-type
-	my $ambdirect = getPref( $client, 'band' . $AMBDIRECTKEY . "value" );	# Directivity for cardioid-type
-	my $ambjw = getPref( $client, 'band' . $AMBJWKEY . "value" );		# jW mix for for metacardioid-type
-	my $ambrotZ = getPref( $client, 'band' . $AMBROTATEZKEY . "value" );	# Rotation about Z (rotate)
-	my $ambrotY = getPref( $client, 'band' . $AMBROTATEYKEY . "value" );	# Rotation about Y (tumble)
-	my $ambrotX = getPref( $client, 'band' . $AMBROTATEXKEY . "value" );	# Rotation about X (tilt)
-	my $ret = "Type=\"" . $ambtype . "\" ";
-	if( $ambtype eq 'Crossed' )
-	{
-		$ret = $ret . ( "Cardioid=\"" . $ambdirect . "\" Angle=\"" . $ambangle . "\" " ); 
-	}
-	elsif( $ambtype eq 'Crossed+jW' )
-	{
-		$ret = $ret . ( "Cardioid=\"" . $ambdirect . "\" Angle=\"" . $ambangle . "\" jW=\"" . $ambjw . "\" " );
-	}
-	$ret = $ret . ( "RotateZ=\"" . $ambrotZ . "\" RotateY=\"" . $ambrotY . "\" RotateX=\"" . $ambrotX . "\" " );
-	return $ret;
-}
 sub defaultPrefs
 {
 	my $client = shift;
 	my $p;
-	$p = 'ambtype';                         setPref( $client, $p, "UHJ" ) unless getPref( $client, $p );
-	$p = 'bands';                           setBandCount( $client, 2 )  unless getPref( $client, $p );
-	$p = 'band' . $QUIETNESSKEY . 'value';  setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $FLATNESSKEY . 'value';   setPref( $client, $p, 10 )  unless getPref( $client, $p );
-	$p = 'band' . $WIDTHKEY . 'value';      setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $BALANCEKEY . 'value';    setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $SKEWKEY . 'value';       setPref( $client, $p, 0 )   unless getPref( $client, $p );
-#	$p = 'band' . $DEPTHKEY . 'value';      setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $AMBANGLEKEY . 'value';   setPref( $client, $p, 90 )  unless getPref( $client, $p );
-	$p = 'band' . $AMBDIRECTKEY . 'value';  setPref( $client, $p, 0.6 ) unless getPref( $client, $p );
-	$p = 'band' . $AMBJWKEY . 'value';      setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $AMBROTATEZKEY . 'value'; setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $AMBROTATEYKEY . 'value'; setPref( $client, $p, 0 )   unless getPref( $client, $p );
-	$p = 'band' . $AMBROTATEXKEY . 'value'; setPref( $client, $p, 0 )   unless getPref( $client, $p );
+	
+	# only set a value to a default if it does not exist
+	$p = 'Bypass';          	setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;
+	$p = 'EQBands'; 		 	setBandCount( $client, 2 ) 	unless  defined ( getPref( $client, $p ))	;       
+	#$p = 'Loudness';       	setPref( $client, $p, 0 )  ; #unless getPref( $client, $p ); }
+	$p = 'Balance';          	setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;      
+	$p = 'Loudness.enabled'; 	setPref( $client, $p, 0 )   unless defined ( getPref( $client, $p ))	;    
+	$p = 'Preamp'; 			    setPref( $client, $p, -12 ) unless defined ( getPref( $client, $p ))	;
+	$p = 'Delay.delay';  	    setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;  
+	$p = 'Highpass.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Highpass.freq';       setPref( $client,$p, 30 ) 	unless defined ( getPref( $client, $p ))	; 
+	$p = 'Highpass.q';      	setPref( $client,$p, 1 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Highshelf.enabled';   setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Highshelf.freq';      setPref( $client,$p, 8000 ) unless defined ( getPref( $client, $p ))	; 
+	$p = 'Highshelf.gain';      setPref( $client,$p, 3 ) 	unless defined ( getPref( $client, $p )	); 
+	$p = 'Highshelf.slope';   	setPref( $client, $p,6 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowpass.enabled';     setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowpass.freq';        setPref( $client,$p, 20000 ) unless defined ( getPref( $client, $p ))	;  
+	$p = 'Lowpass.q';   		setPref( $client, $p,1 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowshelf.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowshelf.freq';       setPref( $client, $p,300 ) 	unless defined ( getPref( $client, $p ))	;  
+	$p = 'Lowshelf.gain';       setPref( $client,$p, 6 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowshelf.slope';   	setPref( $client, $p, 6 ) 	unless defined ( getPref( $client, $p ))	;   
+
+	
 }
 
 sub upgradePrefs
@@ -1187,7 +1226,7 @@ sub upgradePrefs
 			
 			unless( $prevrev eq $revision )
 			{
-				setPref( $client, "version", $revision );
+				setPref( $client, "Version", $revision );
 			}
 		}
 	}
@@ -1196,11 +1235,12 @@ sub upgradePrefs
 
 
 # ----- The CLI requests -----
-
+# The requests below are mapped via the CLI so that client REST API calls invoke them
 
 # CLI command to get the current status detail
 sub currentQuery
 {
+	#Should be the first call made to load a config
 	my $request = shift;
 	my $client = $request->client();
 	debug( "query: current" );
@@ -1210,78 +1250,74 @@ sub currentQuery
 		$request->setStatusBadDispatch();
 		return;
 	}
-
+	my $myJSONFile = getPrefFile( $client );
+	unless( -f $myJSONFile )
+	{
+		#create default file if it does not exist
+		debug( $client,  "Player Config File $myJSONFile not found. Creating" );
+		#need to create file first
+		my $myDefault = {Client=>{}};
+		SaveJSONFile ($myDefault, $myJSONFile );
+		defaultPrefs( $client );
+	}
+	
+	my $myConfig = LoadJSONFile ($myJSONFile);
+	
 	$request->addResult("Revision",  $revision);
-
+	$request->addResult("ClientName", $client->name);
 	# The filters, stripping path but leaving the extension
-	my $filt = ( getPref( $client, 'matrix' ) || '' );
+	
+	my $filt = ( $myConfig->{Client}->{MatrixFile}  || '' );
 	my ( $vol, $dir, $fil ) = splitpath( $filt );
-	$request->addResult("Matrix",    $fil );
+	$request->addResult("MatrixFile",    $fil );
 
-	$filt = ( getPref( $client, 'filter' ) || '' );
+	$filt = ( $myConfig->{Client}->{FIRWavFile} || '' );
 	($vol, $dir, $fil) = splitpath( $filt );
-	$request->addResult("Filter",    $fil );
+	$request->addResult("FIRWavFile",    $fil );
+	
+	my $bandcount = $myConfig->{Client}->{EQBands};
+	$request->addResult("EQBands",     $bandcount );
+	
+	$request->addResult("Preamp",     $myConfig->{Client}->{Preamp} );
+	$request->addResult("Balance",     $myConfig->{Client}->{Balance} );
+	
+	$request->addResult("Bypass",     $myConfig->{Client}->{Bypass} );
+	$request->addResult("Delay.delay", $myConfig->{Client}->{Delay}->{delay} );
+	$request->addResult("Delay.units", $myConfig->{Client}->{Delay}->{units} );
+	#problematics
+	$request->addResult("Loudness.enabled", $myConfig->{Client}->{Loudness}->{enabled} );
+	
+	$request->addResult("Highpass.enabled" , $myConfig->{Client}->{Highpass}->{enabled}) ;
+	$request->addResult("Highpass.freq" , $myConfig->{Client}->{Highpass}->{freq}) ;
+	$request->addResult("Highpass.q" , $myConfig->{Client}->{Highpass}->{q}) ;
+	$request->addResult("Highshelf.enabled" , $myConfig->{Client}->{Highshelf}->{enabled}) ;
+	$request->addResult("Highshelf.freq" , $myConfig->{Client}->{Highshelf}->{freq}) ;
+	$request->addResult("Highshelf.gain" , $myConfig->{Client}->{Highshelf}->{gain}) ;
+	$request->addResult("Highshelf.slope" , $myConfig->{Client}->{Highshelf}->{slope}) ;
+	$request->addResult("Lowpass.enabled" , $myConfig->{Client}->{Lowpass}->{enabled}) ;
+	$request->addResult("Lowpass.freq" , $myConfig->{Client}->{Lowpass}->{freq}) ;
+	$request->addResult("Lowpass.q" , $myConfig->{Client}->{Lowpass}->{q}) ;
+	$request->addResult("Lowshelf.enabled" , $myConfig->{Client}->{Lowshelf}->{enabled}) ;
+	$request->addResult("Lowshelf.freq" , $myConfig->{Client}->{Lowshelf}->{freq}) ;
+	$request->addResult("Lowshelf.gain" , $myConfig->{Client}->{Lowshelf}->{gain}) ;
+	$request->addResult("Lowshelf.slope" , $myConfig->{Client}->{Lowshelf}->{slope}) ;
 
-	$request->addResult("Amb",        getPref( $client, 'ambtype' ) );
-	$request->addResult("Bands",      getPref( $client, 'bands' ) );
-	$request->addResult("Quietness",  getPref( $client, 'band' . $QUIETNESSKEY . 'value' ) );
-	$request->addResult("Flatness",   getPref( $client, 'band' . $FLATNESSKEY . 'value' ) );
-	$request->addResult("Width",      getPref( $client, 'band' . $WIDTHKEY . 'value' ) );
-	$request->addResult("Balance",    getPref( $client, 'band' . $BALANCEKEY . 'value' ) );
-	$request->addResult("Skew",       getPref( $client, 'band' . $SKEWKEY . 'value' ) );
-#	$request->addResult("Depth",      getPref( $client, 'band' . $DEPTHKEY . 'value' ) );
-	$request->addResult("AmbAngle",   getPref( $client, 'band' . $AMBANGLEKEY . 'value' ) );
-	$request->addResult("AmbDirect",  getPref( $client, 'band' . $AMBDIRECTKEY . 'value' ) );
-	$request->addResult("AmbjW",      getPref( $client, 'band' . $AMBJWKEY . 'value' ) );
-	$request->addResult("AmbRotateZ", getPref( $client, 'band' . $AMBROTATEZKEY . 'value' ) );
-	$request->addResult("AmbRotateY", getPref( $client, 'band' . $AMBROTATEYKEY . 'value' ) );
-	$request->addResult("AmbRotateX", getPref( $client, 'band' . $AMBROTATEXKEY . 'value' ) );
 
+	
+	
 	# The current EQ freq/gain values
-	my $bandcount = getPref( $client, 'bands' );
+	my $myBand = "";
 	my $cnt = 0;
 	for( my $n = 0; $n < $bandcount; $n++ )
 	{
-		my $f = getPref( $client, 'b' . $n . 'freq' ) || defaultFreq( $client, $n, $bandcount );
-		my $v = getPref( $client, 'b' . $n . 'value' ) || 0;
-		$request->addResultLoop( 'EQ_loop', $cnt, $f, $v );
+		$myBand = 'EQBand_' . $n;
+		my $f = $myConfig->{Client}->{$myBand}->{freq} || defaultFreq( $client, $n, $bandcount );
+		my $v = $myConfig->{Client}->{$myBand}->{gain} || 0;
+		my $q = $myConfig->{Client}->{$myBand}->{q} || 1.41;
+		# Ithink there is only 4 slots available in the result loop so concatenating gain and Q; will split on the client
+		$request->addResultLoop( 'EQ_loop', $cnt, $f, $v . '|' . $q );
 		$cnt++;
 	}
-
-	# Include the client's "current.json" file if we can
-	# decode_json(...)
-
-	my $json = catdir( $pluginTempDataDir, join('_', split(/:/, $client->id())) . '.current.json' );
-	open( CURR, "$json" ) || do
-	{
-		debug( "Can't read from $json" );
-		$request->setStatusDone();
-		return;
-	};
-	my @jsdata = <CURR>;
-	close(CURR);
-	debug( "@jsdata" );
-	eval
-	{
-		my $current = decode_json("@jsdata");
-#		debug(Data::Dump::dump($current));
-		$cnt = 0;
-		my @pts = $current->{'Points_loop'};
-#		debug(Data::Dump::dump(@pts));
-		foreach my $v ( @pts )
-		{
-			my @vv = @$v;
-			foreach my $f( @vv )
-			{
-				my %h = %$f;
-				foreach my $ff( keys %h )
-				{
-					$request->addResultLoop( 'Points_loop', $cnt, $ff, $h{$ff} );
-					$cnt++;
-				}
-			}
-		}
-	}; # ignore exceptions
 
 	$request->setStatusDone();
 }
@@ -1353,7 +1389,7 @@ sub filtersQuery
 	my $cnt = 0;
 	foreach my $ff( sort { uc($a) cmp uc($b) } keys %filters )
 	{
-		$request->addResultLoop( 'Filter_loop', $cnt, 0, $ff );
+		$request->addResultLoop( 'FIRWavFile_loop', $cnt, 0, $ff );
 		$cnt++;
 	}
 
@@ -1361,7 +1397,7 @@ sub filtersQuery
 	$cnt = 0;
 	foreach my $ff( sort { uc($a) cmp uc($b) } keys %filters )
 	{
-		$request->addResultLoop( 'Matrix_loop', $cnt, 0, $ff );
+		$request->addResultLoop( 'MatrixFile_loop', $cnt, 0, $ff );
 		$cnt++;
 	}
 
@@ -1375,7 +1411,6 @@ sub filtersQuery
 
 	$request->setStatusDone();
 }
-
 
 # CLI command to set a prefs value
 sub setvalCommand
@@ -1401,41 +1436,30 @@ sub setvalCommand
 
 	my $val = $request->getParam('val');
 	debug( "command: setval($key,$val)" );
-
-	# Check this command is OK
+	
+	# Check this command is OK - not validating for now as it will fail anyway and too much change
 	my %cmds = ();
-	$cmds{'Amb'}        = 'ambtype';
-	$cmds{'Bands'}      = 'bands';
-	$cmds{'SigGen'}     = 'siggen';
-	$cmds{'SigFreq'}    = 'sigfreq';
-	$cmds{'Filter'}     = 'filter';
-	$cmds{'Matrix'}     = 'matrix';
-	$cmds{'Preset'}     = 'preset';
-	# Quietness etc can be called by friendly-name (e.g. from web ui) or by internal-name (e.g. from jive)
-	$cmds{'Quietness'}  = 'band' . $QUIETNESSKEY . 'value';
-	$cmds{'Flatness'}   = 'band' . $FLATNESSKEY . 'value';
-	$cmds{'Width'}      = 'band' . $WIDTHKEY . 'value';
-	$cmds{'Balance'}    = 'band' . $BALANCEKEY . 'value';
-	$cmds{'Skew'}       = 'band' . $SKEWKEY . 'value';
-	$cmds{'AmbAngle'}   = 'band' . $AMBANGLEKEY . 'value';
-	$cmds{'AmbDirect'}  = 'band' . $AMBDIRECTKEY . 'value';
-	$cmds{'AmbjW'}      = 'band' . $AMBJWKEY . 'value';
-	$cmds{'AmbRotateZ'} = 'band' . $AMBROTATEZKEY . 'value';
-	$cmds{'AmbRotateY'} = 'band' . $AMBROTATEYKEY . 'value';
-	$cmds{'AmbRotateX'} = 'band' . $AMBROTATEXKEY . 'value';
-	$cmds{'band' . $QUIETNESSKEY . 'value'}  = 'band' . $QUIETNESSKEY . 'value';
-	$cmds{'band' . $FLATNESSKEY . 'value'}   = 'band' . $FLATNESSKEY . 'value';
-	$cmds{'band' . $WIDTHKEY . 'value'}      = 'band' . $WIDTHKEY . 'value';
-	$cmds{'band' . $BALANCEKEY . 'value'}    = 'band' . $BALANCEKEY . 'value';
-	$cmds{'band' . $SKEWKEY . 'value'}       = 'band' . $SKEWKEY . 'value';
-	$cmds{'band' . $AMBANGLEKEY . 'value'}   = 'band' . $AMBANGLEKEY . 'value';
-	$cmds{'band' . $AMBDIRECTKEY . 'value'}  = 'band' . $AMBDIRECTKEY . 'value';
-	$cmds{'band' . $AMBJWKEY . 'value'}      = 'band' . $AMBJWKEY . 'value';
-	$cmds{'band' . $AMBROTATEZKEY . 'value'} = 'band' . $AMBROTATEZKEY . 'value';
-	$cmds{'band' . $AMBROTATEYKEY . 'value'} = 'band' . $AMBROTATEYKEY . 'value';
-	$cmds{'band' . $AMBROTATEXKEY . 'value'} = 'band' . $AMBROTATEXKEY . 'value';
+=pod values should be
+	Preamp
+	Balance
+	FIRWavFile
+	Matrix
+	Preset
+	EQBands
+	Delay.delay
+	Delay.unit
+	Loudness.low_boost
+	Loudness.high_boost
+	Loudness.reference_level
+	Loudness.ramp_time
+	=== The values below should be set by EQ updates
+	EQBAND_n.freq
+	EQBAND_n.gain
+	EQBAND_n.q
+=cut 
 
-	my $bandcount = getPref( $client, 'bands' );
+	my $bandcount = getPref( $client, 'EQBands' );
+=pod	
 	for( my $n = 0; $n < $bandcount; $n++ )
 	{
 		$cmds{ 'b' . $n . 'freq' }  = 'b' . $n . 'freq';
@@ -1443,7 +1467,8 @@ sub setvalCommand
 	}
 
 	my $prf = $cmds{$key};
-	debug( "command: setval($key=" . $prf . ")" );
+
+	debug( "command: setval($key=" . $key . ")" );
 
 	if( !defined($prf) )
 	{
@@ -1451,11 +1476,10 @@ sub setvalCommand
 		$request->setStatusBadDispatch();
 		return;
 	}
-	if( $prf eq 'bands' )
+=cut
+	if( $key eq 'EQBands' )
 	{
 		# special treatment since this affects each band value
-
-		
 
 		# Set the band count
 		setBandCount( $client, $val );
@@ -1463,38 +1487,23 @@ sub setvalCommand
 		# ShowBriefly to tell jive users that the band count has been set
 		my $line = $client->string('PLUGIN_SQUEEZEDSP_CHOSEN_BANDS');
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
-		
-=pod remove jive menu stuff as we are not using it
-		# First clear out the old Jive top menu, since it will change
-		jiveClearTopMenu( $client );
-		# Refresh the Jive main menu
-		my @menuItems = jiveTopMenu( $client );
-		Slim::Control::Jive::registerPluginMenu( \@menuItems, $thistag, $client );
-		Slim::Control::Jive::refreshPluginMenus( $client );
-=cut
+
 	}
-	elsif( $prf eq 'filter' || $prf eq 'matrix' )
+	elsif( $key eq 'FIRWavFile' || $key eq 'MatrixFile' )
 	{
 		# incoming value is just file name, no path, no extension
-		setFilterValue( $client, $prf, $val );
+		setFilterValue( $client, $key, $val );
 	}
-	elsif( $prf eq 'preset' )
+	elsif( $key eq 'Preset' )
 	{
 		# incoming value is the name of an *existing preset* - load it
 		loadPresetFile( $client, $val );
 	}
-	elsif( $prf eq 'siggen' )
-	{
-		setSigGen( $client, $val );
-	}
-	elsif( $prf eq 'sigfreq' )
-	{
-		setSigFreq( $client, $val );
-	}
+
 	else
 	{
 		# Set the value
-		setPref( $client, $prf, $val );
+		setPref( $client, $key, $val );
 
 		# To find something appropriate to display, we could look up the $prf
 		# in the main menu's items (yuk!).  But easier just to say "ok, got it".
@@ -1516,27 +1525,28 @@ sub setFilterValue( $client, $prf, $val )
 	{
 		# that's OK
 		setPref( $client, $prf, $val );
-		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTERNONE' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTERNONE';
+		my $msg = ( $prf eq 'matrixfile' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTERNONE' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTERNONE';
 		my $line = $client->string( $msg );
 		#displays an alert on any jive enabled client
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
 		return;
 	}
-	if( $prf eq 'matrix' )
+	if( $prf eq 'MatrixFile' )
 	{
 		$path = catdir( $pluginMatrixDataDir, $val );
-		$path =~ s#\\#/#g;
+		#replace double slash with forward slash, commenting out for consistency
+		#$path =~ s#\\#/#g;
 
 	}
 	else
 	{
 		$path = catdir( $pluginImpulsesDataDir, $val );
-		$path =~ s#\\#/#g;
+		#$path =~ s#\\#/#g;
 	}
 	if( -f $path )
 	{
 		setPref( $client, $prf, $path );
-		my $msg = ( $prf eq 'matrix' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTER' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTER';
+		my $msg = ( $prf eq 'matrixfile' ) ? 'PLUGIN_SQUEEZEDSP_CHOSEN_MATRIXFILTER' : 'PLUGIN_SQUEEZEDSP_CHOSEN_RCFILTER';
 		my $line = $client->string( $msg );
 		#displays an alert on any jive enabled client
 		$client->showBriefly( { 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 } );
@@ -1613,11 +1623,14 @@ sub loadPresetFile( $client, $val )
 
 # CLI command to set an EQ value (freq and gain both at once)
 # (not used from Jive, only from web UI)
+# amended to include Q
 sub seteqCommand
 {
 	my $request = shift;
 	my $client = $request->client();
 	debug( "command: seteq" );
+	my $file = getPrefFile( $client );
+	my $myConfig = LoadJSONFile ($file);
 
 	if( $request->isNotQuery([[$thistag . '.seteq']]) )
 	{
@@ -1626,27 +1639,33 @@ sub seteqCommand
 		return;
 	}
 
-	my $band = $request->getParam('band');
-	if( !defined($band) )
+	my $eqband = $request->getParam('band');
+	if( !defined($eqband) )
 	{
 		oops( $client, undef, "seteq, no band!" );
 		$request->setStatusBadDispatch();
 		return;
 	}
 
-	my $bandcount = getPref( $client, 'bands' );
-	if( $band >= $bandcount )
+	my $bandcount = $myConfig->{Client}->{EQBands};
+	
+	if( $eqband >= $bandcount )
 	{
-		oops( $client, undef, "seteq, band $band count $bandcount!" );
+		oops( $client, undef, "seteq, band $eqband  count $bandcount!" );
 		$request->setStatusBadDispatch();
 		return;
 	}
+	
 	my $freq = $request->getParam('freq');
 	my $gain = $request->getParam('gain');
-	debug( "command: seteq($band,$freq,$gain)" );
-
-	setPref( $client, 'b' . $band . 'freq', $freq );
-	setPref( $client, 'b' . $band . 'value', $gain );
+	my $q = $request->getParam('q');
+	my $myBand = 'EQBand_' . $eqband;
+	debug( "command: seteq($myBand,$freq,$gain, $q)" );
+	
+	$myConfig->{Client}->{$myBand}->{freq} = $freq ;
+	$myConfig->{Client}->{$myBand}->{gain} = $gain ;
+	$myConfig->{Client}->{$myBand}->{q} = $q ;
+	SaveJSONFile ($myConfig, $file );
 	$request->setStatusDone();
 }
 
@@ -1676,8 +1695,8 @@ sub saveasCommand
 	debug( "command: saveas($key)" );
 
 	my $file = catdir( $pluginSettingsDataDir, join('_', split(/:/, $key)) . '.preset.json' );
-	setPref( $client, 'preset', $file );
-	savePrefs( $client, $file );
+	setPref( $client, 'Preset', $file );
+	savePreset( $client, $file );
 
 	my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED');
 	#displays an alert on any jive enabled client
@@ -1738,7 +1757,5 @@ sub template
 	$template =~ s/\$PIPENUL\$/$pipenul/g;
 	return $template;
 }
-
-
 
 1;
