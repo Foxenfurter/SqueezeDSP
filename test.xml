@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <extensions>
   <details>
-    <title lang="EN">Squeeze-EQ</title>
+    <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
     <plugin name="SqueezeDSP" version="0.0.10" minTarget="7.7.0" maxTarget="*">
