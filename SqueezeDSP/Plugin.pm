@@ -61,7 +61,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.11";
+my $revision = "0.0.91";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -472,7 +472,7 @@ sub initPlugin
 	}		
 	if (!-e $exec) {
 		$log->warn("$exec not executable");
-		return;
+		#return;
 	}
 	#derive standard binary path
 	$bin = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $convolver . $binExtension);
