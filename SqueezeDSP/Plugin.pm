@@ -36,7 +36,8 @@ use File::Path;
 use File::Copy;
 use FindBin qw($Bin);
 use XML::Simple;
-use JSON;
+#use JSON;
+use JSON::XS::VersionOneAndTwo;
 #use JSON::XS qw(decode_json);
 use Data::Dumper;
 use Slim::Utils::Log;
@@ -540,6 +541,7 @@ sub LoadJSONFile
 		<$fh>;                                 			# read and return file content
 		
 	};
+	#my $myoutputData = from_json($txt);
 	my $myoutputData = decode_json($txt);
 	#print Dumper $myoutputData;
 	
@@ -553,9 +555,11 @@ sub SaveJSONFile
 	my $myoutputJSONfile = shift;
 	
 	open my $fh, ">",$myoutputJSONfile;
-	#print $fh encode_json($myinputData);
-	#above works, but we want nice formatting - so
-	print $fh JSON->new->pretty->encode($myinputData);
+#	print $fh to_json($myinputData);
+	print $fh encode_json($myinputData);
+	#above works, but we want nice formatting - so, which unfortunately is not installed on LMS
+	#print $fh JSON->new->pretty->encode($myinputData);
+	
 	close $fh;
 	return ;
 	
