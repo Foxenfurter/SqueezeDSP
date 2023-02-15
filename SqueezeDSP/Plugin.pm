@@ -14,7 +14,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
-	
+	0.0.91	Fox: Cleaning up for installation
 	0.0.11	Fox: removing Debug settings - ready for release
 	0.0.7 - Fox:
 			Using JSON files for config - that is app config and for the DSP/EQ settings.
@@ -505,7 +505,7 @@ sub initPlugin
 	#do any cleanup
 	housekeeping();
 	#do any app config settings, simplifies handover to SqueezeDSP app
-	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'squeezeDSP_config.json');
+	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP_config.json');
 	
 	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	#needs updating to amend json...
@@ -534,7 +534,7 @@ sub housekeeping
 sub LoadJSONFile
 {
 	my $myinputJSONfile = shift;
-
+	debug( "SqueezeDSP Loading JSON File : " . $myinputJSONfile  );
 	my $txt = do {                             			# do block to read file into variable
 		local $/;                              			# slurp entire file
 		open my $fh, "<", $myinputJSONfile or die $!;  	# open for reading
