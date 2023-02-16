@@ -9,7 +9,7 @@
       <desc lang="EN">DSP for Squeezebox server - provides PEQ and DSP. Now using embedded version of CamillaDSP</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.93.zip</url>
-      <sha>a3ecd94185e6570aae07886782ff30c9cc4bbe9d</sha>
+      <sha>95268bfec0ccaaa73b56b057991c1681174d3fe6</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	  <changes>PEQ and DSP working using JSON config files - auto generates CamillaDSP YAML files, better Housekeeping, Binary now .Net 7.0. 

@@ -3,7 +3,7 @@
       "debug" : "false",
       "dither" : "1",
       "gain" : "-14",
-      "DSPexe" : "camilladsp.exe",
+      "DSPexe" : "camilladsp",
       "partitions" : "2",
       "convolvergain" : "-4",
       "DSPfmt" : " Flexible_441.yml ",
