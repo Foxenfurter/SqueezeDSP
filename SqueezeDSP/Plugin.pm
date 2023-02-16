@@ -62,7 +62,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.91";
+my $revision = "0.0.92";
 use vars qw($VERSION);
 $VERSION = $revision;
 
