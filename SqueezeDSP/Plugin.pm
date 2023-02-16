@@ -14,6 +14,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
+	0.0.92	Fox: Fixed Case sensitive filenames on Linux
 	0.0.91	Fox: Cleaning up for installation
 	0.0.11	Fox: removing Debug settings - ready for release
 	0.0.7 - Fox:

@@ -68,46 +68,45 @@ function LocalbuildEQ(data, labeltype, bands)
 					
 					if( !isNaN(f) && !isNaN(g) )
 					{
-	  				
-      myHTML = myHTML + '<TABLE class="table-container"  id="control_' +  labeltype + i + '" style="background: #fff;"   > ';
-      myHTML = myHTML + '<TR><TD class="rowTitle"></TD><TD class="rowBody"> <input type ="number" readonly style="border: none;  visibility: hidden; width: 0 px; height: 0 px;"  id="band_' + labeltype + i + '"  value=' + i + ' ></Input> ';
-	  myHTML = myHTML + '<h4>Band ' + (i + 1 ) + '</h4></TD><TD class="rowSuffix"></TD></TR> ';
-	  
-      myHTML = myHTML + ' <TR><TD class="rowTitle">[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]</TD> ';
-      myHTML = myHTML + '  <TD class="Slide">';
-      myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="100" step=".01" value="' + fp +'"  ' ;
-      myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ';
-      myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.freq" ></Input> ';
-      myHTML = myHTML + '   <output id="' + labeltype + i + '.freqBubble" class="bubble" ></output>   </TD> ';
-      myHTML = myHTML + '  <TD class="rowSuffix"> ';
-      myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.freq" value="' + f +'"  ></Input> ';
-      myHTML = myHTML + '  </TD>  </TR> ';
-		if (i == 0 )
-		{
-			//alert (myHTML);
-		}
-      myHTML = myHTML + ' <TR><TD class="rowTitle">[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]</TD> ';  
-      myHTML = myHTML + '  <TD class="Slide"> ';
-      myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="' + g +'" ' ;
-      myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
-      myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.gain" ></Input> ';
-      myHTML = myHTML + '   <output id="' + labeltype + i + '.gainBubble" class="bubble" ></output>   </TD> ';
-      myHTML = myHTML + '  <TD class="rowSuffix"> ';
-      myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.gain" value="' + g +'"></Input> ';
-      myHTML = myHTML + '  </TD>  </TR> ';
-        
-      myHTML = myHTML + ' <TR><TD class="rowTitle"><div class="tooltip"  >Q<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]</span></div></TD> ';  
-      myHTML = myHTML + '  <TD class="Slide"> ';
-      myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="12" step="0.01" value="' + q +'" ' ;
-      myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
-      myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.q" ></Input> ';
-      myHTML = myHTML + '   <output id="' + labeltype + i + '.qBubble" class="bubble" ></output>   </TD> ';
-      myHTML = myHTML + '  <TD class="rowSuffix"> ';
-      myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.q" value="' + q +'"></Input> ';
-      myHTML = myHTML + '  </TD>  </TR>'; 
+						
+					  myHTML = myHTML + '<TABLE class="table-container"  id="control_' +  labeltype + i + '" style="background: #fff;"   > ';
+					  myHTML = myHTML + '<TR><TD class="rowTitle"></TD><TD class="rowBody">'; 
+					  myHTML = myHTML + '		<input type ="number" readonly style="border: none;  visibility: hidden; width: 0 px; height: 0 px;"  id="band_' + labeltype + i + '"  value=' + i + ' ></Input> ';
+					  myHTML = myHTML + '<h4>Band ' + (i + 1 ) + '</h4></TD><TD class="rowSuffix"></TD></TR> ';
+					  
+					  myHTML = myHTML + ' <TR><TD class="rowTitle">' + document.getElementById('Freq_Desc').value  + '</TD> ';
+					  myHTML = myHTML + '  <TD class="Slide">';
+					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="100" step=".01" value="' + fp +'"  ' ;
+					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ';
+					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.freq" ></Input> ';
+					  myHTML = myHTML + '   <output id="' + labeltype + i + '.freqBubble" class="bubble" ></output>   </TD> ';
+					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
+					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.freq" value="' + f +'"  ></Input> ';
+					  myHTML = myHTML + '  </TD>  </TR> ';
+						
+						
+					  myHTML = myHTML + ' <TR><TD class="rowTitle">' + document.getElementById('Gain_Desc').value  + '</TD> ';  
+					  myHTML = myHTML + '  <TD class="Slide"> ';
+					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="' + g +'" ' ;
+					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
+					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.gain" ></Input> ';
+					  myHTML = myHTML + '   <output id="' + labeltype + i + '.gainBubble" class="bubble" ></output>   </TD> ';
+					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
+					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.gain" value="' + g +'"></Input> ';
+					  myHTML = myHTML + '  </TD>  </TR> ';
+						
+					  myHTML = myHTML + ' <TR><TD class="rowTitle"><div class="tooltip"  >Q<span class="tooltiptext">' + document.getElementById('Q_Help').value  + '</span></div></TD> ';  
+					  myHTML = myHTML + '  <TD class="Slide"> ';
+					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="12" step="0.01" value="' + q +'" ' ;
+					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
+					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.q" ></Input> ';
+					  myHTML = myHTML + '   <output id="' + labeltype + i + '.qBubble" class="bubble" ></output>   </TD> ';
+					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
+					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.q" value="' + q +'"></Input> ';
+					  myHTML = myHTML + '  </TD>  </TR>'; 
 
-      myHTML = myHTML + '</TABLE>';
-					
+					  myHTML = myHTML + '</TABLE>';
+									
 
 					}
 				}
@@ -122,6 +121,7 @@ function LocalbuildEQ(data, labeltype, bands)
 	}
 	return myHTML;
 }	
+
 
 
 

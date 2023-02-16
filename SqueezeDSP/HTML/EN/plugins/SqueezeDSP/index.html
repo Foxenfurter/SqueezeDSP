@@ -9,25 +9,23 @@
 <!--
 	Settings page
 		
-	Modified by Jonathan Fox 2022
+	Modified by Jonathan Fox 2023
 -->
 
 <!-- Script for the model -->
 <script type="text/javascript" src="/html/prototype.js"></script>
  
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="[%webroot%]plugins/SqueezeDSP/css/sqdsp_style.css"/>
-<!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data.js"></script-->
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style.css"/>
+
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data.js"></script>
 <style>
 
 </style>
 
 <script>
 
-/*
----------------------Data Control SPlit
-*/
 
 
 
@@ -59,7 +57,12 @@
 		</td></tr>
 	</table>
 <!-- for Testing Rest Calls-->
-<DIV id="TEST REST" style="bottom:5px;"   >
+<DIV style="display : none;" id="TEST REST" style="bottom:5px;"   >
+<!-- this should help pass strings into functions within the scripts-->
+<Input id = "Freq_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]' >
+<Input id = "Gain_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]' >
+<Input id = "Q_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]' >
+
 	<!--input type ="Button" onclick="InguzGetList(LocalBuildLists)" value="Get List" >
 	<input type ="Button" onclick="InguzGetSettings(LocalUpdateSettings) " value = "Get Settings" >
 	<input type ="Button" onclick="LocalShowSettings() " value = "Show Settings">
@@ -99,8 +102,6 @@
 			<TD >
 			
 			</TD>
-
-			
 		</TR>
     </TABLE>	
 	<DIV id="DSP_container" >
@@ -118,7 +119,7 @@
 				</select>
 			</TD>
 			<TD class="rowSuffix">
-  </TD >
+			</TD >
 		</TR>
 		<TR id="control_NewPreset">
 			<TD class="rowTitle">
@@ -136,10 +137,9 @@
 			<TD class="rowSuffix"></TD >
 		</TR>
 	</TABLE>	
-
-	<BR>
 	<hr>
 	<BR>
+	
 		<!--Convolver Type Filters -->
 	<TABLE class="table-container" >
 		<TR id="control_FIRWavFile">
@@ -159,9 +159,9 @@
 		</TR>
 
 	</TABLE>
-	<BR>
 	<hr>
 	<BR>
+	
 	<TABLE class="table-container" >
 	
 		<TR id="control_Preamp" inc="0.1">
@@ -238,11 +238,10 @@
 	<TABLE id="control_Loudness" class="table-container" >
 			<!-- Placeholder -->	
 	</TABLE>
-	<!--EQ Selector -->
-	<BR>
+
 	<hr>
 	<BR>
-
+	<!--EQ Selector -->
 	<TABLE class="table-container"   >
 		<TR  id="control_EQBands">
 
@@ -274,7 +273,7 @@
 			<!-- This stuff will all be replaced by new EQ -->	
 		</TABLE>
 	<!--Advanced Stuff -->
-	<BR>
+
 	<hr>
 	<BR>
 
@@ -336,10 +335,9 @@
 			</TR>
 	</TR>
 	</TABLE>
-	
-	<BR>
 	<hr>
 	<BR>
+	
 	<TABLE class="table-container"   >	
 		<TR id="control_Lowshelf.enabled"  >
 			<TD class="rowTitle" >
@@ -410,9 +408,9 @@
 			</TR>
 
 	</TABLE>
-	<BR>
 	<hr>
 	<BR>	
+
 	<TABLE class="table-container"   >	
 		<TR id="control_Highshelf.enabled"  >
 			<TD class="rowTitle" >
@@ -482,7 +480,6 @@
 			</TR>
 
 	</TABLE>
-	<BR>
 	<hr>
 	<BR>
 	
@@ -544,10 +541,8 @@
 			</TR>
 	</TR>
 	</TABLE>
-	
-
 	</DIV>
-	<BR>
+
 	<hr>
 	<BR>
 	<!-- end of page -->

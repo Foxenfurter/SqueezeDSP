@@ -3,7 +3,7 @@
   <name>PLUGIN_SQUEEZEDSP_DISPLAYNAME</name>
   <description>PLUGIN_SQUEEZEDSP_MODULEDESC</description>
   <module>Plugins::SqueezeDSP::Plugin</module>
-  <version>0.0.91</version>
+  <version>0.0.92</version>
 
   <creator>Jonathan Fox (Foxenfurter/Foxesden)</creator>
   <email></email>
@@ -16,7 +16,7 @@
 
   <targetApplication>
   <id>SqueezeCenter</id>
-   <minVersion>7.7.0</minVersion>
+   <minVersion>7.8.0</minVersion>
    <maxVersion>*</maxVersion>
   </targetApplication>
 </extension>
