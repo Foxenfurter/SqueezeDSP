@@ -14,6 +14,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
+	
 	0.0.92	Fox: Fixed Case sensitive filenames on Linux
 	0.0.91	Fox: Cleaning up for installation
 	0.0.11	Fox: removing Debug settings - ready for release
@@ -62,7 +63,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.92";
+my $revision = "0.0.93";
 use vars qw($VERSION);
 $VERSION = $revision;
 

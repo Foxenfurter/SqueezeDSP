@@ -25,7 +25,91 @@
 </style>
 
 <script>
+//This function is here because the mapping of strngs.txt does not work in the file version javascripts
+function LocalbuildEQ(data, labeltype, bands)
+{
+	try{
+			// we are going to build a set of slider controls from the data passed in
+			// data = EQ_loop
+			var myHTML = "";
 
+			
+			//prefer the following as it is clearer
+			for ( let i = 0; i < data.length; i++ )
+			{
+				
+				var fgq = data[i];
+				//get an element (key / value pair) where j is the key (frequency)
+				for(var j in fgq)
+				{
+				
+					// f=frequency, g=gain, q=q
+					var f = parseFloat(j);
+					!isNaN(f)
+					{
+						//gain and q are passed within a single | separated string
+						var gq = (fgq[j]);
+						var g = parseFloat(gq.split('|')[0]);
+						var q = parseFloat(gq.split('|')[1]);
+						// calculate the postion of the slider based off it's log value
+						var fp = log2LinearMapper(f);
+					}
+					
+					if( !isNaN(f) && !isNaN(g) )
+					{
+						
+					  myHTML = myHTML + '<TABLE class="table-container"  id="control_' +  labeltype + i + '" style="background: #fff;"   > ';
+					  myHTML = myHTML + '<TR><TD class="rowTitle"></TD><TD class="rowBody">'; 
+					  myHTML = myHTML + '		<input type ="number" readonly style="border: none;  visibility: hidden; width: 0 px; height: 0 px;"  id="band_' + labeltype + i + '"  value=' + i + ' ></Input> ';
+					  myHTML = myHTML + '<h4>Band ' + (i + 1 ) + '</h4></TD><TD class="rowSuffix"></TD></TR> ';
+					  
+					  myHTML = myHTML + ' <TR><TD class="rowSubTitle">' + document.getElementById('Freq_Desc').value  + '</TD> ';
+					  myHTML = myHTML + '  <TD class="Slide">';
+					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="100" step=".01" value="' + fp +'"  ' ;
+					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ';
+					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.freq" ></Input> ';
+					  myHTML = myHTML + '   <output id="' + labeltype + i + '.freqBubble" class="bubble" ></output>   </TD> ';
+					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
+					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.freq" value="' + f +'"  ></Input> ';
+					  myHTML = myHTML + '  </TD>  </TR> ';
+						
+						
+					  myHTML = myHTML + ' <TR><TD class="rowSubTitle">' + document.getElementById('Gain_Desc').value  + '</TD> ';  
+					  myHTML = myHTML + '  <TD class="Slide"> ';
+					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="' + g +'" ' ;
+					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
+					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.gain" ></Input> ';
+					  myHTML = myHTML + '   <output id="' + labeltype + i + '.gainBubble" class="bubble" ></output>   </TD> ';
+					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
+					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.gain" value="' + g +'"></Input> ';
+					  myHTML = myHTML + '  </TD>  </TR> ';
+						
+					  myHTML = myHTML + ' <TR><TD class="rowSubTitle"><div class="tooltip"  >Q<span class="tooltiptext">' + document.getElementById('Q_Help').value  + '</span></div></TD> ';  
+					  myHTML = myHTML + '  <TD class="Slide"> ';
+					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="12" step="0.01" value="' + q +'" ' ;
+					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
+					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.q" ></Input> ';
+					  myHTML = myHTML + '   <output id="' + labeltype + i + '.qBubble" class="bubble" ></output>   </TD> ';
+					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
+					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.q" value="' + q +'"></Input> ';
+					  myHTML = myHTML + '  </TD>  </TR>'; 
+
+					  myHTML = myHTML + '</TABLE>';
+									
+
+					}
+				}
+				
+			}
+			
+	}
+	catch
+	{
+		DefaultAlert("LocalbuildEQ", "Error building EQ profile");
+		
+	}
+	return myHTML;
+}	
 
 
 
@@ -303,8 +387,8 @@
 	</TABLE>
 	<TABLE class="table-container"  id="control_Highpass"  >	
 		<TR >
-				<TD class="rowTitle" >
-				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
+				<TD class="rowSubTitle" >
+				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]				
 				</TD>
 				<TD class="Slide">
 					
@@ -319,7 +403,7 @@
 				</TD>
 			</TR>
 						<TR>
-				<TD class="rowTitle">
+				<TD class="rowSubTitle" >
 					<div class="tooltip"  >Q<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]</span>
 					</div>
 				</TD>
@@ -364,7 +448,7 @@
 	<TABLE class="table-container"  id="control_Lowshelf"  >	
 
 			<TR >
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
 				</TD>
 				<TD class="Slide">
@@ -379,7 +463,7 @@
 				</TD>
 			</TR>
 			<TR>
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 				[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]
 				</TD>
 				<TD class="Slide">
@@ -392,7 +476,7 @@
 				</TD>
 			</TR>
 			<TR>
-				<TD class="rowTitle">				
+				<TD class="rowSubTitle">				
 					<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_SLOPE" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP" | string %]</span>
 					</div>
 				</TD>
@@ -436,7 +520,7 @@
 	</TABLE>	
 	<TABLE class="table-container"  id="control_Highshelf"  >	
 		<TR >
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
 				</TD>
 				<TD class="Slide">
@@ -451,7 +535,7 @@
 				</TD>
 			</TR>
 			<TR>
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 				[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]
 				</TD>
 				<TD class="Slide">
@@ -464,7 +548,7 @@
 				</TD>
 			</TR>
 			<TR>
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 					<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_SLOPE" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP" | string %]</span>
 					</div>		
 				</TD>
@@ -509,7 +593,7 @@
 		</TABLE>	
 	<TABLE class="table-container"  id="control_Lowpass"  >	
 		<TR >
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
 				</TD>
 				<TD class="Slide">
@@ -525,7 +609,7 @@
 				</TD>
 			</TR>
 						<TR>
-				<TD class="rowTitle">
+				<TD class="rowSubTitle">
 					<div class="tooltip"  >Q<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]</span>
 					</div>		
 				</TD>

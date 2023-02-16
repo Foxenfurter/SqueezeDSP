@@ -134,6 +134,13 @@ TD{
   width: 15%;
 }
 
+.rowSubTitle
+{
+	width: 15%;
+	text-align: right; 
+	padding-right: 10px ;
+}
+
 .rowTitleLong
 {
   width: 30%;
