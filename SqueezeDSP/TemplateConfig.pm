@@ -99,7 +99,7 @@ ape flc * $CLIENTID$
 	[mac] $FILE$ - -d | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 flc flc * $CLIENTID$
-	# FRIT:{START=--skip=%t}U:{END=--until=%v}
+	# FRI:{START=--skip=%t}U:{END=--until=%v}
 	[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ |  [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 mov flc * $CLIENTID$
@@ -124,7 +124,7 @@ ogg flc * $CLIENTID$
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --bitrate 320 --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
+	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
 
 
 wav flc * $CLIENTID$
