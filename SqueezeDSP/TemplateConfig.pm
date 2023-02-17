@@ -24,10 +24,6 @@ alc wav * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
-amb wav * $CLIENTID$
-	# IFT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --amb=true --d=16
-
 ape wav * $CLIENTID$
 	# F
 	[mac] $FILE$ - -d | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
@@ -60,9 +56,6 @@ spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
 	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
-uhj wav * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --wav=true --d=16
 
 wav wav * $CLIENTID$
 	# FT:{START=-skip %t}
@@ -101,10 +94,6 @@ alc flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
-amb flc * $CLIENTID$
-	# IFT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ -=amb=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
-
 ape flc * $CLIENTID$
 	# F
 	[mac] $FILE$ - -d | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
@@ -135,11 +124,8 @@ ogg flc * $CLIENTID$
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
+	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --bitrate 320 --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
 
-uhj flc * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 wav flc * $CLIENTID$
 	# FT:{START=-skip %t}
