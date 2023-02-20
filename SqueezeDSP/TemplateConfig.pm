@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.03";
+	my $configrevision = "0.0.04";
 	return $configrevision;
 }
 
@@ -110,7 +110,7 @@ ape flc * $CLIENTID$
 	[mac] $FILE$ - -d | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 flc flc * $CLIENTID$
-	# FRIT:{START=--skip=%t}U:{END=--until=%v}
+	# FRI:{START=--skip=%t}U:{END=--until=%v}
 	[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ |  [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 mov flc * $CLIENTID$
