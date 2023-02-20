@@ -59,10 +59,10 @@ PLUGIN_SQUEEZEDSP_GAIN
 	EN	Gain (dB)
 
 PLUGIN_SQUEEZEDSP_SLOPE
-	EN	Slope (dB per Oct)
+	EN	Slope (0.1->1)
 
 PLUGIN_SQUEEZEDSP_SLOPE_HELP
-	EN	Slope - represents the rate of change between normal gain & shelf gain, it is measured in decibels per Octave with 3 being shallow and 24 a steep slope.
+	EN	Slope - represents the rate of change between normal gain & shelf gain, it uses SoX logic, 0.3 shallow and 1.0 the steepest slope.
 
 PLUGIN_SQUEEZEDSP_Q_HELP
 	EN	Q - represents the bandwidth of a filter. A low Q e.g. < 1 will be a wide filter and a high Q will be a narrow (notch/peak) filter.

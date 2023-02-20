@@ -14,7 +14,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
-	0.0.94	Fox: Amended Template for FLAC
+	0.0.95	Fox: Commented out references to CamillaDSP, using sox instead. Added fallback default for EQ frequency
 	0.0.92	Fox: Fixed Case sensitive filenames on Linux
 	0.0.91	Fox: Cleaning up for installation
 	0.0.11	Fox: removing Debug settings - ready for release
@@ -63,7 +63,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.94";
+my $revision = "0.0.95";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -446,6 +446,9 @@ sub initPlugin
 	# The folder where all settings data lives (filters, settings files, presets, etc)
 	$pluginSettingsDataDir = catdir( $pluginDataDir, 'Settings' );
 	mkdir( $pluginSettingsDataDir );
+	
+	# On linux we need the settings directory to be writable by SqueezeDSP binary
+	
 
 	$pluginImpulsesDataDir = catdir( $pluginDataDir, 'Impulses' );
 	mkdir( $pluginImpulsesDataDir );
@@ -478,28 +481,29 @@ sub initPlugin
 	}
 	#derive standard binary path
 	$bin = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $convolver . $binExtension);
-	#need to copy camilladsp exe too.
+	
+	#need to copy camilladsp exe too. as of v 0.94 camilladsp is not used, using SoX instead 
 	#my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $bin);
 	
-	my $camilladsp = "camilladsp";
+	#my $camilladsp = "camilladsp";
 	#rather than try and work out paths agin lets just re-use this for CamillaDSP
-	my $cambinsrc = $class->binaries;
-	$cambinsrc =~ s/$thisapp/$camilladsp/;
-	my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $cambinsrc);
+	#my $cambinsrc = $class->binaries;
+	#$cambinsrc =~ s/$thisapp/$camilladsp/;
+	#my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $cambinsrc);
 	
-	my $cambinout = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $camilladsp . $binExtension);;
-	debug('camilla binary source path: ' . $cambinsrc . ' and target path: ' .  $cambinout );
+	#my $cambinout = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $camilladsp . $binExtension);;
+	#debug('camilla binary source path: ' . $cambinsrc . ' and target path: ' .  $cambinout );
 	debug('standard binary path: ' . $bin);
 	# copy correct binary into bin folder unless it already exists
 	unless (-e $bin) {
 		debug('copying binary' . $exec );
 		copy( $exec , $bin)  or die "copy failed: $!";
-		copy( $cambinsrc , $cambinout)  or die "copy failed: $!";
+		#copy( $cambinsrc , $cambinout)  or die "copy failed: $!";
 		#we know only windows has an extension, now set the binary
 		if ( $binExtension == "") {
 				debug('executable not having \'x\' permission, correcting');
 				chmod (0555, $bin);
-				chmod (0555, $cambinout);
+		#		chmod (0555, $cambinout);
 				
 		}	
 	}
@@ -1143,7 +1147,7 @@ sub setBandCount
 		for( my $n=0; $n<$prevcount; $n++ )
 		{
 			$myBand = 'EQBand_' . $n;
-			my $f  = $myConfig->{Client}->{$myBand}->{freq}  || defaultFreq( $client, $n, $prevcount );
+			my $f  = $myConfig->{Client}->{$myBand}->{freq}  || defaultFreq( $client, $n, $prevcount ) ;
 			$h{$f} = $myConfig->{Client}->{$myBand}->{gain} || 0;
 			$q{$f} = $myConfig->{Client}->{$myBand}->{q} || 1.41;
 		}
@@ -1166,7 +1170,7 @@ sub setBandCount
 			# now that we can amend frequence we want the actual old value as saved
 			
 			#$myConfig->{Client}->{$myBand}->{freq} =  $f ;
-			$myConfig->{Client}->{$myBand}->{freq} =  $oldf ;
+			$myConfig->{Client}->{$myBand}->{freq} =  $oldf || 60  ;
 			$myConfig->{Client}->{$myBand}->{gain} = $oldv || 0 ;
 			$myConfig->{Client}->{$myBand}->{q} = $oldq || 1.41 ;
 		}
@@ -1204,14 +1208,14 @@ sub defaultPrefs
 	$p = 'Highshelf.enabled';   setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Highshelf.freq';      setPref( $client,$p, 8000 ) unless defined ( getPref( $client, $p ))	; 
 	$p = 'Highshelf.gain';      setPref( $client,$p, 3 ) 	unless defined ( getPref( $client, $p )	); 
-	$p = 'Highshelf.slope';   	setPref( $client, $p,6 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Highshelf.slope';   	setPref( $client, $p,0.3 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowpass.enabled';     setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowpass.freq';        setPref( $client,$p, 20000 ) unless defined ( getPref( $client, $p ))	;  
 	$p = 'Lowpass.q';   		setPref( $client, $p,1 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.freq';       setPref( $client, $p,300 ) 	unless defined ( getPref( $client, $p ))	;  
 	$p = 'Lowshelf.gain';       setPref( $client,$p, 6 ) 	unless defined ( getPref( $client, $p ))	;   
-	$p = 'Lowshelf.slope';   	setPref( $client, $p, 6 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowshelf.slope';   	setPref( $client, $p, 0.3 ) 	unless defined ( getPref( $client, $p ))	;   
 
 	
 }

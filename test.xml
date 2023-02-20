@@ -4,15 +4,15 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.0.94" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.0.95" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server - provides PEQ and DSP. Now using embedded version of CamillaDSP</desc>
+      <desc lang="EN">DSP for Squeezebox server - provides PEQ and DSP.</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.94.zip</url>
-      <sha>9e21ba6486ffbff93ba9c9bdbb0651c0e2fa5879</sha>
+      <sha>5c9429a2c16783d0552ee92f985f79c93d7c3973</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
-	  <changes>PEQ and DSP working using JSON config files - auto generates CamillaDSP YAML files, better Housekeeping, Binary now .Net 7.0. 
+	  <changes>PEQ and DSP working using JSON config files - Replaced CamillaDSP with SoX for PEQ, better Housekeeping, Binary now .Net 7.0. 
 				Had to remove pretty JSON formatting
 				tidy up file names
 				copy some static strings to hidden input fields for use in js files.
