@@ -1200,21 +1200,21 @@ sub defaultPrefs
 	#$p = 'Loudness';       	setPref( $client, $p, 0 )  ; #unless getPref( $client, $p ); }
 	$p = 'Balance';          	setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;      
 	$p = 'Loudness.enabled'; 	setPref( $client, $p, 0 )   unless defined ( getPref( $client, $p ))	;    
-	$p = 'Preamp'; 			    setPref( $client, $p, -12 ) unless defined ( getPref( $client, $p ))	;
+	$p = 'Preamp'; 			    setPref( $client, $p, -5 ) unless defined ( getPref( $client, $p ))	;
 	$p = 'Delay.delay';  	    setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;  
 	$p = 'Highpass.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Highpass.freq';       setPref( $client,$p, 30 ) 	unless defined ( getPref( $client, $p ))	; 
 	$p = 'Highpass.q';      	setPref( $client,$p, 1 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Highshelf.enabled';   setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Highshelf.freq';      setPref( $client,$p, 8000 ) unless defined ( getPref( $client, $p ))	; 
-	$p = 'Highshelf.gain';      setPref( $client,$p, 3 ) 	unless defined ( getPref( $client, $p )	); 
+	$p = 'Highshelf.gain';      setPref( $client,$p, 1 ) 	unless defined ( getPref( $client, $p )	); 
 	$p = 'Highshelf.slope';   	setPref( $client, $p,0.3 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowpass.enabled';     setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowpass.freq';        setPref( $client,$p, 20000 ) unless defined ( getPref( $client, $p ))	;  
 	$p = 'Lowpass.q';   		setPref( $client, $p,1 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.freq';       setPref( $client, $p,300 ) 	unless defined ( getPref( $client, $p ))	;  
-	$p = 'Lowshelf.gain';       setPref( $client,$p, 6 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowshelf.gain';       setPref( $client,$p, 1.5 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.slope';   	setPref( $client, $p, 0.3 ) 	unless defined ( getPref( $client, $p ))	;   
 
 	
