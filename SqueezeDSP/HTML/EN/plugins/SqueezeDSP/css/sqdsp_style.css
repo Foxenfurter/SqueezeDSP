@@ -241,6 +241,7 @@ background-color: lime !important;
 animation-name: showchange;
 animation-duration: 4s;
 }
+
 @keyframes showchange {
   from {background-color: lime;}
   to {background-color: initial;}
@@ -375,7 +376,7 @@ animation-duration: 4s;
   background-image: -moz-linear-gradient(top, #ff4d4d, #800000);
   background-image: -o-linear-gradient(top, #ff4d4d, #800000);
   background-image: linear-gradient(to bottom, #ff4d4d, #800000);
-
+}
 
 
 /* Horizontal line with text in middle */
@@ -431,18 +432,16 @@ animation-duration: 4s;
 	background-color: black;
 	opacity: 0.8;
 	z-index: 20;
-  
-  
+   
 
   /* Position the tooltip */
   position: absolute;
-  z-index: 20;
+  
 }
 
 .tooltip:hover .tooltiptext {
   visibility: visible;
   font-size: 16px;
-
 
  }
 
