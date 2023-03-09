@@ -9,7 +9,7 @@
       <desc lang="EN">DSP for Squeezebox server (Dev version) - provides EQ and DSP. Now allows import of REW EQ Settings</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.98.zip</url>
-      <sha>848a60f8b632e722507c6bda501f681716628164</sha>
+      <sha>d381ece9dbd7d5c65c13cbda5601e16aae5c8bf9</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	  <changes>New Feature - Load PEQ settings from REW (Mono Only)Fixed issue with PEQ being added with odd defaults; 	Fixed intermittent issues resetting PEQ Bands; New Player has default Settings created on detection; Cosmetic changes  	  
