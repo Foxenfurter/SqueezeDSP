@@ -16,10 +16,10 @@
 <script type="text/javascript" src="/html/prototype.js"></script>
  
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_style.css"/>
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_1.css"/>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_1.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_1.js"></script>
 <style>
 /* -- Commented Out whilst testing installer
 .drop_zone {
@@ -373,6 +373,7 @@ function outputlist(text)
 	document.getElementById("FileDrop").textContent = 'DROP REW FILE HERE... ' + text;
 }
 
+
 function ConfirmREW(EQText)
 {
 	if(!confirm ('Load the Settings:' + '\n' + EQText ) )
@@ -383,7 +384,7 @@ function ConfirmREW(EQText)
 
 }
 
-*/
+
 
 //This function is here because the mapping of strngs.txt does not work in the file version javascripts
 function LocalbuildEQ(data, labeltype, bands)
@@ -470,7 +471,7 @@ function LocalbuildEQ(data, labeltype, bands)
 	return myHTML;
 }	
 
-
+*/
 
 </script>
 
