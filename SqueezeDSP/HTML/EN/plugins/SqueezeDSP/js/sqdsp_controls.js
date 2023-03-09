@@ -150,47 +150,75 @@ function LocalSetupRadio(myRadio, newValue )
 	//alert ('processing radio ' + myRadio + ' | ' + newValue );
 	if(radioLength == undefined) {
 		radioObj.checked = (radioObj.value == newValue.toString());
-		return;
+		return radioObj;
 	}
 	for(var i = 0; i < radioLength; i++) {
 		radioObj[i].checked = false;
 		//alert('Current: ' + radioObj[i].value + ' New: ' + newValue);
 		if(radioObj[i].value == newValue) {
 			radioObj[i].checked = true;
+			return radioObj[i];
 		}
 	}
-	//ToggleControl(myRadio, 'control_Lowshelf' )
+	//shouldn't get here now
+	return radioObj ;
 }
 
 function LocalUpdateSettings (data)
 	{
 		// Write Data from REST response to Local cache
-	
 		UpdateSqueezeDSPData(data);
 		
 		//Now We display the data from the cache
 		LocalDisplayVals();	
-	
-		LocalSetupRadio( 'val_Bypass' , SqueezeDSPData.Bypass);
-		//LocalSetupRadio( 'val_EQBands' , SqueezeDSPData.EQBands);
-		LocalSetupRadio( 'val_Loudness.enabled' , replaceNull(SqueezeDSPData.Loudness_enabled,0));
-		LocalSetupRadio( 'val_Lowshelf.enabled' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
-		LocalSetupRadio( 'val_Highshelf.enabled' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
-		LocalSetupRadio( 'val_Highpass.enabled' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
-		LocalSetupRadio( 'val_Lowpass.enabled' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
+		myRadio = LocalSetupRadio( 'val_Bypass' , SqueezeDSPData.Bypass);
 		
-		ToggleControl(SqueezeDSPData.Bypass, 'DSP_container', true );
+		ToggleControl(myRadio, 'DSP_container', true );
+		//LocalSetupRadio( 'val_EQBands' , SqueezeDSPData.EQBands);
+		myRadio = LocalSetupRadio( 'val_Loudness.enabled' , replaceNull(SqueezeDSPData.Loudness_enabled,0));
+		
+		ToggleControl( myRadio, 'control_Loudness' , false );		
 
-		ToggleControl(SqueezeDSPData.Loudness_enabled, 'control_Loudness' , false );
-		ToggleControl(SqueezeDSPData.Highpass_enabled, 'control_Highpass' , false );
-		ToggleControl(SqueezeDSPData.Lowshelf_enabled, 'control_Lowshelf', false );
-		ToggleControl(SqueezeDSPData.Highshelf_enabled, 'control_Highshelf' , false );
-		ToggleControl(SqueezeDSPData.Lowpass_enabled, 'control_Lowpass' , false );
+		myRadio = LocalSetupRadio( 'val_Lowshelf.enabled' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
+		ToggleControl(myRadio, 'control_Lowshelf', false );
+
+		myRadio = LocalSetupRadio( 'val_Highshelf.enabled' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
+		ToggleControl(myRadio, 'control_Highshelf' , false );
+
+		myRadio = LocalSetupRadio( 'val_Highpass.enabled' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
+		ToggleControl(myRadio, 'control_Highpass' , false );
+
+		myRadio = LocalSetupRadio( 'val_Lowpass.enabled' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
+		ToggleControl(myRadio, 'control_Lowpass' , false );
+		
 		
 		LocalDisplayEQ();	
 		
 		ListenForSlide();
 	}
+
+
+
+function LocalClearSettings()
+{
+		//set everything else off.
+		DisableControl('Loudness');
+		DisableControl('Lowshelf');
+		DisableControl('Highshelf');
+		DisableControl('Highpass');
+		DisableControl('Lowpass');
+		SqueezeDSPSelectValue('Preamp', -2);
+		SqueezeDSPSelectValue('Delay.delay', 0);
+		SqueezeDSPSelectValue('Balance', 0);
+		// disable any FIR filter
+		SqueezeDSPSelectValue('FIRWavFile', '-');
+		//SqueezeDSPSelectValue('Preset', '-');
+		edt_NewPreset.value = '';
+		sel_Preset.value = '-' ;				
+		//clear eq Settings - as we will most likely be adding them back in
+		ClearEQ();
+}
+
 
 
 function HideAlert()
@@ -329,6 +357,45 @@ function SliderReset (){
 	
 }
 
+function AddEQBand()
+{
+	/* Add a new band unless max of 31 reached */
+	var myObj= document.getElementById('val_EQBands');
+	var myObjvalue = Number(myObj.value);
+
+	if ( myObjvalue < 31 )
+	{
+		myObj.value = myObjvalue + 1;
+		NewFieldValue ('EQBands', myObj ,  true);
+		ToggleEQ(myObj, 'control_EQ' );
+	}
+}
+
+function DelEQBand()
+{
+	/* delete a  band unless min of 0 reached */
+	var myObj= document.getElementById('val_EQBands');
+	var myObjvalue = parseInt(myObj.value,10);
+	
+	if ( myObjvalue > 0 )
+	{
+		myObj.value = myObjvalue - 1;
+		NewFieldValue ('EQBands', myObj ,  true);
+		ToggleEQ(myObj, 'control_EQ' );
+	}
+}
+
+
+function ClearEQ()
+{
+		myElement = document.getElementById('val_EQBands');
+		myElement.value = 0;
+		NewFieldValue ('EQBands', myElement ,  true);
+		ToggleEQ(myElement, 'control_EQ' );
+}
+
+
+
 function EQReset()
 {
 	try {
@@ -376,21 +443,38 @@ function iSlideEQ (myObj){
 	document.getElementById(myObj + '.gainBubble').style.display = 'none';
 }
 
-function ToggleControl(myInputValue, myControltoToggle, InvertToggle = false )
+function ToggleEQ(myElement, myControltoToggle)
+{
+// EQ doesn't need any style setting, clearer to split the function
+	var myValue = myElement.value;
+	if ( myValue == 0 )
+	{
+			document.getElementById(myControltoToggle).style.display = 'none';			
+	}
+	else
+	{
+			document.getElementById(myControltoToggle).style.display = '';
+	}
+
+}
+
+function ToggleControl(myElement, myControltoToggle, InvertToggle = false )
 {
 //toggle the relevant control on or off depending on field value 
 
-	var myValue = myInputValue;
-	//alert ('Control: ' + myControltoToggle + ' value: ' + myValue + ' isInverted: ' + InvertToggle );
+	var myValue = myElement.value;
+
 	if (InvertToggle)
 	{
 		if ( myValue == 1 )
 			{
 				document.getElementById(myControltoToggle).style.display = 'none';
+				myElement.parentElement.className = 'switch switch-off';
 			}
 		else
 			{
 				document.getElementById(myControltoToggle).style.display = '';
+				myElement.parentElement.className = 'switch switch-on';
 			}
 
 	}
@@ -399,14 +483,17 @@ function ToggleControl(myInputValue, myControltoToggle, InvertToggle = false )
 		if ( myValue == 0 )
 		{
 			document.getElementById(myControltoToggle).style.display = 'none';
+			myElement.parentElement.className = 'switch switch-off';
 		}
 		else
 		{
 			document.getElementById(myControltoToggle).style.display = '';
+			myElement.parentElement.className = 'switch switch-on';
 		}
 
 	}
 }
+
 
 function roundToNearest(numIn, roundto = 5) {
   // Allows the round target to be defined
@@ -471,32 +558,25 @@ function positionFreqSlider(elementname,value) {
  
 }
 
-function AddEQBand()
+function DisableControl(myControl)
 {
-	/* Add a new band unless max of 31 reached */
-	var myObj= document.getElementById('val_EQBands');
-	var myObjvalue = Number(myObj.value);
-	if ( myObjvalue < 31 )
-	{
-		myObj.value = myObjvalue + 1;
-		NewFieldValue ('EQBands', myObj ,  true);
-		ToggleControl(myObj.value, 'control_EQ' )
-	}
+		// simplify switching off controls
+		LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  0 );
+		myElement= document.getElementById( myControl + 'Off');
+		NewFieldValue (myControl + '.enabled', myElement ,  false);
+		ToggleControl(myElement, 'control_' + myControl );
 }
 
-function DelEQBand()
+function EnableControl(myControl)
 {
-	/* delete a  band unless min of 0 reached */
-	var myObj= document.getElementById('val_EQBands');
-	var myObjvalue = parseInt(myObj.value,10);
-
-	if ( myObjvalue > 0 )
-	{
-		myObj.value = myObjvalue - 1;
-		NewFieldValue ('EQBands', myObj ,  true);
-		ToggleControl(myObj.value, 'control_EQ' )
-	}
+		// simplify switching off controls
+		LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  1 );
+		myElement= document.getElementById( myControl + 'On');
+		NewFieldValue (myControl + '.enabled', myElement ,  false);
+		ToggleControl(myElement, 'control_' + myControl );
 }
+
+
 
 
 
@@ -623,5 +703,124 @@ function hideBubble(myObj)
 	document.getElementById(myObj.id + 'Bubble').style.display = 'none';
 }
 
-
 //End of Bubble
+
+// File Handler
+
+function ProcessREW(EQText) {
+  
+		LocalClearSettings();
+		
+	    // split records on new line
+	    EQRecords = EQText.split(/\r?\n/);;
+	    EQBands = 0;
+	
+	
+	for (var i = 0; EQRecords.length; i++ )
+	{
+		
+		// split on white space
+		//see https://stackoverflow.com/questions/26425637/javascript-split-string-with-white-space
+		
+		// find filters
+		if ( EQRecords[i].startsWith('Preamp') )
+		{
+			var PreampSettings = EQRecords[i].split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
+			Gain = Math.round (PreampSettings[1]  * 100) / 100 ;
+			DisplayVal('Preamp', Gain);
+			myElement = document.getElementById ('val_Preamp' );
+			NewFieldValue( 'Preamp' , myElement, false);
+			//alert ( Gain);
+		}
+		
+		
+		if ( EQRecords[i].startsWith('Filter') )
+		{
+
+			var EQSettings = EQRecords[i].split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
+			
+			if (EQSettings[2] == 'ON')
+				{
+				// should have got an EQ setting
+					FilterType = EQSettings[3];
+					if (FilterType == 'PK')
+					{
+						
+						AddEQBand();
+						
+						Freq = Math.round ( EQSettings[5] );
+						Gain = Math.round (EQSettings[8] * 100) / 100 ;
+						Q = Math.round (EQSettings[11] * 100) / 100 ;
+						
+						SqueezeDSPSaveEQBand(EQBands, Freq, Gain, Q);
+						EQBands += 1;
+						//alert ( FilterType.concat( ' ',  EQBands, ' ',  Freq, ' ', Gain , ' ', Q ) );
+					}
+					if (FilterType == 'LS')
+					{
+						EnableControl('Lowshelf');
+						
+						Freq = Math.round( EQSettings[5]);
+						SqueezeDSPSelectValue ('Lowshelf.freq', Freq);
+						
+						Gain = Math.round (EQSettings[8] * 100) / 100 ;
+						SqueezeDSPSelectValue ('Lowshelf.gain', Gain);
+						// NB we want to use Slope
+						Q = Math.round (EQSettings[11] * 100) / 100 ;
+						SqueezeDSPSelectValue ('Lowshelf.slope', Q);
+					}
+					
+					if (FilterType == 'HS')
+					{
+						EnableControl('Highshelf');
+						Freq = Math.round( EQSettings[5]);
+						SqueezeDSPSelectValue('Highshelf.freq', Freq);
+
+						Gain = Math.round (EQSettings[8] * 100) / 100 ;
+						SqueezeDSPSelectValue('Highshelf.gain', Gain);
+						// NB we want to use Slope
+						Q = Math.round (EQSettings[11] * 100) / 100 ;
+						SqueezeDSPSelectValue('Highshelf.slope',Q);						
+					}
+				}
+						
+			
+		}
+	}
+	
+}
+
+
+function readFile(file, callback) {
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    callback(reader.result);
+  }
+
+  reader.readAsText(file);
+}
+
+
+function dodrop(event)
+{
+	var dt = event.dataTransfer;
+	var files = dt.files;
+	if (files.length > 1)
+	{
+		outputlist ('Only 1 file at a time Please');
+		return;
+	}
+
+	for (var i = 0; i < files.length; i++) 
+	{
+		outputlist(" Last File dropped was: "  + files[i].name + " " );
+		
+		readFile(files[i], ConfirmREW);
+	}
+}
+
+function outputlist(text)
+{
+	document.getElementById("FileDrop").textContent = 'DROP REW FILE HERE... ' + text;
+}

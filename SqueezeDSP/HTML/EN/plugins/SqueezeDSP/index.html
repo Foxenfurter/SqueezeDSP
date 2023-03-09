@@ -25,6 +25,20 @@
 </style>
 
 <script>
+
+function ConfirmREW(EQText)
+{
+if (!confirm('Load the settings:' + '\n' + EQText )) {
+		// Exit!
+			return;
+		}
+
+ProcessREW(EQText) ;
+}	
+
+
+
+
 //This function is here because the mapping of strngs.txt does not work in the file version javascripts
 function LocalbuildEQ(data, labeltype, bands)
 {
@@ -105,8 +119,7 @@ function LocalbuildEQ(data, labeltype, bands)
 	}
 	catch
 	{
-		DefaultAlert("LocalbuildEQ", "Error building EQ profile");
-		
+		DefaultAlert("LocalbuildEQ", "Error building EQ profile");		
 	}
 	return myHTML;
 }	
@@ -119,7 +132,6 @@ function LocalbuildEQ(data, labeltype, bands)
 	<!-- the style-police -->
 		
 	<div>
-	
 	<div class="bubble" id="myMessage">To use please select Squeeze DSP on Extras Menu</div>
 	<Output>
 	[% "PLUGIN_SQUEEZEDSP_DISPLAYNAME" | string %]  
@@ -131,13 +143,11 @@ function LocalbuildEQ(data, labeltype, bands)
 	<Output style="float: right;" id="ClientName"></Output>
 	<BR>
 	<Output style="float: right;" id="myPlayer"></Output>
-	
 	<!--Output style="float: right;" id="myPlayerName">[% "PLAYER_NAME" | string %]</Output-->
-
 	</div>
 	<table style="width:100%;padding:0; display:none;" zzz_onresize="resizeContainer()">
 		<tr><td>
-			<div id="RestTestHost" style="margin-right:20px; height:200px; width:95%;"></div>
+			<div id="RestTestHost" style="margin-right:20px; height:20px; width:95%;"></div>
 		</td></tr>
 	</table>
 <!-- for Testing Rest Calls-->
@@ -163,29 +173,24 @@ function LocalbuildEQ(data, labeltype, bands)
 	<!--PRESETS-->
 	<BR>
 	<hr>
-	<BR>
-	
-  </div>
 	<TABLE class="table-container" >
 		<TR id="control_Bypass" >
 			<TD class="rowTitle">
-				<div class="tooltip"  ><!--label for="val_Bypass"  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label-->
-				<label class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label>
+				<div class="tooltip"  ><!--label for="val_Bypass"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label-->
+				<label class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label>
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BYPASS_HELP" | string %]</span></div>
 			</TD>
-
-			<TD  class="rowSuffix" >
+			<TD  class="rowSwitch" >
 				<div class="switch switch-blue">
-				<input type="radio" class="switch-input"  name="val_Bypass"  value="1" id="DSPOff" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this.value, 'DSP_container', true );">
+				<input type="radio" class="switch-input"  name="val_Bypass"  value="1" id="DSPOff" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this, 'DSP_container', true );">
 				<label for="DSPOff" class="switch-label switch-label-off">Off</label>	
-				<input type="radio" class="switch-input" name="val_Bypass"  value="0"  id="DSPOn" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this.value, 'DSP_container', true );">
+				<input type="radio" class="switch-input" name="val_Bypass"  value="0"  id="DSPOn" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this, 'DSP_container', true ); " >
 				<label for="DSPOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
 				</div>
 			</TD>
 			<TD >
-			
-			</TD>
+			</TD >
 		</TR>
     </TABLE>	
 	<DIV id="DSP_container" >
@@ -193,32 +198,41 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR  id="control_Preset">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
-					<Output class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_CHOOSE_PRESET" | string %]</Output>
+					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CHOOSE_PRESET" | string %]</Output>
 					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
 					</div>
 				</TD>
 			<TD class="rowBody">
-				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.json',''); NewFieldValue('Preset', this, true); "  >
+				<select class="sqdsp-select" id="sel_Preset" onchange=" ClearEQ() ; edt_NewPreset.value = this.value.replace('.preset.json','');  NewFieldValue('Preset', this, true); "  >
 					<option value="-">None</option>
 				</select>
 			</TD>
 			<TD class="rowSuffix">
 			</TD >
 		</TR>
+		<TR><TD class="rowTitle"/><TD class="rowBody"/><TD class="rowSuffix"/></TR>
 		<TR id="control_NewPreset">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
-				<Output class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_SAVEPRESETFILE" | string %]</Output>
+				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_SAVEPRESETFILE" | string %]</Output>
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
 				</div>	
 			</TD>
+		
 			<TD class="rowBody">
 				<input class="sqdsp-edit" id="edt_NewPreset" value="None" />
 				<BR>
-	
+				<BR>
 				<input class="sqdsp-click" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)"/>
-				</TD>
-			<TD class="rowSuffix"></TD >
+				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<div class="tooltip"  >
+					<input class="sqdsp-click " type="button" name="btn_ClearAll" value="Clear All" onclick="LocalClearSettings()"/>
+					<span class="tooltiptext">Clears All settings used by current player</span>
+				</div>
+			</TD>
+			<TD class="rowSuffix">
+			
+			</TD >
 		</TR>
 	</TABLE>	
 	<hr>
@@ -229,7 +243,7 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_FIRWavFile">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
-				<Output  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_ROOMCORR" | string %]</Output>
+				<Output  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_ROOMCORR" | string %]</Output>
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_ROOMCORR_HELP" | string %]</span>
 				</div>	
 			
@@ -251,7 +265,7 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Preamp" inc="0.1">
 			 <TD class="rowTitle">
 				<div class="tooltip"  >
-				<Output class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_PREAMP" | string %]</Output>
+				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_PREAMP" | string %]</Output>
 			 	<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PREAMP_HELP" | string %]</span>
 				</div>	
 			 </TD>
@@ -267,7 +281,7 @@ function LocalbuildEQ(data, labeltype, bands)
 		
 	    <TD class="rowTitle">
 				<div class="tooltip"  >
-				<Output class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_DELAY" | string %]</Output>
+				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_DELAY" | string %]</Output>
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_DELAY_HELP" | string %]</span>
 				</div>	
 		</TD >
@@ -283,7 +297,7 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Balance" inc="0.1">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
-					<Output class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_BALANCE" | string %]</Output>
+					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BALANCE" | string %]</Output>
 							<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BALANCE_HELP" | string %]</span>
 				</div>	
 			</TD>
@@ -298,18 +312,18 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Loudness.enabled" >
 			<TD class="rowTitle">
 				<div class="tooltip"  >
-				<label for="val_Loudness.enabled"  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_LOUDNESS" | string %]</label>
+				<label for="val_Loudness.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_LOUDNESS" | string %]</label>
 										<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOUDNESS_HELP" | string %]</span>
 				</div>	
 			
 			</TD>
 
-			<TD class="rowSuffix">
+			<TD class="rowSwitch">
 				<div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="LoudnessOff" name="val_Loudness.enabled"  value="0"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this.value, 'control_Loudness' );">
+				<input type="radio"  class="switch-input" id="LoudnessOff" name="val_Loudness.enabled"  value="0"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this, 'control_Loudness' );">
 				<label for="LoudnessOff" class="switch-label switch-label-off">Off</label>
 				
-				<input type="radio"  class="switch-input" id="LoudnessOn" name="val_Loudness.enabled"  value="1"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this.value, 'control_Loudness' );">
+				<input type="radio"  class="switch-input" id="LoudnessOn" name="val_Loudness.enabled"  value="1"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this, 'control_Loudness' );">
 				<label for="LoudnessOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
 				</div>
@@ -331,7 +345,7 @@ function LocalbuildEQ(data, labeltype, bands)
 
 			<TD class="rowTitle">
 			<div class="tooltip"  >
-				<label for="val_EQBands" class="songInfoTitle" >[% "PLUGIN_SQUEEZEDSP_EQUALIZER" | string %]</label>
+				<label for="val_EQBands" class="infoTitle" >[% "PLUGIN_SQUEEZEDSP_EQUALIZER" | string %]</label>
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_EQUALIZER_HELP" | string %]</span>
 			</div>	
 			</TD>
@@ -341,6 +355,9 @@ function LocalbuildEQ(data, labeltype, bands)
 				<input class="sqdsp-click" type="button" name="btn_delBand" value="-" onclick="DelEQBand();"/>&nbsp;&nbsp;
 				<input class="sqdsp-click" type="button" name="btn_addBand" value="+" onclick="AddEQBand();"/>
 				</TD>
+				<TD>
+
+				</TD>
 		
 				<!--TD><input type="radio" name="val_EQBands" value="0"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> Off </Output></input></TD>
 				<TD><input type="radio" name="val_EQBands" value="2"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> 2 </Output></input></TD>
@@ -348,7 +365,7 @@ function LocalbuildEQ(data, labeltype, bands)
 				<TD><input type="radio" name="val_EQBands" value="5"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> 5 </Output></input></TD>
 				<TD><input type="radio" name="val_EQBands" value="9"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 9 </Output></input></TD>
 				<TD><input type="radio" name="val_EQBands" value="15" onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 15 </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="31" onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 31 </Output></input></TD>
+				<TD><input type="radio" name="val_EQBands" value="31" onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 31 </Output></input></TD-->
 
 		</TR>
 	</TABLE>
@@ -365,17 +382,17 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Highpass.enabled"  >
 			<TD class="rowTitle" >
 				<div class="tooltip"  >
-							<label for="val_Highpass.enabled"  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_HIGHPASS" | string %]</label>
+							<label for="val_Highpass.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_HIGHPASS" | string %]</label>
 							<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_HIGHPASS_HELP" | string %]</span>
 				</div>	
 			</TD>
 
-			<TD class="rowSuffix">
+			<TD class="rowSwitch">
 			<div class="switch switch-blue">
-				<input type="radio" class="switch-input" id="HighpassOff"  name="val_Highpass.enabled"  value="0"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this.value, 'control_Highpass' );"/>
+				<input type="radio" class="switch-input" id="HighpassOff"  name="val_Highpass.enabled"  value="0"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this, 'control_Highpass' );"/>
 				<label for="HighpassOff" class="switch-label switch-label-off">Off</label>
 				
-				<input type="radio" class="switch-input" id="HighpassOn"  name="val_Highpass.enabled"  value="1"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this.value, 'control_Highpass' );"/>
+				<input type="radio" class="switch-input" id="HighpassOn"  name="val_Highpass.enabled"  value="1"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this, 'control_Highpass' );"/>
 				<label for="HighpassOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
 			</div>
@@ -426,17 +443,17 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Lowshelf.enabled"  >
 			<TD class="rowTitle" >
 				<div class="tooltip"  >
-					<label for="val_Lowshelf.enabled"  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_LOWSHELF" | string %]</label>
+					<label for="val_Lowshelf.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_LOWSHELF" | string %]</label>
 						<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOWSHELF_HELP" | string %]</span>
 				</div>	
 			</TD>
 
-			<TD class="rowSuffix">
+			<TD class="rowSwitch">
 				<div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="LowshelfOff" name="val_Lowshelf.enabled"  value="0"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this.value, 'control_Lowshelf' );"/>
+				<input type="radio"  class="switch-input" id="LowshelfOff" name="val_Lowshelf.enabled"  value="0"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this, 'control_Lowshelf' );"/>
 				<label for="LowshelfOff" class="switch-label switch-label-off">Off</label>
 
-				<input type="radio"  class="switch-input"  id="LowshelfOn"  name="val_Lowshelf.enabled"  value="1"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this.value, 'control_Lowshelf' );"/>
+				<input type="radio"  class="switch-input"  id="LowshelfOn"  name="val_Lowshelf.enabled"  value="1"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this, 'control_Lowshelf' );"/>
 				<label for="LowshelfOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
 				</div>
@@ -499,17 +516,17 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Highshelf.enabled"  >
 			<TD class="rowTitle" >
 				<div class="tooltip"  >
-					<label for="val_Highshelf.enabled"  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_HIGHSHELF" | string %]</label>
+					<label for="val_Highshelf.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_HIGHSHELF" | string %]</label>
 					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_HIGHSHELF_HELP" | string %]</span>
 				</div>	
 			</TD>
 
-			<TD class="rowSuffix" >
+			<TD class="rowSwitch" >
 				<div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="HighshelfOff" name="val_Highshelf.enabled"  value="0"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this.value, 'control_Highshelf' );"/>
+				<input type="radio"  class="switch-input" id="HighshelfOff" name="val_Highshelf.enabled"  value="0"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this, 'control_Highshelf' );"/>
 				<label for="HighshelfOff" class="switch-label switch-label-off">Off</label>
 
-				<input type="radio"  class="switch-input"  id="HighshelfOn"  name="val_Highshelf.enabled"  value="1"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this.value, 'control_Highshelf' );"/>
+				<input type="radio"  class="switch-input"  id="HighshelfOn"  name="val_Highshelf.enabled"  value="1"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this, 'control_Highshelf' );"/>
 				<label for="HighshelfOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
 				</div>
@@ -571,18 +588,18 @@ function LocalbuildEQ(data, labeltype, bands)
 		<TR id="control_Lowpass.enabled"  >
 			<TD class="rowTitle" >
 				<div class="tooltip"  >
-					<label for="val_Lowpass.enabled"  class="songInfoTitle">[% "PLUGIN_SQUEEZEDSP_LOWPASS" | string %]</label>
+					<label for="val_Lowpass.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_LOWPASS" | string %]</label>
 					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOWPASS_HELP" | string %]</span>
 				</div>	
 	
 			</TD>
 
-			<TD class="rowSuffix" >
+			<TD class="rowSwitch" >
 				<div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="LowpassOff" name="val_Lowpass.enabled"  value="0"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this.value, 'control_Lowpass' );"/>
+				<input type="radio"  class="switch-input" id="LowpassOff" name="val_Lowpass.enabled"  value="0"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this, 'control_Lowpass' );"/>
 				<label for="LowpassOff" class="switch-label switch-label-off">Off</label>
 
-				<input type="radio"  class="switch-input"  id="LowpassOn"  name="val_Lowpass.enabled"  value="1"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this.value, 'control_Lowpass' );"/>
+				<input type="radio"  class="switch-input"  id="LowpassOn"  name="val_Lowpass.enabled"  value="1"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this, 'control_Lowpass' );"/>
 				<label for="LowpassOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
 				</div>
@@ -624,11 +641,19 @@ function LocalbuildEQ(data, labeltype, bands)
 				
 			</TR>
 	</TR>
+
 	</TABLE>
+	<hr>
+				<div id="FileDrop" class = "drop_zone"
+						ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
+						ondragover="event.stopPropagation(); event.preventDefault();"
+						ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
+						DROP REW FILE HERE...
+				</div>
 	</DIV>
 
-	<hr>
-	<BR>
+
+
 	<!-- end of page -->
 	[% END %]
 

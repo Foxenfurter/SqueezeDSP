@@ -14,6 +14,9 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
+	0.0.98	Fox: New EQ Bands now appearing in correct place, wth no weird defaults
+			New players now have default JSON files created properly
+	0.0.97	Fox: Adding and deleting a frequency band working predictably off a simple default
 	0.0.95	Fox: Commented out references to CamillaDSP, using sox instead. Added fallback default for EQ frequency
 	0.0.92	Fox: Fixed Case sensitive filenames on Linux
 	0.0.91	Fox: Cleaning up for installation
@@ -63,7 +66,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.96";
+my $revision = "0.0.97";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -145,7 +148,7 @@ my $myconfigrevision = get_config_revision();
 #
 
 # Lists of center frequencies for each mode
-my @fq0 = ( 0 );
+my @fq0 = ( 60 );
 # original values
 my @fq1 = ( 960 );
 my @fq2 = ( 60, 15360 );
@@ -234,40 +237,7 @@ sub valuelabel
 	return  $valu . $labl . $extra;
 }
 
-# Format a frequency/band
-sub freqlabel
-{
-	my $client = shift;
-	my $item = shift;
-	my $bandcount = getPref( $client, 'EQBands' );
-	my $freq = getPref( $client, 'b' . $item . 'freq' ) || defaultFreq( $client, $item, $bandcount );
-	my $labl = undef;
-	if( $item =~ /^\d*$/ )
-	{
-		if( $bandcount==2 )
-		{
-			my @v = ( 'PLUGIN_SQUEEZEDSP_BASS', 'PLUGIN_SQUEEZEDSP_TREBLE' );
-			$labl = $client->string( $v[$item] );
-		}
-		elsif( $bandcount==3 )
-		{
-			my @v = ( 'PLUGIN_SQUEEZEDSP_BASS', 'PLUGIN_SQUEEZEDSP_MID', 'PLUGIN_SQUEEZEDSP_TREBLE' );
-			$labl = $client->string( $v[$item] );
-		}
-		else
-		{
-			if( $freq > 1000 )
-			{
-				$labl = ( int( $freq / 100 ) / 10 ) . ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_KILOHERTZ' );
-			}
-			else
-			{
-				$labl = int( $freq ) . ' ' . $client->string( 'PLUGIN_SQUEEZEDSP_HERTZ' );
-			}
-		}
-	}
-	return $labl;
-}
+=pod
 
 sub defaultFreq
 {
@@ -283,6 +253,9 @@ sub defaultFreqs
 	my $client = shift;
 	# re-use the existing defaults but fill in the gaps by using the next highest default set
 	# easier than re-writing or putting a full set of defaults in that no-one will use
+	# given that we are either going to increment/decrement the number of bands by one or physically overwrite the frequencies via file upload,
+	# the historic approach of defaults freqs for a set number of bands doesn't work any more.
+	
 	my $bandcount = shift || getPref( $client, 'EQBands' ) || 2;
 	my @bandfreqs = @fq2;
 	if( $bandcount==0 )
@@ -321,7 +294,7 @@ sub defaultFreqs
 	}
 	return @bandfreqs;
 }
-
+=cut
 sub newConfigPath
 {
 	my @rootdirs = Slim::Utils::PluginManager::dirsFor($thisapp,'enabled');
@@ -712,6 +685,7 @@ sub initConfiguration
 				{
 					if( $c eq $cc )
 					{
+						
 						#if found client matches a client
 						$ok = 1;
 						last;
@@ -736,7 +710,7 @@ sub initConfiguration
 		$needUpgrade = 1;
 		@foundClients = @clientIDs;
 	}
-	
+		
 	upgradePrefs( $prevrev, $PRE_0_9_21, @foundClients );
 	
 	return unless $needUpgrade;
@@ -775,10 +749,12 @@ sub initConfiguration
 	print OUT "";
 	close( OUT );
 	
-	#restart will trigger a re-writeso re-set need upgrade to off.
-	$needUpgrade = 0;
-	my $myRestart = Slim::Player::TranscodingHelper::loadConversionTables();
+	#restart will trigger a re-write so re-set need upgrade to off.
+	$needUpgrade = 1;
 	debug( "Reload Conversion Tables" );
+	my $myRestart = Slim::Player::TranscodingHelper::loadConversionTables();
+	# see if doing this twice eliminates the duplicates - NB it doesn't
+	
 }
 
 
@@ -950,30 +926,6 @@ sub setPref
 	SaveJSONFile ( $myConfig, $file );
 }
 
-=pod commenting out
-sub setPref_old
-{
-# set the named preference and value for the named player(client)
-# set the server maintained value and re-write the pref file if the value is different
-
-	my ( $client, $prefName, $prefValue ) = @_;
-	my $prev = $prefs->client( $client )->get( $prefName );
-	$prefs->client( $client )->set( $prefName, $prefValue );
-
-	unless( $prefValue eq $prev )
-	{
-		debug( "setPref " . $prefName . "=" . $prefValue );
-
-		unless( $prefName eq 'mainmenu' || $prefName eq 'settingsmenu' || $prefName eq 'equalizationmenu' )
-		{
-			# write to {client}.settings.conf (as JSON, for easy consumption by the convolver)
-			my $file = getPrefFile( $client );
-			savePrefs( $client, $file );
-		}
-	}
-}
-=cut
-
 
 sub delPref
 {
@@ -1082,8 +1034,6 @@ sub loadPrefs
 	$myConfig->{Client}->{Lowshelf}->{gain} = $doc->{Client}->{Lowshelf}->{gain} ;
 	$myConfig->{Client}->{Lowshelf}->{slope} = $doc->{Client}->{Lowshelf}->{slope} ;
 
-
-	
 	
 	my $bandcount = $doc->{Client}->{EQBands};
 	# Read bands from conf, but clear them first
@@ -1110,16 +1060,12 @@ sub loadPrefs
 }
 
 
-sub closestFreq
-{
-	my ( $f, %h ) = @_;
-	return (sort { abs($a-$f)<=>abs($b-$f) } keys %h)[0];
-}
-
 sub setBandCount
 {
 	#tries to map old eq values to current equailzer when band count changes
 	#only going to do the deletion for now
+	
+	# not sure remapping values is relevant any more.
 	my $client = shift;
 	my $bandcount = shift;
 	$bandcount = int( $bandcount );
@@ -1127,8 +1073,7 @@ sub setBandCount
 	#return if( $bandcount<2 );
 	
 	# get doc from JSON file
-	#my $doc = LoadJSONFile ($file);
-	#client config file
+
 	my $myJSONFile = getPrefFile( $client );
 	my $myConfig = LoadJSONFile ($myJSONFile);
 	# the old routine tried to calculate gain for similar bands if the count changed.
@@ -1140,49 +1085,37 @@ sub setBandCount
 	{
 		# When the number of bands changes
 		my $myBand = "";
-		
-		# Make a hashtable of the current values/frequencies
-		my %h = ();
-		my %q = ();
-		for( my $n=0; $n<$prevcount; $n++ )
-		{
-			$myBand = 'EQBand_' . $n;
-			my $f  = $myConfig->{Client}->{$myBand}->{freq}  || defaultFreq( $client, $n, $prevcount ) ;
-			$h{$f} = $myConfig->{Client}->{$myBand}->{gain} || 0;
-			$q{$f} = $myConfig->{Client}->{$myBand}->{q} || 1.41;
-		}
-
-		# Get an array of the default band frequencies we'll map to
-		my @freqs = defaultFreqs( $client, $bandcount );
-
-		# Where the frequency matches, use the closest old value
+		#nb bandcount is number of bands where band numbering starts at 0
 		for( my $n=0; $n<$bandcount; $n++ )
 		{
-			my $f = $freqs[$n];
 			
-			my $oldf = closestFreq($f,%h);
-			
-			my $oldv = $h{$oldf};
-			my $oldq = $q{$oldf};
+			# copy values and if they are blank we will use defaults	
 			$myBand = 'EQBand_' . $n;
 			
-			debug( "closest to $f is $oldf (=$oldv)" );
+			my $oldf = $myConfig->{Client}->{$myBand}->{freq};
+			my $oldv = $myConfig->{Client}->{$myBand}->{gain};
+			my $oldq = $myConfig->{Client}->{$myBand}->{q};
+			
+			debug( "Adding Band" . $myBand );
+			#debug( "closest to $f is $oldf (=$oldv)" );
 			# now that we can amend frequence we want the actual old value as saved
 			
-			#$myConfig->{Client}->{$myBand}->{freq} =  $f ;
+
 			$myConfig->{Client}->{$myBand}->{freq} =  $oldf || 60  ;
 			$myConfig->{Client}->{$myBand}->{gain} = $oldv || 0 ;
 			$myConfig->{Client}->{$myBand}->{q} = $oldq || 1.41 ;
 		}
 
 		# Delete any unused prefs
-		for( my $n=$bandcount; $n<$prevcount; $n++ )
+		if ( $prevcount > $bandcount )
 		{
-			$myBand = 'EQBand_' . $n;
-			delete $myConfig->{Client}->{$myBand};
-			#delPref( $client, $myBand  );
-			#delPref( $client, 'b' . $n . 'gain' );
-			#delPref( $client, 'b' . $n . 'q' );
+			for( my $n=$bandcount; $n<$prevcount; $n++ )
+			{
+				$myBand = 'EQBand_' . $n;
+				debug( "Delete Band" . $myBand );
+				delete $myConfig->{Client}->{$myBand};
+
+			}
 		}
 	}
 	$myConfig->{Client}->{EQBands} = $bandcount;
@@ -1214,7 +1147,7 @@ sub defaultPrefs
 	$p = 'Lowpass.q';   		setPref( $client, $p,1 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.freq';       setPref( $client, $p,300 ) 	unless defined ( getPref( $client, $p ))	;  
-	$p = 'Lowshelf.gain';       setPref( $client,$p, 1.5 ) 	unless defined ( getPref( $client, $p ))	;   
+	$p = 'Lowshelf.gain';       setPref( $client,$p, 2 ) 	unless defined ( getPref( $client, $p ))	;   
 	$p = 'Lowshelf.slope';   	setPref( $client, $p, 0.3 ) 	unless defined ( getPref( $client, $p ))	;   
 
 	
@@ -1222,19 +1155,33 @@ sub defaultPrefs
 
 sub upgradePrefs
 {
+	# Going to run this each time the server starts and update revision number for each active client
+	# 
 	my ( $prevrev, $PRE_0_9_21, @clientIDs ) = @_;
-	return if ( $prevrev eq $revision ) && !$PRE_0_9_21;
 	debug( "upgrade from " . $prevrev . " to " . $revision );
+	#return if ( $prevrev eq $revision ) && !$PRE_0_9_21;
 	
 	foreach my $clientID ( @clientIDs )
 	{
 		debug( "client " . $clientID );
 		my $client = Slim::Player::Client::getClient( $clientID );
+		#create a player json file with default settings.
+		my $myJSONFile = catdir( $pluginSettingsDataDir, join('_', split(/:/, $clientID)) . ".settings.json" );
+		#my $myJSONFile = getPrefFile( $client );
+		unless( -f $myJSONFile )
+		{
+			#create default file if it does not exist
+			debug( $client,  "Player Config File $myJSONFile not found. Creating" );
+			#need to create file first
+			my $myDefault = {Client=>{}};
+			SaveJSONFile ($myDefault, $myJSONFile );
+			defaultPrefs( $client );
+		}
+	
+		#Now touch the version numbers	
 		if( defined( $client ) )
 		{
-
-			
-			unless( $prevrev eq $revision )
+			#unless( $prevrev eq $revision )
 			{
 				setPref( $client, "Version", $revision );
 			}
@@ -1311,8 +1258,6 @@ sub currentQuery
 	$request->addResult("Lowshelf.freq" , $myConfig->{Client}->{Lowshelf}->{freq}) ;
 	$request->addResult("Lowshelf.gain" , $myConfig->{Client}->{Lowshelf}->{gain}) ;
 	$request->addResult("Lowshelf.slope" , $myConfig->{Client}->{Lowshelf}->{slope}) ;
-
-
 	
 	
 	# The current EQ freq/gain values
@@ -1321,7 +1266,7 @@ sub currentQuery
 	for( my $n = 0; $n < $bandcount; $n++ )
 	{
 		$myBand = 'EQBand_' . $n;
-		my $f = $myConfig->{Client}->{$myBand}->{freq} || defaultFreq( $client, $n, $bandcount );
+		my $f = $myConfig->{Client}->{$myBand}->{freq} || 60;
 		my $v = $myConfig->{Client}->{$myBand}->{gain} || 0;
 		my $q = $myConfig->{Client}->{$myBand}->{q} || 1.41;
 		# Ithink there is only 4 slots available in the result loop so concatenating gain and Q; will split on the client
@@ -1469,24 +1414,7 @@ sub setvalCommand
 =cut 
 
 	my $bandcount = getPref( $client, 'EQBands' );
-=pod	
-	for( my $n = 0; $n < $bandcount; $n++ )
-	{
-		$cmds{ 'b' . $n . 'freq' }  = 'b' . $n . 'freq';
-		$cmds{ 'b' . $n . 'value' } = 'b' . $n . 'value';
-	}
 
-	my $prf = $cmds{$key};
-
-	debug( "command: setval($key=" . $key . ")" );
-
-	if( !defined($prf) )
-	{
-		oops( $client, undef, "setval, key $key is not valid!" );
-		$request->setStatusBadDispatch();
-		return;
-	}
-=cut
 	if( $key eq 'EQBands' )
 	{
 		# special treatment since this affects each band value
