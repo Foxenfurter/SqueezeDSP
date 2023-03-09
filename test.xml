@@ -6,7 +6,7 @@
   <plugins>
     <plugin name="SqueezeDSP" version="0.0.96" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server - provides PEQ and DSP.</desc>
+      <desc lang="EN">DSP for Squeezebox server - provides PEQ and DSP (Dev version).</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.96.zip</url>
       <sha>4d9b7830d2c8970341dbf0d39288e07e7bbd34cb</sha>
