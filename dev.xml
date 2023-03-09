@@ -6,7 +6,7 @@
   <plugins>
     <plugin name="SqueezeDSP" version="0.0.10" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server - provides EQ and DSP. Now using JSON files, simplified code and needs less resources</desc>
+      <desc lang="EN">DSP for Squeezebox server (Dev version) - provides EQ and DSP. Now allows import of REW EQ Settings</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.0.98.zip</url>
       <sha>848a60f8b632e722507c6bda501f681716628164</sha>
