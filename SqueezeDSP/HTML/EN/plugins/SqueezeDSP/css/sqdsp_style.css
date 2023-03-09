@@ -81,7 +81,7 @@ Label
 }
 
 .sqdsp-select {
-  //appearance: none;
+  /*appearance: none;*/
   border:1px solid black; 
   border-radius:3px;
   padding: 0 1em 0 0;
@@ -196,7 +196,7 @@ Label
   height: 35px;
 }
 
-.rowBody{
+.rowBody {
   width: 70%;
   position: relative;
   margin: 0 auto 3rem;
@@ -236,18 +236,20 @@ Label
 background-color: initial;
 }
 
-.Highlight{
+.Highlight
+{
 background-color: lime !important;
 animation-name: showchange;
 animation-duration: 4s;
 }
 
+/*
 @keyframes showchange {
   from {background-color: lime;}
   to {background-color: initial;}
   //to {background-color: lime;}
 }
-
+*/
 .OutputVal
 {
 	width : 55%;

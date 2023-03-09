@@ -21,23 +21,369 @@
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data.js"></script>
 <style>
+/* -- Commented Out whilst testing installer
+.drop_zone {
+ border: 2px dashed #bbb;
+  -webkit-border-radius: 5px;
+  border-radius: 5px;
+  padding: 20px;
+  text-align: center;
+  font: 21pt bold arial;
+  color: #bbb;
+}
+
+.rowSwitch
+{
+  width: 10%;
+}
+
+.switch-on .switch-selection {
+  background: #339933;
+  background-image: -webkit-linear-gradient(top, #00ff00, #339933);
+  background-image: -moz-linear-gradient(top, #00ff00, #339933);
+  background-image: -o-linear-gradient(top, #00ff00, #339933);
+  background-image: linear-gradient(to bottom, #00ff00, #339933);
+}
+
+.switch-off .switch-selection {
+  background: #800000;
+  background-image: -webkit-linear-gradient(top, #ff4d4d, #800000);
+  background-image: -moz-linear-gradient(top, #ff4d4d, #800000);
+  background-image: -o-linear-gradient(top, #ff4d4d, #800000);
+  background-image: linear-gradient(to bottom, #ff4d4d, #800000);
+}
+
+*/
 
 </style>
 
 <script>
+/* -- Commented Out whilst testing installer
+function LocalSetupRadio(myRadio, newValue )
+{
+	
+	var radioObj = document.getElementsByName(myRadio);
+	//if(!radioObj)
+	//	return;
+	
+	var radioLength = radioObj.length;
+	//alert ('processing radio ' + myRadio + ' | ' + newValue );
+	if(radioLength == undefined) {
+		radioObj.checked = (radioObj.value == newValue.toString());
+		return radioObj;
+	}
+	for(var i = 0; i < radioLength; i++) {
+		radioObj[i].checked = false;
+		//alert('Current: ' + radioObj[i].value + ' New: ' + newValue);
+		if(radioObj[i].value == newValue) {
+			radioObj[i].checked = true;
+			return radioObj[i];
+		}
+	}
+	//shouldn't get here now
+	return radioObj ;
+}
+
+function LocalUpdateSettings (data)
+	{
+		// Write Data from REST response to Local cache
+		UpdateSqueezeDSPData(data);
+		
+		//Now We display the data from the cache
+		LocalDisplayVals();	
+		myRadio = LocalSetupRadio( 'val_Bypass' , SqueezeDSPData.Bypass);
+		
+		ToggleControl(myRadio, 'DSP_container', true );
+		//LocalSetupRadio( 'val_EQBands' , SqueezeDSPData.EQBands);
+		myRadio = LocalSetupRadio( 'val_Loudness.enabled' , replaceNull(SqueezeDSPData.Loudness_enabled,0));
+		
+		ToggleControl( myRadio, 'control_Loudness' , false );		
+
+		myRadio = LocalSetupRadio( 'val_Lowshelf.enabled' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
+		ToggleControl(myRadio, 'control_Lowshelf', false );
+
+		myRadio = LocalSetupRadio( 'val_Highshelf.enabled' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
+		ToggleControl(myRadio, 'control_Highshelf' , false );
+
+		myRadio = LocalSetupRadio( 'val_Highpass.enabled' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
+		ToggleControl(myRadio, 'control_Highpass' , false );
+
+		myRadio = LocalSetupRadio( 'val_Lowpass.enabled' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
+		ToggleControl(myRadio, 'control_Lowpass' , false );
+		
+		
+		LocalDisplayEQ();	
+		
+		ListenForSlide();
+	}
+
+
+
+function LocalClearSettings()
+{
+		//set everything else off.
+		DisableControl('Loudness');
+		DisableControl('Lowshelf');
+		DisableControl('Highshelf');
+		DisableControl('Highpass');
+		DisableControl('Lowpass');
+		SqueezeDSPSelectValue('Preamp', -2);
+		SqueezeDSPSelectValue('Delay.delay', 0);
+		SqueezeDSPSelectValue('Balance', 0);
+		// disable any FIR filter
+		SqueezeDSPSelectValue('FIRWavFile', '-');
+		//SqueezeDSPSelectValue('Preset', '-');
+		edt_NewPreset.value = '';
+		sel_Preset.value = '-' ;				
+		//clear eq Settings - as we will most likely be adding them back in
+		ClearEQ();
+}
+
+
+function DisableControl(myControl)
+{
+		// simplify switching off controls
+		LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  0 );
+		myElement= document.getElementById( myControl + 'Off');
+		NewFieldValue (myControl + '.enabled', myElement ,  false);
+		ToggleControl(myElement, 'control_' + myControl );
+}
+
+function EnableControl(myControl)
+{
+		// simplify switching off controls
+		LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  1 );
+		myElement= document.getElementById( myControl + 'On');
+		NewFieldValue (myControl + '.enabled', myElement ,  false);
+		ToggleControl(myElement, 'control_' + myControl );
+}
+
+
+
+
+function AddEQBand()
+{
+	// Add a new band unless max of 31 reached 
+	var myObj= document.getElementById('val_EQBands');
+	var myObjvalue = Number(myObj.value);
+
+	if ( myObjvalue < 31 )
+	{
+		myObj.value = myObjvalue + 1;
+		NewFieldValue ('EQBands', myObj ,  true);
+		ToggleEQ(myObj, 'control_EQ' );
+	}
+}
+
+function DelEQBand()
+{
+	// delete a  band unless min of 0 reached 
+	var myObj= document.getElementById('val_EQBands');
+	var myObjvalue = parseInt(myObj.value,10);
+	
+	if ( myObjvalue > 0 )
+	{
+		myObj.value = myObjvalue - 1;
+		NewFieldValue ('EQBands', myObj ,  true);
+		ToggleEQ(myObj, 'control_EQ' );
+	}
+}
+
+
+function ClearEQ()
+{
+		myElement = document.getElementById('val_EQBands');
+		myElement.value = 0;
+		NewFieldValue ('EQBands', myElement ,  true);
+		ToggleEQ(myElement, 'control_EQ' );
+}
+
+
+
+// File Handler
+function ToggleEQ(myElement, myControltoToggle)
+{
+// EQ doesn't need any style setting, clearer to split the function
+	var myValue = myElement.value;
+	if ( myValue == 0 )
+	{
+			document.getElementById(myControltoToggle).style.display = 'none';			
+	}
+	else
+	{
+			document.getElementById(myControltoToggle).style.display = '';
+	}
+
+}
+
+function ToggleControl(myElement, myControltoToggle, InvertToggle = false )
+{
+//toggle the relevant control on or off depending on field value 
+
+	var myValue = myElement.value;
+
+	if (InvertToggle)
+	{
+		if ( myValue == 1 )
+			{
+				document.getElementById(myControltoToggle).style.display = 'none';
+				myElement.parentElement.className = 'switch switch-off';
+			}
+		else
+			{
+				document.getElementById(myControltoToggle).style.display = '';
+				myElement.parentElement.className = 'switch switch-on';
+			}
+
+	}
+	else
+	{
+		if ( myValue == 0 )
+		{
+			document.getElementById(myControltoToggle).style.display = 'none';
+			myElement.parentElement.className = 'switch switch-off';
+		}
+		else
+		{
+			document.getElementById(myControltoToggle).style.display = '';
+			myElement.parentElement.className = 'switch switch-on';
+		}
+
+	}
+}
+
+
+
+function ProcessREW(EQText) {
+  
+		LocalClearSettings();
+		
+	    // split records on new line
+	    EQRecords = EQText.split(/\r?\n/);;
+	    EQBands = 0;
+	
+	
+	for (var i = 0; EQRecords.length; i++ )
+	{
+		
+		// split on white space
+		//see https://stackoverflow.com/questions/26425637/javascript-split-string-with-white-space
+		
+		// find filters
+		if ( EQRecords[i].startsWith('Preamp') )
+		{
+			var PreampSettings = EQRecords[i].split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
+			Gain = Math.round (PreampSettings[1]  * 100) / 100 ;
+			DisplayVal('Preamp', Gain);
+			myElement = document.getElementById ('val_Preamp' );
+			NewFieldValue( 'Preamp' , myElement, false);
+			//alert ( Gain);
+		}
+		
+		
+		if ( EQRecords[i].startsWith('Filter') )
+		{
+
+			var EQSettings = EQRecords[i].split(/(\s+)/).filter( function(e) { return e.trim().length > 0; } );
+			
+			if (EQSettings[2] == 'ON')
+				{
+				// should have got an EQ setting
+					FilterType = EQSettings[3];
+					if (FilterType == 'PK')
+					{
+						
+						AddEQBand();
+						
+						Freq = Math.round ( EQSettings[5] );
+						Gain = Math.round (EQSettings[8] * 100) / 100 ;
+						Q = Math.round (EQSettings[11] * 100) / 100 ;
+						
+						SqueezeDSPSaveEQBand(EQBands, Freq, Gain, Q);
+						EQBands += 1;
+						//alert ( FilterType.concat( ' ',  EQBands, ' ',  Freq, ' ', Gain , ' ', Q ) );
+					}
+					if (FilterType == 'LS')
+					{
+						EnableControl('Lowshelf');
+						
+						Freq = Math.round( EQSettings[5]);
+						SqueezeDSPSelectValue ('Lowshelf.freq', Freq);
+						
+						Gain = Math.round (EQSettings[8] * 100) / 100 ;
+						SqueezeDSPSelectValue ('Lowshelf.gain', Gain);
+						// NB we want to use Slope
+						Q = Math.round (EQSettings[11] * 100) / 100 ;
+						SqueezeDSPSelectValue ('Lowshelf.slope', Q);
+					}
+					
+					if (FilterType == 'HS')
+					{
+						EnableControl('Highshelf');
+						Freq = Math.round( EQSettings[5]);
+						SqueezeDSPSelectValue('Highshelf.freq', Freq);
+
+						Gain = Math.round (EQSettings[8] * 100) / 100 ;
+						SqueezeDSPSelectValue('Highshelf.gain', Gain);
+						// NB we want to use Slope
+						Q = Math.round (EQSettings[11] * 100) / 100 ;
+						SqueezeDSPSelectValue('Highshelf.slope',Q);						
+					}
+				}
+						
+			
+		}
+	}
+	
+}
+
+
+function readFile(file, callback) {
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    callback(reader.result);
+  }
+
+  reader.readAsText(file);
+}
+
+
+
+function dodrop(event)
+{
+	var dt = event.dataTransfer;
+	var files = dt.files;
+	if (files.length > 1)
+	{
+		outputlist ('Only 1 file at a time Please');
+		return;
+	}
+
+	for (var i = 0; i < files.length; i++) 
+	{
+		outputlist(" Last File dropped was: "  + files[i].name + " " );
+		
+		readFile(files[i], ConfirmREW);
+	}
+}
+
+function outputlist(text)
+{
+	document.getElementById("FileDrop").textContent = 'DROP REW FILE HERE... ' + text;
+}
 
 function ConfirmREW(EQText)
 {
-if (!confirm('Load the settings:' + '\n' + EQText )) {
-		// Exit!
-			return;
-		}
+	if(!confirm ('Load the Settings:' + '\n' + EQText ) )
+	{
+		return;
+	}
+	ProcessREW(EQText);
 
-ProcessREW(EQText) ;
-}	
+}
 
-
-
+*/
 
 //This function is here because the mapping of strngs.txt does not work in the file version javascripts
 function LocalbuildEQ(data, labeltype, bands)
@@ -225,10 +571,8 @@ function LocalbuildEQ(data, labeltype, bands)
 				<BR>
 				<input class="sqdsp-click" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<div class="tooltip"  >
-					<input class="sqdsp-click " type="button" name="btn_ClearAll" value="Clear All" onclick="LocalClearSettings()"/>
-					<span class="tooltiptext">Clears All settings used by current player</span>
-				</div>
+				<input class="sqdsp-click " type="button" name="btn_ClearAll" value="Clear All" onclick="LocalClearSettings()"/>
+				
 			</TD>
 			<TD class="rowSuffix">
 			

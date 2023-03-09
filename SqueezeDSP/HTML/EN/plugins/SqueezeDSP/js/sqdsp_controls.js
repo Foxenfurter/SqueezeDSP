@@ -577,10 +577,6 @@ function EnableControl(myControl)
 }
 
 
-
-
-
-
 function NewFieldValue(FieldName, myEl, RefreshAfter)
 {
 	//var myHost = myEl.parentNode.parentNode;
@@ -789,6 +785,17 @@ function ProcessREW(EQText) {
 	}
 	
 }
+
+function ConfirmREW(EQText)
+{
+	if(!confirm ('Load the Settings:' + '\n' + EQText ) )
+	{
+		return;
+	}
+	ProcessREW(EQText);
+
+}
+
 
 
 function readFile(file, callback) {
