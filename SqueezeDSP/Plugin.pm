@@ -14,6 +14,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
+	0.1.00	Fox: Binary update PLugin update to version number
 	0.0.98	Fox: New EQ Bands now appearing in correct place, wth no weird defaults
 			New players now have default JSON files created properly
 	0.0.97	Fox: Adding and deleting a frequency band working predictably off a simple default
@@ -66,7 +67,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.0.98";
+my $revision = "0.1.00";
 use vars qw($VERSION);
 $VERSION = $revision;
 

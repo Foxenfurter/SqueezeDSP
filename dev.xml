@@ -9,7 +9,7 @@
       <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.00) - provides EQ and DSP. Now allows import of REW EQ Settings</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.00.zip</url>
-      <sha>80bd919433b91df37b5812d8305259c9f8e10f73</sha>
+      <sha>5e248c153eb4fc5c4378bb7044cb5a1299f601f2</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	</plugin>
