@@ -4,7 +4,7 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.0.10" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.00" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server (Dev version) - provides EQ and DSP. Now allows import of REW EQ Settings</desc>
 
