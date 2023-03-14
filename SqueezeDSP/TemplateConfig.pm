@@ -89,6 +89,7 @@ EOF1
 sub template_FLAC24
 {
 	return <<'EOF1';
+	
 aac flc * $CLIENTID$
 	# IF
 	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
