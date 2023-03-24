@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.04";
+	my $configrevision = "0.0.05";
 	return $configrevision;
 }
 
@@ -18,7 +18,7 @@ aac wav * $CLIENTID$
 
 aif wav * $CLIENTID$
 	# FT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --be=true --wav=true --d=16
+	flac -cs --totally-silent $START$ $END$ -- $FILE$ | sox -q -t flac - -t wav - | [$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --be=true --wav=true --d=16
 
 alc wav * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
@@ -54,7 +54,7 @@ mpc wav * $CLIENTID$
 
 ogg wav * $CLIENTID$
 	# IFD:{RESAMPLE=-r %D}
-	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ -w - | [$CONVAPP$] --id="$CLIENTID$" --be=true --d=16
+	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --be=true --d=16
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
@@ -86,17 +86,19 @@ EOF1
 # replaced alc - jb
 # added spt (spotty) (jb)
 # changed FLAC compressions level to 0 (was 5)
+# v.05 amended flac to FRIT - needed change to DSP to handle error when track skipping
+# amended Ogg-flc, wasn't playing, but now working. amended aac to make it more standard, no diff noted however
+# amended aif file, now playing (bit of a long path)
 sub template_FLAC24
 {
 	return <<'EOF1';
-	
 aac flc * $CLIENTID$
-	# IF
+	# IFB:{BITRATE=--abr %B}
 	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 aif flc * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ -=be=true --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+	# FRIT:{START=--skip=%t}U:{END=--until=%v}
+	flac -cs --totally-silent $START$ $END$ -- $FILE$ | sox -q -t flac - -t wav - | [$CONVAPP$]  --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 alc flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
@@ -111,7 +113,7 @@ ape flc * $CLIENTID$
 	[mac] $FILE$ - -d | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 flc flc * $CLIENTID$
-	# FRI:{START=--skip=%t}U:{END=--until=%v}
+	# FRIT:{START=--skip=%t}U:{END=--until=%v}
 	[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ |  [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 mov flc * $CLIENTID$
@@ -131,8 +133,15 @@ mpc flc * $CLIENTID$
 	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 ogg flc * $CLIENTID$
-	# IFD:{RESAMPLE=-r %D}
-	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ -w - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+	# IFRD:{RESAMPLE=-r %D}
+	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+
+
+ops flc * $CLIENTID$
+	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
+	[sox] -q -t opus $FILE$ -t wav - | [SqueezeDSP] [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+
+
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
@@ -154,10 +163,18 @@ wmal flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
 	[wmadec] -w $PATH$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 	
+wmap flc * $CLIENTID$
+	# FT:{START=--skip=%t}U:{END=--until=%v}
+	[wmadec] -w $PATH$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+
 
 wvp flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
 	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+
+
+
+
 
 EOF1
 }

@@ -16,28 +16,195 @@
 <script type="text/javascript" src="/html/prototype.js"></script>
  
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_1.css"/>
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_02.css"/>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_1.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_1.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_03.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_02.js"></script>
 <style>
-/* -- Commented Out whilst testing installer
-.drop_zone {
- border: 2px dashed #bbb;
-  -webkit-border-radius: 5px;
-  border-radius: 5px;
-  padding: 20px;
+/*
+html body {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/*********** Baseline, reset styles ***********/
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  width: 25rem;
+}
+
+/* Removes default focus */
+input[type="range"]:focus {
+  outline: none;
+}
+
+/******** Chrome, Safari, Opera and Edge Chromium styles ********/
+/* slider track */
+input[type="range"]::-webkit-slider-runnable-track {
+  background-color: #9b9b9b;
+  border-radius: 0.5rem;
+  height: 0.5rem;
+}
+
+/* slider thumb */
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -3.5px; /* Centers thumb on the track */
+  background-color: #4169e1;
+  border-radius: 1.5rem;
+  height: 15px;
+  width: 15px;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  outline: 3px solid #4169e1;
+  outline-offset: 0.125rem;
+}
+
+/*********** Firefox styles ***********/
+/* slider track */
+input[type="range"]::-moz-range-track {
+  background-color: #9b9b9b;
+  border-radius: 0.5rem;
+  height: 0.5rem;
+}
+
+/* slider thumb */
+input[type="range"]::-moz-range-thumb {
+  background-color: #4169e1;
+  border: none; /*Removes extra border that FF applies*/
+  border-radius: 1.5rem;
+  height: 15px;
+  width: 15px;
+}
+
+input[type="range"]:focus::-moz-range-thumb{
+  outline: 3px solid #4169e1;
+  outline-offset: 0.125rem;
+}
+
+
+
+.bubble {
+  background: #ff8c00;
+  color: white;
+  padding: 3px 5px;
+  position: absolute;
+  border-radius: 4px;
+  top: -14px;
+  /* was 30px */
+  width: 60px;  
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+  display: none;
   text-align: center;
-  font: 21pt bold arial;
-  color: #bbb;
+  /*vertical-align: top;*/
 }
 
-.rowSwitch
+.bubble::after {
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #ff8c00;
+  /*top: -1px;*/
+  bottom: -2px;
+  left: 50%;
+}
+
+
+.sqdsp-select {
+  /*appearance: none;*/
+
+  width: 95%;
+  border:2px solid RoyalBlue; 
+  border-radius:3px;
+  padding: 0 1em 0 0;
+  margin: 0;
+  font-family: inherit;
+  cursor: inherit;
+  line-height: 20px;;
+  /*height: 18px;*/
+  font-size:  14px;
+  
+  color: Black;
+  border-radius: 6px;
+  background-color: GhostWhite;
+  /*box-shadow: 4px 4px #ccc;*/
+  
+}
+
+.sqdsp-edit
 {
-  width: 10%;
+  Vertical-align: middle;
+  font-size: 14px;
+	border: 2px solid RoyalBlue;
+	border-radius: 6px;
+  width: 95%;
 }
 
-.switch-on .switch-selection {
+
+.OutputVal
+{
+	width : 90%;
+	position: absolute:
+	left : 10px:
+	max-width: 30px;
+	font-size:  14px;
+	border: 2px solid SlateGrey;
+	border-radius: 6px;
+	margin: 1px auto;
+}
+
+
+#logSummary {
+  /*width: 100%;
+  height: 18px;*/
+  display: flex;
+  /*overflow-x: auto;
+  background-color: initial;*/
+  text-align: center;
+  background-color: initial;
+  border-radius: 3px;
+ /*  background-image: -webkit-linear-gradient(top, HoneyDew, LightSlateGrey);
+  background-image: -moz-linear-gradient(top, HoneyDew, LightSlateGrey);
+  background-image: -o-linear-gradient(top, HoneyDew, LightSlateGrey);
+  background-image: linear-gradient(to bottom, HoneyDew, LightSlateGrey);
+ -webkit-box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 0 2px rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px rgba(255, 255, 255, 0.5), 0 0 2px rgba(0, 0, 0, 0.2);*/
+}
+
+.peak {
+  width: 25px;
+  /*flex-shrink: 0;*/
+  height: 10px;
+  font-size: 16px ;
+  border: 1px solid;
+	border-bottom-color: DimGrey ;
+	border-left-color: Gainsboro	;
+	border-right-color: DimGrey	;
+	border-top-color:	Gainsboro ;
+ 
+  margin: 5px auto;
+  border-radius: 3px;
+  -webkit-box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px rgba(255, 255, 255, 0.1);
+  
+}
+
+.peak-unknown
+{
+	display: none;
+}
+
+
+.peak-ok
+{
   background: #339933;
   background-image: -webkit-linear-gradient(top, #00ff00, #339933);
   background-image: -moz-linear-gradient(top, #00ff00, #339933);
@@ -45,7 +212,9 @@
   background-image: linear-gradient(to bottom, #00ff00, #339933);
 }
 
-.switch-off .switch-selection {
+.peak-clipping
+{
+	/*background-color: red;*/
   background: #800000;
   background-image: -webkit-linear-gradient(top, #ff4d4d, #800000);
   background-image: -moz-linear-gradient(top, #ff4d4d, #800000);
@@ -53,36 +222,161 @@
   background-image: linear-gradient(to bottom, #ff4d4d, #800000);
 }
 
-*/
+.peak-high
+{
+  background: goldenrod;
+  background-image: -webkit-linear-gradient(top, #e0dd94, goldenrod);
+  background-image: -moz-linear-gradient(top, #e0dd94, goldenrod);
+  background-image: -o-linear-gradient(top, #e0dd94, goldenrod);
+  background-image: linear-gradient(to bottom, #e0dd94, goldenrod);	
+}
 
+.peak-toolow
+{
+  background: blue;
+  background-image: -webkit-linear-gradient(top, #4fc9ee, blue);
+  background-image: -moz-linear-gradient(top, #4fc9ee, blue);
+  background-image: -o-linear-gradient(top, #4fc9ee, blue);
+  background-image: linear-gradient(to bottom, #4fc9ee, blue);	
+}
+
+.clipping-possible
+{
+	background-color: yellow;	
+}
+
+ input[type="file"] {
+        display: none;
+      }
+ 
+
+/*buttons*/
+.button {
+  background-color: #4CAF50; /* Green */
+  border: none;
+  border-radius: 6px;
+  color: white;
+  padding: 3px 6px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 14px;
+  margin: 4px 2px;
+  transition-duration: 0.4s;
+  cursor: pointer;
+}
+
+.button-blue:hover {
+  background-color: LightSteelBlue; 
+  color: black; 
+  border: 2px solid RoyalBlue;
+}
+
+.button-blue {
+  background-color: RoyalBlue;
+  color: GhostWhite;
+  border: 2px solid RoyalBlue;
+}
+
+.button-green {
+  background-color: white; 
+  color: black; 
+  border: 2px solid #00ff00;
+}
+
+.button-green:hover {
+  background-color: #00ff00;
+  color: white;
+}
+
+.text-right
+{
+ text-align: right;	
+}
+
+.text-left
+{
+ text-align: left;	
+}
+
+/*Toggle Switches*/
+.Check{
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+
+.Toggle {
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 50px;
+  height: 24px;
+  background: grey;
+  display: block;
+  border-radius: 24px;
+  position: relative;
+}
+
+.Toggle:after {
+  content: '';
+  position: absolute;
+  top: 1px;
+  left: 2px;
+  width: 22px;
+  height: 22px;
+  background: #fff;
+  border-radius: 22px;
+  transition: 0.1s;
+}
+
+.Check:checked + .Toggle {
+  background: MediumSeaGreen;
+}
+
+.Check:checked + .Toggle:after {
+  left: calc(100% - 2px);
+  transform: translateX(-100%);
+}
+
+.Toggle:active:after {
+  width: 24px;
+}
+*/
 </style>
 
 <script>
-/* -- Commented Out whilst testing installer
-function LocalSetupRadio(myRadio, newValue )
+/*
+function LocalSetupToggle(myControl, newValue, InvertToggle = false  )
 {
-	
-	var radioObj = document.getElementsByName(myRadio);
-	//if(!radioObj)
-	//	return;
-	
-	var radioLength = radioObj.length;
-	//alert ('processing radio ' + myRadio + ' | ' + newValue );
-	if(radioLength == undefined) {
-		radioObj.checked = (radioObj.value == newValue.toString());
-		return radioObj;
-	}
-	for(var i = 0; i < radioLength; i++) {
-		radioObj[i].checked = false;
-		//alert('Current: ' + radioObj[i].value + ' New: ' + newValue);
-		if(radioObj[i].value == newValue) {
-			radioObj[i].checked = true;
-			return radioObj[i];
+	myCheck = document.getElementById(myControl);
+	myCheck.value = newValue;
+	//alert(myCheck.value);
+	if ( myCheck.value == 1 ) 
+	{
+		if (!InvertToggle )
+		{
+			myCheck.checked = true;
+		}
+		else 
+		{
+			myCheck.checked = false;
 		}
 	}
-	//shouldn't get here now
-	return radioObj ;
+	if ( myCheck.value == 0)
+	{
+		if(InvertToggle )
+		{
+			myCheck.checked = true;
+		}
+		else 
+		{
+			myCheck.checked = false;
+		}
+	}
+	//alert(myCheck.checked);
+	return myCheck ;
 }
+
 
 function LocalUpdateSettings (data)
 	{
@@ -91,24 +385,31 @@ function LocalUpdateSettings (data)
 		
 		//Now We display the data from the cache
 		LocalDisplayVals();	
-		myRadio = LocalSetupRadio( 'val_Bypass' , SqueezeDSPData.Bypass);
 		
+
+		//myRadio = LocalSetupRadio( 'val_Bypass' , SqueezeDSPData.Bypass);
+		myRadio = LocalSetupToggle('DSP', SqueezeDSPData.Bypass, true );
 		ToggleControl(myRadio, 'DSP_container', true );
 		//LocalSetupRadio( 'val_EQBands' , SqueezeDSPData.EQBands);
-		myRadio = LocalSetupRadio( 'val_Loudness.enabled' , replaceNull(SqueezeDSPData.Loudness_enabled,0));
-		
+				
+		//myRadio = LocalSetupRadio( 'val_Loudness.enabled' , replaceNull(SqueezeDSPData.Loudness_enabled,0));
+		myRadio = LocalSetupToggle('Loudness', replaceNull(SqueezeDSPData.Loudness_enabled,0));
 		ToggleControl( myRadio, 'control_Loudness' , false );		
-
-		myRadio = LocalSetupRadio( 'val_Lowshelf.enabled' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
+		
+		myRadio = LocalSetupToggle( 'Lowshelf' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
+//		myRadio = LocalSetupRadio( 'val_Lowshelf.enabled' , replaceNull(SqueezeDSPData.Lowshelf_enabled,0));
 		ToggleControl(myRadio, 'control_Lowshelf', false );
-
-		myRadio = LocalSetupRadio( 'val_Highshelf.enabled' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
+		
+		myRadio = LocalSetupToggle( 'Highshelf' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
+//		myRadio = LocalSetupRadio( 'val_Highshelf.enabled' , replaceNull(SqueezeDSPData.Highshelf_enabled,0));
 		ToggleControl(myRadio, 'control_Highshelf' , false );
 
-		myRadio = LocalSetupRadio( 'val_Highpass.enabled' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
+		myRadio = LocalSetupToggle( 'Highpass' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
+//		myRadio = LocalSetupRadio( 'val_Highpass.enabled' , replaceNull(SqueezeDSPData.Highpass_enabled,0));
 		ToggleControl(myRadio, 'control_Highpass' , false );
 
-		myRadio = LocalSetupRadio( 'val_Lowpass.enabled' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
+		myRadio = LocalSetupToggle( 'Lowpass' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
+		//myRadio = LocalSetupRadio( 'val_Lowpass.enabled' , replaceNull(SqueezeDSPData.Lowpass_enabled,0));
 		ToggleControl(myRadio, 'control_Lowpass' , false );
 		
 		
@@ -119,120 +420,26 @@ function LocalUpdateSettings (data)
 
 
 
-function LocalClearSettings()
-{
-		//set everything else off.
-		DisableControl('Loudness');
-		DisableControl('Lowshelf');
-		DisableControl('Highshelf');
-		DisableControl('Highpass');
-		DisableControl('Lowpass');
-		SqueezeDSPSelectValue('Preamp', -2);
-		SqueezeDSPSelectValue('Delay.delay', 0);
-		SqueezeDSPSelectValue('Balance', 0);
-		// disable any FIR filter
-		SqueezeDSPSelectValue('FIRWavFile', '-');
-		//SqueezeDSPSelectValue('Preset', '-');
-		edt_NewPreset.value = '';
-		sel_Preset.value = '-' ;				
-		//clear eq Settings - as we will most likely be adding them back in
-		ClearEQ();
-}
-
-
-function DisableControl(myControl)
-{
-		// simplify switching off controls
-		LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  0 );
-		myElement= document.getElementById( myControl + 'Off');
-		NewFieldValue (myControl + '.enabled', myElement ,  false);
-		ToggleControl(myElement, 'control_' + myControl );
-}
-
-function EnableControl(myControl)
-{
-		// simplify switching off controls
-		LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  1 );
-		myElement= document.getElementById( myControl + 'On');
-		NewFieldValue (myControl + '.enabled', myElement ,  false);
-		ToggleControl(myElement, 'control_' + myControl );
-}
-
-
-
-
-function AddEQBand()
-{
-	// Add a new band unless max of 31 reached 
-	var myObj= document.getElementById('val_EQBands');
-	var myObjvalue = Number(myObj.value);
-
-	if ( myObjvalue < 31 )
-	{
-		myObj.value = myObjvalue + 1;
-		NewFieldValue ('EQBands', myObj ,  true);
-		ToggleEQ(myObj, 'control_EQ' );
-	}
-}
-
-function DelEQBand()
-{
-	// delete a  band unless min of 0 reached 
-	var myObj= document.getElementById('val_EQBands');
-	var myObjvalue = parseInt(myObj.value,10);
-	
-	if ( myObjvalue > 0 )
-	{
-		myObj.value = myObjvalue - 1;
-		NewFieldValue ('EQBands', myObj ,  true);
-		ToggleEQ(myObj, 'control_EQ' );
-	}
-}
-
-
-function ClearEQ()
-{
-		myElement = document.getElementById('val_EQBands');
-		myElement.value = 0;
-		NewFieldValue ('EQBands', myElement ,  true);
-		ToggleEQ(myElement, 'control_EQ' );
-}
-
-
-
-// File Handler
-function ToggleEQ(myElement, myControltoToggle)
-{
-// EQ doesn't need any style setting, clearer to split the function
-	var myValue = myElement.value;
-	if ( myValue == 0 )
-	{
-			document.getElementById(myControltoToggle).style.display = 'none';			
-	}
-	else
-	{
-			document.getElementById(myControltoToggle).style.display = '';
-	}
-
-}
-
 function ToggleControl(myElement, myControltoToggle, InvertToggle = false )
 {
 //toggle the relevant control on or off depending on field value 
 
 	var myValue = myElement.value;
-
+//	if ( myElement.id == 'DSP'){
+//		alert (myElement.id + ':' + myValue + ':' + myControltoToggle + ':' + InvertToggle );
+//	}
+	
 	if (InvertToggle)
 	{
 		if ( myValue == 1 )
 			{
 				document.getElementById(myControltoToggle).style.display = 'none';
-				myElement.parentElement.className = 'switch switch-off';
+				//myElement.parentElement.className = 'switch switch-off';
 			}
 		else
 			{
 				document.getElementById(myControltoToggle).style.display = '';
-				myElement.parentElement.className = 'switch switch-on';
+				//myElement.parentElement.className = 'switch switch-on';
 			}
 
 	}
@@ -241,17 +448,139 @@ function ToggleControl(myElement, myControltoToggle, InvertToggle = false )
 		if ( myValue == 0 )
 		{
 			document.getElementById(myControltoToggle).style.display = 'none';
-			myElement.parentElement.className = 'switch switch-off';
+			//myElement.parentElement.className = 'switch switch-off';
 		}
 		else
 		{
 			document.getElementById(myControltoToggle).style.display = '';
-			myElement.parentElement.className = 'switch switch-on';
+			//myElement.parentElement.className = 'switch switch-on';
 		}
 
 	}
 }
 
+
+
+function SwitchCheckbox(myElement, InvertToggle = false ){
+
+  
+   if (myElement.checked )
+	{ if (!InvertToggle ) 
+		{
+		myElement.value=1;
+		}
+		else {
+		myElement.value= 0;
+		}
+	}
+	
+	if (!myElement.checked)
+	{
+		if( InvertToggle )
+		{
+	       myElement.value=1;
+		}
+		else {
+			myElement.value= 0;
+		}
+       
+	}
+   //alert('SwitchCheckbox' + myElement.value);
+   
+}
+
+
+function GetLogSummary()
+{
+	// Calls function to get summary of log for clipping monitor 
+	SqueezeDSPLogSummary(LocalDisplayLogSummary);
+
+}
+
+function LocalDisplayLogSummary(logData)
+{
+	//Display the log summary
+	var myHTML = '';
+	var peakStyle = 'peak peak-unknown';
+	var tracklimit = 10;
+	//myHTML = JSON.stringify(logData);
+	//myHTML = logData.result['trackcount'];
+    // only display 5 results latest is leftmost - set peak level color based off value		
+	try
+    {
+      
+        for (var i = 1; i <= tracklimit; i++)
+        {
+		  var peakdBfs = logData.result['peakdBfs_' + i];
+		  switch (true)
+		  {
+			case (peakdBfs < -5):
+				peakStyle = 'peak peak-toolow';
+				break;
+			case (peakdBfs < -1):
+				peakStyle = 'peak peak-ok';
+				break;
+			case (peakdBfs <= 0.1):
+				peakStyle = 'peak peak-high';
+				break;
+			case (peakdBfs > 0.1):
+				peakStyle = 'peak peak-clipping';
+				break;
+			 default:
+				peakStyle = 'peak peak-unknown';
+				break;
+		   }
+		   myHTML = myHTML + "<div class='tooltip'  >";	
+		   myHTML = myHTML + "<div class='" + peakStyle + "'> </div> "; 
+
+			myHTML = myHTML + " <div class='tooltiptext'><TABLE >";
+		   myHTML = myHTML + "		<TR><TD></TD><TD class='text-right'>Playerid:  </TD><TD class='text-left'>"  + logData.result['playerid_' + i] + "</TD></TR>";
+		   myHTML = myHTML + "		<TR><TD></TD><TD class='text-right'>Start Date: </TD><TD class='text-left'>" + logData.result['date_' + i] + "</TD></TR>";
+		   myHTML = myHTML + "		<TR><TD></TD><TD class='text-right'>Start Time: </TD><TD class='text-left'>"  + logData.result['time_' + i] + "</TD></TR>";
+		   myHTML = myHTML + "		<TR><TD></TD><TD class='text-right'>Preamp Gain: </TD><TD class='text-left'>"  + logData.result['preamp_' + i] + "</TD></TR>";
+		   myHTML = myHTML + "		<TR><TD></TD><TD class='text-right'>Sample Rate:  </TD><TD class='text-left'>"  + logData.result['outputrate_' + i]+ "</TD></TR>";
+		   myHTML = myHTML + "		<TR><TD></TD><TD class='text-right'>Peak Level:  </TD><TD class='text-left'>"  + logData.result['peakdBfs_' + i] + "</TD></TR>";
+		   myHTML = myHTML + "	</TABLE></div>";
+		   myHTML = myHTML + "	</span>";                
+		   myHTML = myHTML + "</div>";                
+                
+        }
+        
+    }
+    catch
+    {
+        DisplayAlert("LocalDisplayLogSummary", "Error building log summary", 3000);
+        
+    }
+    document.getElementById('logSummary').innerHTML = myHTML;
+
+}
+
+function DisableControl(myControl)
+{
+		// simplify switching off controls
+		myElement =  LocalSetupToggle(myControl, 0);
+		
+		//LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  0 );
+		//myElement= document.getElementById( myControl);
+		//NewFieldValue ('Loudness.enabled', this, false);
+		NewFieldValue (myControl + '.enabled', myElement ,  false);
+		ToggleControl(myElement, 'control_' + myControl );
+		
+}
+
+function EnableControl(myControl)
+{
+		// simplify switching off controls
+		myElement = LocalSetupToggle(myControl, 1);
+		//LocalSetupRadio( 'val_' + myControl +  '.enabled' ,  1 );
+		//myElement= document.getElementById( myControl);
+		//myElement= document.getElementById( myControl + 'On');
+		NewFieldValue (myControl + '.enabled', myElement ,  false);
+		//NewFieldValue (myControl + '.enabled', myElement ,  false);
+		ToggleControl(myElement, 'control_' + myControl );
+
+}
 
 
 function ProcessREW(EQText) {
@@ -338,6 +667,9 @@ function ProcessREW(EQText) {
 }
 
 
+
+
+
 function readFile(file, callback) {
   const reader = new FileReader();
 
@@ -346,8 +678,8 @@ function readFile(file, callback) {
   }
 
   reader.readAsText(file);
+  outputlist("Last File loaded was: "  + file.name  );
 }
-
 
 
 function dodrop(event)
@@ -362,7 +694,7 @@ function dodrop(event)
 
 	for (var i = 0; i < files.length; i++) 
 	{
-		outputlist(" Last File dropped was: "  + files[i].name + " " );
+		
 		
 		readFile(files[i], ConfirmREW);
 	}
@@ -370,108 +702,12 @@ function dodrop(event)
 
 function outputlist(text)
 {
-	document.getElementById("FileDrop").textContent = 'DROP REW FILE HERE... ' + text;
+	document.getElementById("LastFile").textContent = text;
+	document.getElementById("rewpicker").value = "";
 }
-
-
-function ConfirmREW(EQText)
-{
-	if(!confirm ('Load the Settings:' + '\n' + EQText ) )
-	{
-		return;
-	}
-	ProcessREW(EQText);
-
-}
-
-
-
-//This function is here because the mapping of strngs.txt does not work in the file version javascripts
-function LocalbuildEQ(data, labeltype, bands)
-{
-	try{
-			// we are going to build a set of slider controls from the data passed in
-			// data = EQ_loop
-			var myHTML = "";
-
-			
-			//prefer the following as it is clearer
-			for ( let i = 0; i < data.length; i++ )
-			{
-				
-				var fgq = data[i];
-				//get an element (key / value pair) where j is the key (frequency)
-				for(var j in fgq)
-				{
-				
-					// f=frequency, g=gain, q=q
-					var f = parseFloat(j);
-					!isNaN(f)
-					{
-						//gain and q are passed within a single | separated string
-						var gq = (fgq[j]);
-						var g = parseFloat(gq.split('|')[0]);
-						var q = parseFloat(gq.split('|')[1]);
-						// calculate the postion of the slider based off it's log value
-						var fp = log2LinearMapper(f);
-					}
-					
-					if( !isNaN(f) && !isNaN(g) )
-					{
-						
-					  myHTML = myHTML + '<TABLE class="table-container"  id="control_' +  labeltype + i + '" style="background: #fff;"   > ';
-					  myHTML = myHTML + '<TR><TD class="rowTitle"></TD><TD class="rowBody">'; 
-					  myHTML = myHTML + '		<input type ="number" readonly style="border: none;  visibility: hidden; width: 0 px; height: 0 px;"  id="band_' + labeltype + i + '"  value=' + i + ' ></Input> ';
-					  myHTML = myHTML + '<h4>Band ' + (i + 1 ) + '</h4></TD><TD class="rowSuffix"></TD></TR> ';
-					  
-					  myHTML = myHTML + ' <TR><TD class="rowSubTitle">' + document.getElementById('Freq_Desc').value  + '</TD> ';
-					  myHTML = myHTML + '  <TD class="Slide">';
-					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="100" step=".01" value="' + fp +'"  ' ;
-					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ';
-					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.freq" ></Input> ';
-					  myHTML = myHTML + '   <output id="' + labeltype + i + '.freqBubble" class="bubble" ></output>   </TD> ';
-					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
-					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.freq" value="' + f +'"  ></Input> ';
-					  myHTML = myHTML + '  </TD>  </TR> ';
-						
-						
-					  myHTML = myHTML + ' <TR><TD class="rowSubTitle">' + document.getElementById('Gain_Desc').value  + '</TD> ';  
-					  myHTML = myHTML + '  <TD class="Slide"> ';
-					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="' + g +'" ' ;
-					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
-					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.gain" ></Input> ';
-					  myHTML = myHTML + '   <output id="' + labeltype + i + '.gainBubble" class="bubble" ></output>   </TD> ';
-					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
-					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.gain" value="' + g +'"></Input> ';
-					  myHTML = myHTML + '  </TD>  </TR> ';
-						
-					  myHTML = myHTML + ' <TR><TD class="rowSubTitle"><div class="tooltip"  >Q<span class="tooltiptext">' + document.getElementById('Q_Help').value  + '</span></div></TD> ';  
-					  myHTML = myHTML + '  <TD class="Slide"> ';
-					  myHTML = myHTML + '   <input  class="range" type="range" orient="horizontal"  min="0" max="12" step="0.01" value="' + q +'" ' ;
-					  myHTML = myHTML + 'onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="EQReset.call(this);"  ' ;
-					  myHTML = myHTML + 'onchange="iSlideEQ(\'' + labeltype + i + '\')" id="' + labeltype + i + '.q" ></Input> ';
-					  myHTML = myHTML + '   <output id="' + labeltype + i + '.qBubble" class="bubble" ></output>   </TD> ';
-					  myHTML = myHTML + '  <TD class="rowSuffix"> ';
-					  myHTML = myHTML + '   <Input type="number" readonly  class="OutputVal"   id="val_' +  labeltype + i   +  '.q" value="' + q +'"></Input> ';
-					  myHTML = myHTML + '  </TD>  </TR>'; 
-
-					  myHTML = myHTML + '</TABLE>';
-									
-
-					}
-				}
-				
-			}
-			
-	}
-	catch
-	{
-		DefaultAlert("LocalbuildEQ", "Error building EQ profile");		
-	}
-	return myHTML;
-}	
 
 */
+
 
 </script>
 
@@ -527,19 +763,25 @@ function LocalbuildEQ(data, labeltype, bands)
 				<label class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label>
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BYPASS_HELP" | string %]</span></div>
 			</TD>
-			<TD  class="rowSwitch" >
-				<div class="switch switch-blue">
+			<TD  class="rowBody" >
+				           <input class="Check" type="checkbox" 
+							name="val_Bypass" id="DSP"
+							value="1" onclick="SwitchCheckbox(this, true); NewFieldValue ('Bypass', this, false);  ToggleControl(this, 'DSP_container', true ); " > <label for="DSP" class="Toggle" >Toggle</label>
+			
+				<!--div class="switch switch-blue">
 				<input type="radio" class="switch-input"  name="val_Bypass"  value="1" id="DSPOff" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this, 'DSP_container', true );">
 				<label for="DSPOff" class="switch-label switch-label-off">Off</label>	
 				<input type="radio" class="switch-input" name="val_Bypass"  value="0"  id="DSPOn" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this, 'DSP_container', true ); " >
 				<label for="DSPOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
-				</div>
+				</div-->
 			</TD>
 			<TD >
 			</TD >
+			
 		</TR>
-    </TABLE>	
+    </TABLE>
+		<BR>
 	<DIV id="DSP_container" >
 	<TABLE class="table-container" >
 		<TR  id="control_Preset">
@@ -550,7 +792,7 @@ function LocalbuildEQ(data, labeltype, bands)
 					</div>
 				</TD>
 			<TD class="rowBody">
-				<select class="sqdsp-select" id="sel_Preset" onchange=" ClearEQ() ; edt_NewPreset.value = this.value.replace('.preset.json','');  NewFieldValue('Preset', this, true); "  >
+				<select class="sqdsp-select" id="sel_Preset" onchange=" ClearEQ() ; edt_NewPreset.value = this.value.replace('.preset.json','');  NewFieldValue('Preset', this, true); outputlist(''); "  >
 					<option value="-">None</option>
 				</select>
 			</TD>
@@ -570,9 +812,9 @@ function LocalbuildEQ(data, labeltype, bands)
 				<input class="sqdsp-edit" id="edt_NewPreset" value="None" />
 				<BR>
 				<BR>
-				<input class="sqdsp-click" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)"/>
+				<input class="sqdsp-click  button button-blue" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<input class="sqdsp-click " type="button" name="btn_ClearAll" value="Clear All" onclick="LocalClearSettings()"/>
+				<input class="sqdsp-click  button button-blue" type="button" name="btn_ClearAll" value="Reset" onclick="LocalClearSettings(); outputlist('');"/>
 				
 			</TD>
 			<TD class="rowSuffix">
@@ -604,8 +846,22 @@ function LocalbuildEQ(data, labeltype, bands)
 	</TABLE>
 	<hr>
 	<BR>
-	
+
 	<TABLE class="table-container" >
+		<TR id="control_Indicator" inc="0.1">	
+				<TD class="rowTitle">
+					<div class="tooltip"  >
+					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CLIPPING" | string %]</Output>
+					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_CLIPPING_HELP" | string %]</span>
+				</div>	
+				</TD>
+				<TD class="rowSwitch"><label for="logSummary"  class="infoTitle"></label>
+					<span id="logSummary"></span>
+				</TD >
+				<TD class="rowSuffix"></TD>
+			
+		</TR>
+	
 	
 		<TR id="control_Preamp" inc="0.1">
 			 <TD class="rowTitle">
@@ -618,7 +874,7 @@ function LocalbuildEQ(data, labeltype, bands)
 				<input  class="range" type="range"   orient="horizontal"  min="-30" max="0" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" onchange="iSlide(this)" id="Preamp" ></Input>
 				<output id="PreampBubble" class="bubble" ></output></TD>
 						
-			<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal" min="-30" max="0" step="0.1"  style="width:55%" id="val_Preamp"></Input></TD>
+			<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal" min="-30" max="0" step="0.1"   id="val_Preamp"></Input></TD>
 			
 		</TR>
 
@@ -635,7 +891,7 @@ function LocalbuildEQ(data, labeltype, bands)
 			<input  class="range" type="range"   orient="horizontal"  min="-20" max="20" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Delay.delay" ></Input>
 			<output id="Delay.delayBubble" class="bubble" ></output>
 		</TD>
-		<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal"  min="-20" max="20" step="0.1" style="width:55%" id="val_Delay.delay" ></Input></TD >
+		<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal"  min="-20" max="20" step="0.1"  id="val_Delay.delay" ></Input></TD >
 	 </TR>
 
 		
@@ -650,7 +906,7 @@ function LocalbuildEQ(data, labeltype, bands)
 					<input  class="range" type="range"   orient="horizontal"  min="-12" max="12" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Balance" ></Input>
 					<Output id="BalanceBubble" class="bubble" ></Output>
 			 </TD>
-			<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal" min="-12" max="12" step="0.1" style="width:55%" id="val_Balance"></Input></TD>
+			<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal" min="-12" max="12" step="0.1" id="val_Balance"></Input></TD>
 		</TR>
 	</TABLE>
 	<TABLE class="table-container"   >	
@@ -664,15 +920,24 @@ function LocalbuildEQ(data, labeltype, bands)
 			</TD>
 
 			<TD class="rowSwitch">
-				<div class="switch switch-blue">
+	           <input class="Check" type="checkbox" 
+						name="val_Loudness.enabled" id="Loudness"
+						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Loudness.enabled', this, false);  ToggleControl(this, 'control_Loudness'); " > 
+						
+				<label for="Loudness" class="Toggle" >Toggle</label>
+
+			
+				<!--div class="switch switch-blue">
 				<input type="radio"  class="switch-input" id="LoudnessOff" name="val_Loudness.enabled"  value="0"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this, 'control_Loudness' );">
 				<label for="LoudnessOff" class="switch-label switch-label-off">Off</label>
 				
 				<input type="radio"  class="switch-input" id="LoudnessOn" name="val_Loudness.enabled"  value="1"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this, 'control_Loudness' );">
 				<label for="LoudnessOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span>
+				<span class="switch-selection"></span-->
 				</div>
+				
 			</TD>
+
 			<TD>
 			</TD>
 			
@@ -697,8 +962,8 @@ function LocalbuildEQ(data, labeltype, bands)
 
 				<TD>
 				<Input type="number" readonly style="width:50px" class="OutputVal" name="val_EQBands" id="val_EQBands" ></Input>&nbsp;&nbsp;
-				<input class="sqdsp-click" type="button" name="btn_delBand" value="-" onclick="DelEQBand();"/>&nbsp;&nbsp;
-				<input class="sqdsp-click" type="button" name="btn_addBand" value="+" onclick="AddEQBand();"/>
+				<input class="sqdsp-click button button-blue " type="button" name="btn_delBand" value="-" onclick="DelEQBand();"/>&nbsp;&nbsp;
+				<input class="sqdsp-click  button button-blue " type="button" name="btn_addBand" value="+" onclick="AddEQBand();"/>
 				</TD>
 				<TD>
 
@@ -733,14 +998,21 @@ function LocalbuildEQ(data, labeltype, bands)
 			</TD>
 
 			<TD class="rowSwitch">
-			<div class="switch switch-blue">
+				<input class="Check" type="checkbox" 
+						name="val_Highpass.enabled" id="Highpass"
+						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Highpass.enabled', this, false);  ToggleControl(this, 'control_Highpass' ); " > 
+						
+				<label for="Highpass" class="Toggle" >Toggle</label>
+			
+			
+			<!--div class="switch switch-blue">
 				<input type="radio" class="switch-input" id="HighpassOff"  name="val_Highpass.enabled"  value="0"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this, 'control_Highpass' );"/>
 				<label for="HighpassOff" class="switch-label switch-label-off">Off</label>
 				
 				<input type="radio" class="switch-input" id="HighpassOn"  name="val_Highpass.enabled"  value="1"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this, 'control_Highpass' );"/>
 				<label for="HighpassOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
-			</div>
+			</div-->
 				
 			</TD>
 			<TD ></TD>
@@ -794,14 +1066,20 @@ function LocalbuildEQ(data, labeltype, bands)
 			</TD>
 
 			<TD class="rowSwitch">
-				<div class="switch switch-blue">
+				<input class="Check" type="checkbox" 
+						name="val_Lowshelf.enabled" id="Lowshelf"
+						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Lowshelf.enabled', this, false);  ToggleControl(this, 'control_Lowshelf' ); " > 
+						
+				<label for="Lowshelf" class="Toggle" >Toggle</label>
+			
+				<!--div class="switch switch-blue">
 				<input type="radio"  class="switch-input" id="LowshelfOff" name="val_Lowshelf.enabled"  value="0"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this, 'control_Lowshelf' );"/>
 				<label for="LowshelfOff" class="switch-label switch-label-off">Off</label>
 
 				<input type="radio"  class="switch-input"  id="LowshelfOn"  name="val_Lowshelf.enabled"  value="1"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this, 'control_Lowshelf' );"/>
 				<label for="LowshelfOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
-				</div>
+				</div-->
 			</TD>
 			<TD ></TD>
 		</TR>
@@ -867,14 +1145,22 @@ function LocalbuildEQ(data, labeltype, bands)
 			</TD>
 
 			<TD class="rowSwitch" >
-				<div class="switch switch-blue">
+						
+				<input class="Check" type="checkbox" 
+						name="val_Highshelf.enabled" id="Highshelf"
+						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Highshelf.enabled', this, false);  ToggleControl(this, 'control_Highshelf' ); " > 
+						
+				<label for="Highshelf" class="Toggle" >Toggle</label>
+			
+			
+				<!--div class="switch switch-blue">
 				<input type="radio"  class="switch-input" id="HighshelfOff" name="val_Highshelf.enabled"  value="0"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this, 'control_Highshelf' );"/>
 				<label for="HighshelfOff" class="switch-label switch-label-off">Off</label>
 
 				<input type="radio"  class="switch-input"  id="HighshelfOn"  name="val_Highshelf.enabled"  value="1"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this, 'control_Highshelf' );"/>
 				<label for="HighshelfOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
-				</div>
+				</div-->
 			</TD>
 			<TD ></TD>
 		</TR>
@@ -940,14 +1226,21 @@ function LocalbuildEQ(data, labeltype, bands)
 			</TD>
 
 			<TD class="rowSwitch" >
-				<div class="switch switch-blue">
+									
+				<input class="Check" type="checkbox" 
+						name="val_Lowpass.enabled" id="Lowpass"
+						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Lowpass.enabled', this, false);  ToggleControl(this, 'control_Lowpass' ); " > 
+						
+				<label for="Lowpass" class="Toggle" >Toggle</label>
+				
+				<!--div class="switch switch-blue">
 				<input type="radio"  class="switch-input" id="LowpassOff" name="val_Lowpass.enabled"  value="0"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this, 'control_Lowpass' );"/>
 				<label for="LowpassOff" class="switch-label switch-label-off">Off</label>
 
 				<input type="radio"  class="switch-input"  id="LowpassOn"  name="val_Lowpass.enabled"  value="1"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this, 'control_Lowpass' );"/>
 				<label for="LowpassOn" class="switch-label switch-label-on">On</label>
 				<span class="switch-selection"></span>
-				</div>
+				</div-->
 			</TD>
 			<TD ></TD>
 			</TR>
@@ -993,7 +1286,15 @@ function LocalbuildEQ(data, labeltype, bands)
 						ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
 						ondragover="event.stopPropagation(); event.preventDefault();"
 						ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
-						DROP REW FILE HERE...
+						DROP REW FILE HERE...<BR> -or- <BR>
+						 <label class="button  button-blue" for="rewpicker">Choose REW File</label>
+						<input
+						  type="file"
+						  id="rewpicker"
+						  accept=".txt"
+						  class = ' button button-blue'
+						/><BR>
+						<Output id="LastFile"></Output>
 				</div>
 	</DIV>
 
@@ -1004,12 +1305,26 @@ function LocalbuildEQ(data, labeltype, bands)
 
 <script>
 
+
 myPlayer.value = playerid;
 
 window.setTimeout( function() {
 	Initialise();
 	GetCurrentPlayerSettings();
 },500);
+//initial call to view log
+GetLogSummary();
+//we want to get log every subsequent 0s
+var myDelay = 30 * 1000;
+setInterval(GetLogSummary, myDelay);
+// add event listner for file 
+document.getElementById('rewpicker').addEventListener('change', function(e) {
+  if (e.target.files[0]) {
+    //alert('You selected ' + e.target.files[0].name);
+	readFile(e.target.files[0], ConfirmREW);
+	e.target.files[0] = '';
+  }
+})
 
 </script>
 

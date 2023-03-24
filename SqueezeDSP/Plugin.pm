@@ -14,6 +14,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#	
 	#Initial version
 	#
+	0.1.01	Fox: Added in logging interface, new call will read SqueezeDSP log file.
 	0.1.00	Fox: Binary update PLugin update to version number
 	0.0.98	Fox: New EQ Bands now appearing in correct place, wth no weird defaults
 			New players now have default JSON files created properly
@@ -67,7 +68,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.00";
+my $revision = "0.1.01";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -94,7 +95,7 @@ my $modeMatrix       = "PLUGIN.SqueezeDSP.Matrix";
 #my $modeAmbisonic    = "PLUGIN.SqueezeDSP.Ambisonic";
 
 my $log = Slim::Utils::Log->addLogCategory({ 'category' => 'plugin.' . $thistag, 'defaultLevel' => 'WARN', 'description'  => $thisapp });
-
+my $logfile = "";
 my $prefs = preferences('plugin.' . $thistag);
 
 # these sort alphabetically
@@ -403,6 +404,7 @@ sub initPlugin
 	Slim::Control::Request::addDispatch([$thistag . '.setval'],                              [1, 1, 1, \&setvalCommand]);		# set a pref value
 	Slim::Control::Request::addDispatch([$thistag . '.seteq'],                               [1, 1, 1, \&seteqCommand]);		# set an EQ value pair
 	Slim::Control::Request::addDispatch([$thistag . '.saveas'],                              [1, 1, 1, \&saveasCommand]);		# save as preset-file
+	Slim::Control::Request::addDispatch([$thistag . '.logsummary'],                          [1, 1, 0, \&logsummaryQuery]);		# read log for current player
 	#Slim::Control::Request::addDispatch([$thistag . '.topmenu'],                             [1, 1, 1, \&topmenuCommand]);		# top menu for Jive
 	#Slim::Control::Request::addDispatch([$thistag . '.settingsmenu', '_index', '_quantity'], [1, 1, 1, \&settingsmenuCommand]);	# settings sub-menu for Jive
 	#Slim::Control::Request::addDispatch([$thistag . '.ambimenu', '_index', '_quantity'],     [1, 1, 1, \&ambimenuCommand]);		# amb settings sub-menu for Jive
@@ -492,7 +494,7 @@ sub initPlugin
 	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
 	# find folder for log file
 
-	my $logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
+	$logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
 
 	amendPluginConfig($appConfig, 'logFile',$logfile);
 	# Subscribe to player connect/disconnect messages
@@ -1275,6 +1277,101 @@ sub currentQuery
 		$cnt++;
 	}
 
+	$request->setStatusDone();
+}
+
+
+sub logsummaryQuery
+{
+	#Get the last 5 log entries and return them
+	my $request = shift;
+	my $client = $request->client();
+	my $clientID = $client->id() ;
+	my $tracklimit = 10;
+	debug( "query: logsummary" );
+
+	if( $request->isNotQuery([[$thistag . '.logsummary']]) )
+	{
+		$request->setStatusBadDispatch();
+		return;
+	}
+    
+	my $startline = '';
+	my $trackcount = 0;
+	my @reportlines ;
+	my @startvalues ;
+
+	#$myfile = 'C:\ProgramData\Squeezebox\Logs\squeezedsp.log';
+	#$myfile =~ s#\\#/#g;
+	debug( "Opening log file " . $logfile . " for "  . $clientID   );
+
+	open(FILE, "<$logfile") or
+ 	die("Could not open log file. $!\n");
+	while(<FILE>) {
+		
+ 		my($line) = $_;
+ 		chomp($line);
+		
+	 	if (index($line, '=>') != -1 && index($line, $clientID) != -1 ) {
+			 #copy Line but only use it if the output is complete
+		 	$startline = $line;
+			#debug( "Log Start" . $line );
+	 	}
+ 
+	 	if (index($line, 'peak') != -1 && index($line, $clientID) != -1 ) {
+			my @endvalues = split(' ', $line);
+			#check that a number of samples have actually been played
+			if ($endvalues[3] != 0 ) {
+				@startvalues = split(' ', $startline);
+				#debug( "Log End" . $line );
+			
+				my %reportrow = (
+					date    => $startvalues[0],
+					time 	=> $startvalues[1],
+					playerid => $startvalues[2],
+					inputrate => $startvalues[3],
+					outputrate	=> $startvalues[6],
+					preamp 	=> $startvalues[10],	
+					peakdBfs => $endvalues[13],
+					);
+
+			push @reportlines, \%reportrow;   # What's this?
+			$trackcount++;
+			}
+		} 
+    
+	}
+	#We don't need the file any more so close it
+	close(FILE);
+	# Only going to display info relating to last $tracklimit tracks
+	#debug( "TrackCount found is: " . $trackcount );
+	if ( $trackcount > $tracklimit )
+	{
+		$trackcount = $tracklimit
+	}
+	my $length = scalar @reportlines;
+	my $firstline = $length - $trackcount;
+	my $lastline = $length - 1 ;
+	#we always want tracks 1 up to 5 
+	my $trackpos = 1;
+	for ( my $i = $firstline  ; $i <= $lastline ; $i++ ) {
+		#debug( "Log Processing Line : " . $i );
+
+		my $reportrow = $reportlines[$i];
+		$request->addResult("date_$trackpos" , $reportrow -> {date}) ;
+		$request->addResult("time_$trackpos" , $reportrow -> {time}) ;
+		$request->addResult("playerid_$trackpos" , $reportrow -> {playerid}) ;
+		$request->addResult("inputrate_$trackpos" , $reportrow -> {inputrate}) ;
+		$request->addResult("outputrate_$trackpos" , $reportrow -> {outputrate}) ;
+		$request->addResult("preamp_$trackpos" , $reportrow -> {preamp}) ;
+		$request->addResult("peakdBfs_$trackpos" , $reportrow -> {peakdBfs}) ;
+
+		$trackpos++;
+
+	}
+	#debug( "TrackCount reported is: " . $trackcount );
+
+	$request->addResult("trackcount" , $trackcount) ;
 	$request->setStatusDone();
 }
 

@@ -29,10 +29,10 @@ PLUGIN_SQUEEZEDSP_BANDCENTER
 	EN	Band center frequency:
 
 PLUGIN_SQUEEZEDSP_BYPASS
-	EN	DSP (On/Off)
+	EN	DSP (Off/On)
 	
 PLUGIN_SQUEEZEDSP_BYPASS_HELP
-	EN	DSP On/Off - Selecting On will enable DSP processing and selecting Off will bypass all DSP processing. This may be useful if you have multiple players and only want SqueezeDSP active on some of them.
+	EN	DSP Off/On - Selecting On will enable DSP processing and selecting Off will bypass all DSP processing. This may be useful if you have multiple players and only want SqueezeDSP active on some of them.
 
 PLUGIN_SQUEEZEDSP_LOUDNESS
 	EN	Loudness
@@ -137,7 +137,7 @@ PLUGIN_SQUEEZEDSP_PRESET_SAVED
 	EN	Preset saved.
 
 PLUGIN_SQUEEZEDSP_PRESET_HELP
-	EN	Select the preset name in the dropdown and it will automatically load. In order to save the existing settings as a new preset, enter a suitable name for the preset and press Save.	
+	EN	Select the preset name in the dropdown and it will automatically load. In order to save the existing settings as a new preset, enter a suitable name for the preset and press Save.<BR>Pressing Reset will set the current settings back to default
 
 PLUGIN_SQUEEZEDSP_PRESET_LOADED
 	EN	Preset loaded.
@@ -146,10 +146,16 @@ PLUGIN_SQUEEZEDSP_SAVEPRESETFILE
 	EN	Save preset:
 
 PLUGIN_SQUEEZEDSP_ROOMCORR
-	EN	Load Impulse File:
+	EN	Load FIR File:
 	
 PLUGIN_SQUEEZEDSP_ROOMCORR_HELP
 	EN	Load Impulse File - Room correction is automatically applied if an Impulse file is selected. Impulse files should be wav files in mono or stereo and should be saved into the Impulse folder. It is recommended that you save your impulse files at a sampling rate of 44.1K (CD Quality)
+	
+PLUGIN_SQUEEZEDSP_CLIPPING
+	EN	Levels
+	
+PLUGIN_SQUEEZEDSP_CLIPPING_HELP
+	EN	Displays Red/Amber/Green/Blue clipping status for the last 10 tracks played by the current player.<BR>red = Clipping<BR>Amber = Borderline<BR>Green = OK<BR>Blue = Levels may be too low <BR> Detailed information can be accessed by hovering/clicking an indicator.
 	
 PLUGIN_SQUEEZEDSP_CHOOSE_RCFILTER
 	EN	Select filter:
