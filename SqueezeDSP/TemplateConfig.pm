@@ -17,16 +17,17 @@ aac wav * $CLIENTID$
 	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
 aif wav * $CLIENTID$
-	# FT:{START=-skip %t}
-	flac -cs --totally-silent $START$ $END$ -- $FILE$ | sox -q -t flac - -t wav - | [$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --be=true --wav=true --d=16
+	# IF
+	[sox] -t aiff $FILE$ -t wav - | [$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --be=true --wav=true --d=16
 
 alc wav * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
-amb wav * $CLIENTID$
-	# IFT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --amb=true --d=16
+alcx wav * $CLIENTID$
+	# FT:{START=-j %s}U:{END=-e %u}
+	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
+
 
 ape wav * $CLIENTID$
 	# F
@@ -48,6 +49,11 @@ mp4 wav * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
+mp4x wav * $CLIENTID$
+	# FT:{START=-j %s}U:{END=-e %u}
+	[faad] -q -w -f 2 -b 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=16 
+
+
 mpc wav * $CLIENTID$
 	# IR
 	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
@@ -59,10 +65,6 @@ ogg wav * $CLIENTID$
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
 	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
-
-uhj wav * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --wav=true --d=16
 
 wav wav * $CLIENTID$
 	# FT:{START=-skip %t}
@@ -88,7 +90,8 @@ EOF1
 # changed FLAC compressions level to 0 (was 5)
 # v.05 amended flac to FRIT - needed change to DSP to handle error when track skipping
 # amended Ogg-flc, wasn't playing, but now working. amended aac to make it more standard, no diff noted however
-# amended aif file, now playing (bit of a long path)
+# amended aif file, now playing (bit of a long path); added mp4x and alcx
+
 sub template_FLAC24
 {
 	return <<'EOF1';
@@ -98,15 +101,17 @@ aac flc * $CLIENTID$
 
 aif flc * $CLIENTID$
 	# FRIT:{START=--skip=%t}U:{END=--until=%v}
-	flac -cs --totally-silent $START$ $END$ -- $FILE$ | sox -q -t flac - -t wav - | [$CONVAPP$]  --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
+	[flac] -cs --totally-silent $START$ $END$ -- $FILE$ | [sox] -q -t flac - -t wav - | [$CONVAPP$]  --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
+
 
 alc flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
-amb flc * $CLIENTID$
-	# IFT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ -=amb=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+alcx flc * $CLIENTID$
+	# FT:{START=-j %s}U:{END=-e %u}
+	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+
 
 ape flc * $CLIENTID$
 	# F
@@ -128,6 +133,10 @@ mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
+mp4x flc  * $CLIENTID$
+	# FT:{START=-j %s}U:{END=-e %u}
+	[faad] -q -w -f 2 -b 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+
 mpc flc * $CLIENTID$
 	# IR
 	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
@@ -139,17 +148,12 @@ ogg flc * $CLIENTID$
 
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
-	[sox] -q -t opus $FILE$ -t wav - | [SqueezeDSP] [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
-
+	[sox] -q -t opus $FILE$ -t wav - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
 	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
-
-uhj flc * $CLIENTID$
-	# FT:{START=-skip %t}
-	[$CONVAPP$] --id="$CLIENTID$" --input=$FILE$ --skip=$START$ --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 wav flc * $CLIENTID$
 	# FT:{START=-skip %t}
@@ -171,9 +175,6 @@ wmap flc * $CLIENTID$
 wvp flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
 	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
-
-
-
 
 
 EOF1
