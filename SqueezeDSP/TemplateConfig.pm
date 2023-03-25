@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.05";
+	my $configrevision = "0.0.06";
 	return $configrevision;
 }
 
@@ -51,8 +51,7 @@ mp4 wav * $CLIENTID$
 
 mp4x wav * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 2 -b 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=16 
-
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=16 
 
 mpc wav * $CLIENTID$
 	# IR
@@ -135,7 +134,7 @@ mp4 flc * $CLIENTID$
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 2 -b 1 $START$ $END$ $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mpc flc * $CLIENTID$
 	# IR
