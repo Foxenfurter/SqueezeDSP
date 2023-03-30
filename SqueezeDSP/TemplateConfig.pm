@@ -5,9 +5,22 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.06";
+	my $configrevision = "0.0.07";
 	return $configrevision;
 }
+
+
+# transcode for 24-bit FLAC output (sb2, sb3, transporter)
+# aac & mp4 added by jb
+# deleted aap entry - jb
+# replaced alc - jb
+# added spt (spotty) (jb)
+# changed FLAC compressions level to 0 (was 5)
+# v.05 amended flac to FRIT - needed change to DSP to handle error when track skipping
+# amended Ogg-flc, wasn't playing, but now working. amended aac to make it more standard, no diff noted however
+# amended aif file, now playing (bit of a long path); added mp4x and alcx
+# v.07 added in mapping for ogf and corrected spt wav mapiing for 16 bit
+
 
 sub template_WAV16
 {
@@ -61,7 +74,11 @@ ogg wav * $CLIENTID$
 	# IFD:{RESAMPLE=-r %D}
 	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --be=true --d=16
 
-spt flc * $CLIENTID$
+ogf wav * *
+	# IFRD:{RESAMPLE=-r %d}
+	[flac] --ogg -dcs -- $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
+
+spt wav * $CLIENTID$
 	# RT:{START=--start-position %s}
 	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
@@ -80,16 +97,6 @@ wvp wav * $CLIENTID$
 EOF1
 }
 
-
-# transcode for 24-bit FLAC output (sb2, sb3, transporter)
-# aac & mp4 added by jb
-# deleted aap entry - jb
-# replaced alc - jb
-# added spt (spotty) (jb)
-# changed FLAC compressions level to 0 (was 5)
-# v.05 amended flac to FRIT - needed change to DSP to handle error when track skipping
-# amended Ogg-flc, wasn't playing, but now working. amended aac to make it more standard, no diff noted however
-# amended aif file, now playing (bit of a long path); added mp4x and alcx
 
 sub template_FLAC24
 {
@@ -143,6 +150,11 @@ mpc flc * $CLIENTID$
 ogg flc * $CLIENTID$
 	# IFRD:{RESAMPLE=-r %D}
 	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+
+
+ogf flc * *
+	# IFRD:{RESAMPLE=-r %d}
+	[flac] --ogg -dcs -- $FILE$ |  [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 
 ops flc * $CLIENTID$

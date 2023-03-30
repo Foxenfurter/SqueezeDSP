@@ -148,7 +148,7 @@ my $myconfigrevision = get_config_revision();
 # For 2-band EQ we approximate the classic Baxandall tone control by assuming "mid" is fixed at 0dB.
 # For higher numbers of bands, each band level is individually adjustable. Interpolation should use cosine shelves.
 #
-
+=pod
 # Lists of center frequencies for each mode
 my @fq0 = ( 60 );
 # original values
@@ -160,7 +160,7 @@ my @fq9 = ( 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360 );
 # 15 and 31 for good measure - NOT the standard centers though
 my @fq15 = ( 25, 40, 63, 100, 160, 250, 400, 630, 1000, 1600, 2500, 4000, 6300, 10000, 16000 );
 my @fq31 = ( 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000 );
-
+=cut
 
 # ------ other globals this module ------
 
@@ -457,24 +457,13 @@ sub initPlugin
 	}
 	#derive standard binary path
 	$bin = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $convolver . $binExtension);
-	
-	#need to copy camilladsp exe too. as of v 0.94 camilladsp is not used, using SoX instead 
-	#my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $bin);
-	
-	#my $camilladsp = "camilladsp";
-	#rather than try and work out paths agin lets just re-use this for CamillaDSP
-	#my $cambinsrc = $class->binaries;
-	#$cambinsrc =~ s/$thisapp/$camilladsp/;
-	#my $cambinsrc = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin', $cambinsrc);
-	
-	#my $cambinout = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $camilladsp . $binExtension);;
-	#debug('camilla binary source path: ' . $cambinsrc . ' and target path: ' .  $cambinout );
+		
 	debug('standard binary path: ' . $bin);
 	# copy correct binary into bin folder unless it already exists
 	unless (-e $bin) {
 		debug('copying binary' . $exec );
 		copy( $exec , $bin)  or die "copy failed: $!";
-		#copy( $cambinsrc , $cambinout)  or die "copy failed: $!";
+
 		#we know only windows has an extension, now set the binary
 		if ( $binExtension == "") {
 				debug('executable not having \'x\' permission, correcting');
