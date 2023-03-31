@@ -16,32 +16,19 @@
 <script type="text/javascript" src="/html/prototype.js"></script>
  
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_02.css"/>
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_03.css"/>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_04.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_06.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_02.js"></script>
 <style>
+
+
+
 </style>
 
 <script>
-/*function LocalDisplayEQ()
-{
-	
-	
-	var myEQ=SqueezeDSPData.EQ_loop;
-	var myBands=SqueezeDSPData.EQBands;
 
-	if (myBands> 0 )
-	{
-		var mytempHTML = LocalbuildEQ(myEQ, 'Slide', myBands);
-		document.getElementById('control_EQ').innerHTML = mytempHTML;
-	}
-	// Added lines below because EQ not loaded on load of a preset.
-	var myElement = document.getElementById('val_EQBands');
-	ToggleEQ(myElement, 'control_EQ' );	
-}
 
-*/
 
 
 </script>
@@ -209,7 +196,7 @@
 				<input  class="range" type="range"   orient="horizontal"  min="-30" max="0" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" onchange="iSlide(this)" id="Preamp" ></Input>
 				<output id="PreampBubble" class="bubble" ></output></TD>
 						
-			<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal" min="-30" max="0" step="0.1"   id="val_Preamp"></Input></TD>
+			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-30" max="0" step="0.1"   id="val_Preamp"  ></Input></TD>
 			
 		</TR>
 
@@ -226,7 +213,7 @@
 			<input  class="range" type="range"   orient="horizontal"  min="-20" max="20" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Delay.delay" ></Input>
 			<output id="Delay.delayBubble" class="bubble" ></output>
 		</TD>
-		<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal"  min="-20" max="20" step="0.1"  id="val_Delay.delay" ></Input></TD >
+		<TD class="rowSuffix"><Input type="number"   class="OutputVal"  min="-20" max="20" step="0.1"  id="val_Delay.delay" onChange="valInputDecimal(this);" ></Input></TD >
 	 </TR>
 
 		
@@ -241,7 +228,7 @@
 					<input  class="range" type="range"   orient="horizontal"  min="-12" max="12" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Balance" ></Input>
 					<Output id="BalanceBubble" class="bubble" ></Output>
 			 </TD>
-			<TD class="rowSuffix"><Input type="number" readonly  class="OutputVal" min="-12" max="12" step="0.1" id="val_Balance"></Input></TD>
+			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Balance" onChange="valInputDecimal(this);" ></Input></TD>
 		</TR>
 	</TABLE>
 	<TABLE class="table-container"   >	
@@ -365,7 +352,7 @@
 					<output id="Highpass.freqBubble" class="bubble" ></output>
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"   id="val_Highpass.freq"></Input>
+					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Highpass.freq"></Input>
 					
 					<BR>
 					
@@ -382,7 +369,7 @@
 					
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal" min="0" max="12" step="0.01"  id="val_Highpass.q"></Input>
+					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal" min="0" max="12" step="0.01"  id="val_Highpass.q"></Input>
 				</TD>
 				
 			</TR>
@@ -432,7 +419,7 @@
 					<output id="Lowshelf.freqBubble" class="bubble" ></output>
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"   id="val_Lowshelf.freq"></Input>
+					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Lowshelf.freq"></Input>
 					<BR>
 					
 				</TD>
@@ -447,7 +434,7 @@
 				</TD>
 			
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"  min="-15" max="15" step="0.1" id="val_Lowshelf.gain"></Input>
+					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="-15" max="15" step="0.1" id="val_Lowshelf.gain"></Input>
 				</TD>
 			</TR>
 			<TR>
@@ -461,7 +448,7 @@
 					
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"  min="0.1" max="1" step="0.1" id="val_Lowshelf.slope"></Input>
+					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="0.1" max="1" step="0.1" id="val_Lowshelf.slope"></Input>
 				</TD>
 				
 			</TR>
@@ -512,7 +499,7 @@
 					<output id="Highshelf.freqBubble" class="bubble" ></output>
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"   id="val_Highshelf.freq"></Input>
+					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Highshelf.freq"></Input>
 					<BR>
 					
 				</TD>
@@ -527,7 +514,7 @@
 				</TD>
 			
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"  min="-15" max="15" step="0.1" id="val_Highshelf.gain"></Input>
+					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="-15" max="15" step="0.1" id="val_Highshelf.gain"></Input>
 				</TD>
 			</TR>
 			<TR>
@@ -541,7 +528,7 @@
 					
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"  min="0.1" max="1" step="0.1" id="val_Highshelf.slope"></Input>
+					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="0.1" max="1" step="0.1" id="val_Highshelf.slope"></Input>
 				</TD>
 				
 			</TR>
@@ -592,7 +579,7 @@
 					<output id="Lowpass.freqBubble" class="bubble" ></output>
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly  class="OutputVal"   id="val_Lowpass.freq"></Input>
+					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Lowpass.freq"></Input>
 
 					<BR>
 					
@@ -609,7 +596,7 @@
 					
 				</TD>
 				<TD class="rowSuffix">
-					<Input type="number" readonly min="0" max="12" step="0.01" class="OutputVal"   id="val_Lowpass.q"></Input>
+					<Input type="number" onChange="valInputDecimal(this);" min="0" max="12" step="0.01" class="OutputVal"   id="val_Lowpass.q"></Input>
 				</TD>
 				
 			</TR>
