@@ -12,8 +12,9 @@ package Plugins::SqueezeDSP::Plugin;
 	# Revision history:
 	#
 	#	
-	#Initial version
 	#
+	0.1.04	Fox: Code added in to remove native conversion and competing flac conversions so that SqueezeDSP is the default
+				 this code was reworked from C3P0 plugin.
 	0.1.01	Fox: Added in logging interface, new call will read SqueezeDSP log file.
 	0.1.00	Fox: Binary update PLugin update to version number
 	0.0.98	Fox: New EQ Bands now appearing in correct place, wth no weird defaults
@@ -68,7 +69,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.02";
+my $revision = "0.1.04";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -587,6 +588,83 @@ sub clientEvent {
 }
 
 
+sub _inspectProfile{
+	my $profile=shift;
+	
+	my $inputtype;
+	my $outputtype;
+	my $clienttype;
+	my $clientid;;
+	
+	if ($profile =~ /^(\S+)\-+(\S+)\-+(\S+)\-+(\S+)$/) {
+
+		$inputtype  = $1;
+		$outputtype = $2;
+		$clienttype = $3;
+		$clientid   = lc($4);
+		
+		return ($inputtype, $outputtype, $clienttype, $clientid);	
+	}
+	return (undef,undef,undef,undef);
+}
+
+
+sub _getEnabledPlayers{
+	my @clientList= Slim::Player::Client::clients();
+	my %enabled=();
+	
+	for my $client (@clientList){
+		
+			
+			$enabled{$client->id()} = 1;
+	}
+	return \%enabled;
+}
+
+sub removeNativeConversion{
+    my $self = shift;
+    my $client = shift || undef;
+    my $conv    = Slim::Player::TranscodingHelper::Conversions();
+	my $caps    = \%Slim::Player::TranscodingHelper::capabilities;
+    my %players = %{_getEnabledPlayers()};
+    
+    my %out=();
+
+    for my $profile (sort keys %$conv){
+    
+        my ($inputtype, $outputtype, $clienttype, $clientid) = _inspectProfile($profile);
+
+        if ($client ){
+            
+            if (!($clientid eq '*') && !($client->id() eq $clientid)) {next}
+            if (!($clienttype eq '*') && !($client->model() eq $clienttype)) {next}
+        }
+        
+        my $command = $conv->{$profile};
+
+		my $enabled = Slim::Player::TranscodingHelper::enabledFormat($profile);
+
+		#delete native commands
+		if ( $enabled == 1 && $clienttype  eq "*" && $command eq "-"){
+				debug ( "delete native command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command ") ;
+				delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
+				delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
+
+		}
+		#delete generic flac commands
+		if ( $enabled == 1 &&  $clientid  eq "*" && $outputtype eq "flc"){
+				debug ( "delete flac command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command ") ;
+				delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
+				delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
+
+		}
+
+
+    }
+}
+
+
+
 sub initConfiguration
 {
 	# called when a client first appears
@@ -704,7 +782,7 @@ sub initConfiguration
 	}
 		
 	upgradePrefs( $prevrev, $PRE_0_9_21, @foundClients );
-	
+	removeNativeConversion();
 	return unless $needUpgrade;
 
 	# Recreate -convert.conf
@@ -742,13 +820,14 @@ sub initConfiguration
 	close( OUT );
 	
 	#restart will trigger a re-write so re-set need upgrade to off.
-	$needUpgrade = 1;
+	$needUpgrade = 0;
 	debug( "Reload Conversion Tables" );
 	my $myRestart = Slim::Player::TranscodingHelper::loadConversionTables();
+	#need to do this again as we have just loaaded the conversion tables again, which add back in native formats
+	removeNativeConversion();
 	# see if doing this twice eliminates the duplicates - NB it doesn't
 	
 }
-
 
 
 # ------ web interface ------

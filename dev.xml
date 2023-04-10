@@ -4,12 +4,12 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.03b" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.04a" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.03b) - provides EQ and DSP. Now with Peak Level Monitor; UI update and transcoding fixes</desc>
+      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.04a) - provides EQ and DSP. Now default transcoder for most file types</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.03b.zip</url>
-      <sha>1fdce096856aaa58ac8b318f143955fd14148dfd</sha>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.04a.zip</url>
+      <sha>c67fd7a2b703cde98e049f6478dc9fc6a85db1e1</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	</plugin>

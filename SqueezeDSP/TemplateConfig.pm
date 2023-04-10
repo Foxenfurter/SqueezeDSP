@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.07";
+	my $configrevision = "0.0.08";
 	return $configrevision;
 }
 
@@ -20,7 +20,7 @@ sub get_config_revision
 # amended Ogg-flc, wasn't playing, but now working. amended aac to make it more standard, no diff noted however
 # amended aif file, now playing (bit of a long path); added mp4x and alcx
 # v.07 added in mapping for ogf and corrected spt wav mapiing for 16 bit
-
+# v.08 aif not being used in preference to default, change command header
 
 sub template_WAV16
 {
@@ -106,7 +106,7 @@ aac flc * $CLIENTID$
 	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 aif flc * $CLIENTID$
-	# FRIT:{START=--skip=%t}U:{END=--until=%v}
+	# IFT:{START=--skip=%t}U:{END=--until=%v}
 	[flac] -cs --totally-silent $START$ $END$ -- $FILE$ | [sox] -q -t flac - -t wav - | [$CONVAPP$]  --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 
