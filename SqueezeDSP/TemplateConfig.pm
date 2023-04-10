@@ -74,7 +74,7 @@ ogg wav * $CLIENTID$
 	# IFD:{RESAMPLE=-r %D}
 	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --be=true --d=16
 
-ogf wav * *
+ogf wav *  $CLIENTID$
 	# IFRD:{RESAMPLE=-r %d}
 	[flac] --ogg -dcs -- $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
@@ -152,9 +152,9 @@ ogg flc * $CLIENTID$
 	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 
-ogf flc * *
+ogf flc *  $CLIENTID$
 	# IFRD:{RESAMPLE=-r %d}
-	[flac] --ogg -dcs -- $FILE$ |  [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
+	[flac] --ogg -dcs -- $FILE$ |  [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24|  [sox] -q --ignore-length -t wav - -t flac -C 0 $RESAMPLE$ -
 
 
 ops flc * $CLIENTID$
