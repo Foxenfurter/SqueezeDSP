@@ -2,12 +2,9 @@
    "settings" : {
       "debug" : "false",
       "dither" : "1",
-      "gain" : "-14",
-      "DSPexe" : "camilladsp",
+      "gain" : "-10",
       "partitions" : "2",
       "convolvergain" : "-4",
-      "DSPfmt" : " Flexible_441.yml ",
-      "soxExe" : "E:\\GitHub\\slimserver-win64\\Bin\\MSWin32-x64-multi-thread\\sox.exe",
       "logFile" : "C:\\ProgramData\\Squeezebox\\Logs\\squeezedsp.log"
    }
 }

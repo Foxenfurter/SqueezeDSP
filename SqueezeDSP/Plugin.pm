@@ -13,6 +13,8 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	
+	0.1.05	Fox: New Binary no longer using SoX wrapped but internal library instead. Amending this code to automatically update binaries
 	0.1.04	Fox: Code added in to remove native conversion and competing flac conversions so that SqueezeDSP is the default
 				 this code was reworked from C3P0 plugin.
 	0.1.01	Fox: Added in logging interface, new call will read SqueezeDSP log file.
@@ -70,6 +72,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # slimserver-convert.conf, requiring restart.
 #
 my $revision = "0.1.04";
+my $binversion = "0_1_05";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -458,20 +461,25 @@ sub initPlugin
 	}
 	#derive standard binary path
 	$bin = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", $convolver . $binExtension);
-		
+	$binversion	=catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/",$binversion);
 	debug('standard binary path: ' . $bin);
 	# copy correct binary into bin folder unless it already exists
-	unless (-e $bin) {
+	#unless (-e $bin) {
+	# if we have a new binary the root binary directory should contain a file named after the binversion
+	# we check for this file and then do a copy and delete the file.
+	if (-e $binversion) {	
 		debug('copying binary' . $exec );
 		copy( $exec , $bin)  or die "copy failed: $!";
-
+		
 		#we know only windows has an extension, now set the binary
 		if ( $binExtension == "") {
 				debug('executable not having \'x\' permission, correcting');
 				chmod (0555, $bin);
-		#		chmod (0555, $cambinout);
+
 				
-		}	
+		}
+		#now remove the file
+		unlink $binversion;
 	}
 	
 	#do any cleanup
@@ -479,9 +487,9 @@ sub initPlugin
 	#do any app config settings, simplifies handover to SqueezeDSP app
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP_config.json');
 	
-	my $soxbinary = Slim::Utils::Misc::findbin('sox');
+	#my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	#needs updating to amend json...
-	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
+	#amendPluginConfig($appConfig, 'soxExe', $soxbinary);
 	# find folder for log file
 
 	$logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
