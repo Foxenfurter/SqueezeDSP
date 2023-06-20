@@ -2,9 +2,9 @@
    "settings" : {
       "debug" : "false",
       "dither" : "1",
-      "gain" : "-14",
+      "gain" : "-12",
       "partitions" : "2",
-      "convolvergain" : "-4",
+      "convolvergain" : "-2",
       "logFile" : "C:\\ProgramData\\Squeezebox\\Logs\\squeezedsp.log"
    }
 }
