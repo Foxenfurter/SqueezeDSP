@@ -4,15 +4,17 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-   <plugin name="SqueezeDSP" version="0.1.04c" minTarget="7.8.0" maxTarget="*">
+   <plugin name="SqueezeDSP" version="0.1.05e" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Test version 0.1.04c) - provides EQ and DSP. Now default transcoder for most file types</desc>
+      <desc lang="EN">DSP for Squeezebox server (Test version 0.1.05e) - provides EQ and DSP. New internal library for DSP</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.04c.zip</url>
-      <sha>1ddb17df5f1cb5c9d547ca9da58a712d9810b0c8</sha>
-      <creator>Jonathan Fox</creator>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.05e.zip</url>
+      <sha>63567f874d336c4c87ac245f549675968bba7ed7</sha>     <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	  <changes>
+		  <change>0.1.05e - amended binary now using new simple internal DSP library, provides PEQ functions, resampler and basic convolver. Should be simpler to maintain and is faster.
+		  </change>	
+		  
 		  <change>0.1.04c - amended binary so that faad processes don't hang.
 		  </change>	
 		  <change>New Feature - Load PEQ settings from REW (Mono Only); Fixed issue with PEQ being added with odd defaults; 	Fixed intermittent issues resetting PEQ Bands; New Player has default Settings created on detection; Cosmetic changes; added editable outpied fields.  	
