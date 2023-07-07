@@ -39,7 +39,13 @@ PLUGIN_SQUEEZEDSP_LOUDNESS
 	
 PLUGIN_SQUEEZEDSP_LOUDNESS_HELP
 	EN	Loudness - Switching this on will boost Bass and Treble when playing at lower volumes.
-
+	
+PLUGIN_SQUEEZEDSP_LOUDLEVEL
+	EN	Listening Level
+	
+PLUGIN_SQUEEZEDSP_LOUDLEVEL_HELP
+	EN	Measure the db level at 1000 Hz when playing at lower volumes, or use 70 db as a default.
+	
 PLUGIN_SQUEEZEDSP_LOUDNESS_OFF
 	EN	(Off)
 
@@ -75,6 +81,13 @@ PLUGIN_SQUEEZEDSP_BALANCE
 
 PLUGIN_SQUEEZEDSP_BALANCE_HELP
 	EN	Balance -  Moving the slider left of centre decreases left channel gain and right decreases the right channel. Double-click to recentre the slider. 
+	
+	
+PLUGIN_SQUEEZEDSP_WIDTH
+	EN	Width
+
+PLUGIN_SQUEEZEDSP_WIDTH_HELP
+	EN	Width -  Moving the slider left of centre decreases width effect and right increases width effect. Double-click to recentre the slider. 	
 
 PLUGIN_SQUEEZEDSP_DELAY
 	EN	Delay (ms)

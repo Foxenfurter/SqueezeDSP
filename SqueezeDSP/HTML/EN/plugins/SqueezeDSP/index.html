@@ -18,8 +18,8 @@
 <!--Now let's split out the libraries and stylese-->
 <link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_03.css"/>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_06.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_02.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_07.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_03.js"></script>
 <style>
 
 
@@ -230,6 +230,20 @@
 			 </TD>
 			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Balance" onChange="valInputDecimal(this);" ></Input></TD>
 		</TR>
+		<TR id="control_Width" inc="0.1">
+			<TD class="rowTitle">
+				<div class="tooltip"  >
+					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_WIDTH" | string %]</Output>
+							<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_WIDTH_HELP" | string %]</span>
+				</div>	
+			</TD>
+			<TD class="Slide">
+					<input  class="range" type="range"   orient="horizontal"  min="-12" max="12" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Width" ></Input>
+					<Output id="WidthBubble" class="bubble" ></Output>
+			 </TD>
+			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Width" onChange="valInputDecimal(this);" ></Input></TD>
+		</TR>
+
 	</TABLE>
 	<TABLE class="table-container"   >	
 		<TR id="control_Loudness.enabled" >
@@ -262,8 +276,25 @@
 
 			<TD>
 			</TD>
-			
 		</TR>
+	</TABLE>
+	 <TABLE class="table-container"  id="control_Loudness"  >	
+		<TR>
+		
+			<TD class="rowSubTitle">
+				<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL_HELP" | string %]</span>
+				</div>		
+			</TD>
+			<TD class="Slide">
+					<input  class="range" type="range"   orient="horizontal"  min="50" max="85" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Loudness.listening_level" ></Input>
+					<Output id="Loudness.listening_levelBubble" class="bubble" ></Output>
+			 </TD>
+			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="50" max="85" step="0.1" id="val_Loudness.listening_level" onChange="valInputDecimal(this);" ></Input></TD>
+		</TR>
+<TR>
+
+
+
 	</TABLE>
 	<TABLE id="control_Loudness" class="table-container" >
 			<!-- Placeholder -->	

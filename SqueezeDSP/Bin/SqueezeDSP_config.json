@@ -1,10 +1,1 @@
-{
-   "settings" : {
-      "debug" : "false",
-      "dither" : "1",
-      "gain" : "-12",
-      "partitions" : "2",
-      "convolvergain" : "-2",
-      "logFile" : "C:\\ProgramData\\Squeezebox\\Logs\\squeezedsp.log"
-   }
-}
+{"settings":{"tail":"true","logFile":"C:\\ProgramData\\Squeezebox\\Logs\\squeezedsp.log","partitions":"0","dither":"1","soxExe":"E:\\GitHub\\slimserver-win64\\Bin\\MSWin32-x64-multi-thread\\sox.exe","gain":"-9","debug":"false","convolvergain":"-6"}}

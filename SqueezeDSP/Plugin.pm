@@ -13,7 +13,11 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
-	
+	0.1.06	Fox: Revised Binary, impulse loaded and resampled via SoX with no temp file used, SoX resampler was more accurate than new internal one.
+				Convolver code for Impulses revised to use Externl FFT.Calculation as this seems more accurate
+				A number of code tweaks, suggested for improving speed. Mainly optimising loops.
+				Corrected an issue with Low Pass filter, which generated rubbish when approaching Nyquist frequency.
+				Added Loudness fine-tuning and Width processing, and this needed amendments to UI and Perl Script	
 	0.1.05	Fox: New Binary no longer using SoX wrapped but internal library instead. Amending this code to automatically update binaries
 	0.1.04	Fox: Code added in to remove native conversion and competing flac conversions so that SqueezeDSP is the default
 				 this code was reworked from C3P0 plugin.
@@ -71,8 +75,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.04";
-my $binversion = "0_1_05";
+my $revision = "0.1.06";
+my $binversion = "0_1_06";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -487,9 +491,9 @@ sub initPlugin
 	#do any app config settings, simplifies handover to SqueezeDSP app
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP_config.json');
 	
-	#my $soxbinary = Slim::Utils::Misc::findbin('sox');
+	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	#needs updating to amend json...
-	#amendPluginConfig($appConfig, 'soxExe', $soxbinary);
+	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
 	# find folder for log file
 
 	$logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
@@ -919,10 +923,7 @@ sub getPref
 	my $returnval;
 			if ( $prefName eq "Delay.delay" ) { $returnval =  $myConfig->{Client}->{Delay}->{delay}  ; }
 		elsif  ( $prefName eq  "Loudness.enabled" ) { $returnval =  $myConfig->{Client}->{Loudness}->{enabled}  ; }
-		elsif  ( $prefName eq  "Loudness.low_boost" ) { $returnval =  $myConfig->{Client}->{Loudness}->{low_boost}  ; }
-		elsif  ( $prefName eq  "Loudness.high_boost" ) { $returnval =  $myConfig->{Client}->{Loudness}->{high_boost}  ; }
-		elsif  ( $prefName eq  "Loudness.reference_level" ) { $returnval =  $myConfig->{Client}->{Loudness}->{reference_level}  ;}
-		elsif  ( $prefName eq  "Loudness.ramp_time" ) { $returnval =  $myConfig->{Client}->{Loudness}->{ramp_time}  ; }
+		elsif  ( $prefName eq  "Loudness.listening_level" ) { $returnval =  $myConfig->{Client}->{Loudness}->{listening_level}  ;}
 		elsif  ( $prefName eq  "Highpass.enabled"  )   {    $returnval =  $myConfig->{Client}->{Highpass}->{enabled}  ;      }
 		elsif  ( $prefName eq  "Highpass.freq"  )   {    $returnval =  $myConfig->{Client}->{Highpass}->{freq}  ;      }
 		elsif  ( $prefName eq  "Highpass.q"  )   {    $returnval =  $myConfig->{Client}->{Highpass}->{q}  ;      }
@@ -955,31 +956,10 @@ sub setPref
 	my $myConfig = LoadJSONFile ($file);
 	debug( "setPref " . $prefName . "=" . $prefValue );
 	# Control structure is not flat!
-		if ( $prefName eq "Delay.delay" )
-		{
-			debug( "setPref in Delay Delay " . $prefName . " = " . $prefValue );
-			$myConfig->{Client}->{Delay}->{delay} = $prefValue ;
-		}
-		elsif  ( $prefName eq  "Loudness.enabled" )
-		{
-			$myConfig->{Client}->{Loudness}->{enabled} = $prefValue ;			
-		}
-		elsif  ( $prefName eq  "Loudness.low_boost" )
-		{
-			$myConfig->{Client}->{Loudness}->{low_boost} = $prefValue ;			
-		}
-		elsif  ( $prefName eq  "Loudness.high_boost" )
-		{
-			$myConfig->{Client}->{Loudness}->{high_boost} = $prefValue ;			
-		}
-		elsif  ( $prefName eq  "Loudness.reference_level" )
-		{
-			$myConfig->{Client}->{Loudness}->{reference_level} = $prefValue ;			
-		}
-		elsif  ( $prefName eq  "Loudness.ramp_time" )
-		{
-			$myConfig->{Client}->{Loudness}->{ramp_time} = $prefValue ;			
-		}
+	# only use this for more complicated settings
+		if     ( $prefName eq "Delay.delay" ) {		$myConfig->{Client}->{Delay}->{delay} = $prefValue ;		}
+		elsif  ( $prefName eq  "Loudness.enabled" ) {	$myConfig->{Client}->{Loudness}->{enabled} = $prefValue ;	}		
+		elsif  ( $prefName eq  "Loudness.listening_level" ) {$myConfig->{Client}->{Loudness}->{listening_level} = $prefValue ;	}
 		elsif  ( $prefName eq  "Highpass.enabled"  )   {    $myConfig->{Client}->{Highpass}->{enabled} = $prefValue ;      }
 		elsif  ( $prefName eq  "Highpass.freq"  )   {    $myConfig->{Client}->{Highpass}->{freq} = $prefValue ;      }
 		elsif  ( $prefName eq  "Highpass.q"  )   {    $myConfig->{Client}->{Highpass}->{q} = $prefValue ;      }
@@ -1088,15 +1068,12 @@ sub loadPrefs
 	
 	$myConfig->{Client}->{Bypass} = $doc->{Client}->{Bypass} ;
 	$myConfig->{Client}->{Balance} = $doc->{Client}->{Balance} ;
+	$myConfig->{Client}->{Width} = $doc->{Client}->{Width} ;
 	$myConfig->{Client}->{Delay}->{delay} = $doc->{Client}->{Delay}->{delay} ;
 	$myConfig->{Client}->{Delay}->{units} = $doc->{Client}->{Delay}->{units} ;
 	$myConfig->{Client}->{EQBands} = $doc->{Client}->{EQBands};
 	$myConfig->{Client}->{Loudness}->{enabled} = $doc->{Client}->{Loudness}->{enabled} ;
-	$myConfig->{Client}->{Loudness}->{low_boost} =$doc->{Client}->{Loudness}->{low_boost} ;	
-	$myConfig->{Client}->{Loudness}->{low_boost} =$doc->{Client}->{Loudness}->{low_boost} ;			
-	$myConfig->{Client}->{Loudness}->{high_boost} = $doc->{Client}->{Loudness}->{high_boost} ;
-	$myConfig->{Client}->{Loudness}->{reference_level} = $doc->{Client}->{Loudness}->{reference_level} ;			
-	$myConfig->{Client}->{Loudness}->{ramp_time} = $doc->{Client}->{Loudness}->{ramp_time} ;	
+	$myConfig->{Client}->{Loudness}->{listening_level} = $doc->{Client}->{Loudness}->{listening_level} ;			
 	
 	$myConfig->{Client}->{Highpass}->{enabled} = $doc->{Client}->{Highpass}->{enabled} ;
 	$myConfig->{Client}->{Highpass}->{freq} = $doc->{Client}->{Highpass}->{freq} ;
@@ -1210,8 +1187,10 @@ sub defaultPrefs
 	$p = 'Bypass';          	setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;
 	$p = 'EQBands'; 		 	setBandCount( $client, 2 ) 	unless  defined ( getPref( $client, $p ))	;       
 	#$p = 'Loudness';       	setPref( $client, $p, 0 )  ; #unless getPref( $client, $p ); }
-	$p = 'Balance';          	setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;      
+	$p = 'Balance';          	setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;
+	$p = 'Width';          		setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;           
 	$p = 'Loudness.enabled'; 	setPref( $client, $p, 0 )   unless defined ( getPref( $client, $p ))	;    
+	$p = 'Loudness.listening_level'; 	setPref( $client, $p, 70 )   unless defined ( getPref( $client, $p ))	;    
 	$p = 'Preamp'; 			    setPref( $client, $p, -5 ) unless defined ( getPref( $client, $p ))	;
 	$p = 'Delay.delay';  	    setPref( $client, $p, 0 )  	unless defined ( getPref( $client, $p ))	;  
 	$p = 'Highpass.enabled';    setPref( $client,$p, 0 ) 	unless defined ( getPref( $client, $p ))	;   
@@ -1318,10 +1297,12 @@ sub currentQuery
 	$request->addResult("Balance",     $myConfig->{Client}->{Balance} );
 	
 	$request->addResult("Bypass",     $myConfig->{Client}->{Bypass} );
+	$request->addResult("Width",     $myConfig->{Client}->{Width} );
 	$request->addResult("Delay.delay", $myConfig->{Client}->{Delay}->{delay} );
 	$request->addResult("Delay.units", $myConfig->{Client}->{Delay}->{units} );
 	#problematics
 	$request->addResult("Loudness.enabled", $myConfig->{Client}->{Loudness}->{enabled} );
+	$request->addResult("Loudness.listening_level", $myConfig->{Client}->{Loudness}->{listening_level} );
 	
 	$request->addResult("Highpass.enabled" , $myConfig->{Client}->{Highpass}->{enabled}) ;
 	$request->addResult("Highpass.freq" , $myConfig->{Client}->{Highpass}->{freq}) ;
