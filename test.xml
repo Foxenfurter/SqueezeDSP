@@ -21,7 +21,7 @@
 		  
 		  <change>0.1.04c - amended binary so that faad processes don't hang.
 		  </change>	
-		  <change>New Feature - Load PEQ settings from REW (Mono Only); Fixed issue with PEQ being added with odd defaults; 	Fixed intermittent issues resetting PEQ Bands; New Player has default Settings created on detection; Cosmetic changes; added editable outpied fields.  	
+		  <change>New Feature - Load PEQ settings from REW (Mono Only); Fixed issue with PEQ being added with odd defaults; Fixed intermittent issues resetting PEQ Bands; New Player has default Settings created on detection; Cosmetic changes; added editable outpied fields.  	
 		  </change>
 	  </changes>
     </plugin>
