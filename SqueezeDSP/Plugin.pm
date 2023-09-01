@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.07	Fox: Amended mechanism for deriving the settings folder by passing it from the plugin script to the binary via the config file. This should enable MacOs install to work
 	0.1.06	Fox: Revised Binary, impulse loaded and resampled via SoX with no temp file used, SoX resampler was more accurate than new internal one.
 				Convolver code for Impulses revised to use Externl FFT.Calculation as this seems more accurate
 				A number of code tweaks, suggested for improving speed. Mainly optimising loops.
@@ -75,8 +76,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.06";
-my $binversion = "0_1_06";
+my $revision = "0.1.07";
+my $binversion = "0_1_07";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -490,7 +491,9 @@ sub initPlugin
 	housekeeping();
 	#do any app config settings, simplifies handover to SqueezeDSP app
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP_config.json');
-	
+	# add settings folder, MacOS is inconsistent hence we need to pass the value
+	amendPluginConfig($appConfig, 'pluginDataFolder', $pluginDataDir);
+
 	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	#needs updating to amend json...
 	amendPluginConfig($appConfig, 'soxExe', $soxbinary);
