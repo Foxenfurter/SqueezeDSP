@@ -4,15 +4,18 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-   <plugin name="SqueezeDSP" version="0.1.06c" minTarget="7.8.0" maxTarget="*">
+   <plugin name="SqueezeDSP" version="0.1.07a" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Test version 0.1.06c) - provides EQ and DSP. Loudness fine tuning and width added </desc>
+      <desc lang="EN">DSP for Squeezebox server (Test version 0.1.07a) - provides EQ and DSP. Fixed Environment for MacOS</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.06c.zip</url>
-      <sha>96bc0fcc9a9f8035b78da64aac49223f69344ec1</sha>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.07a.zip</url>
+      <sha>57f162d94d40f30d2c044db75ac00a35ba9b9eae</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 		<changes>
+		  <change>0.1.07a - Amended settings so that settings folder is passed via the config file. This fixes issue for MacOS where original code did not work.
+		  </change>
+	
 		  <change>0.1.06c - Reverted to my WAV file loader and re-wrote resampler, testng via REW and through audio showed this was more accurate that REW. Tuned Normailzation gain settings so that they are consistent
 		  </change>
 		  <change>0.1.06a - Loudness fine tuning, Width Filter added. Some issues fixed, mainly resampling Impulse should be better.
