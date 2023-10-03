@@ -8,6 +8,8 @@ Processing is designed for mono or Stereo signals and can be configured on a per
 Audio formats supported  - includes a custom converstion profile for the following formats: aac, aif, alc, alcx, ape, flc, mov, mp3, mp4, mp4x, mpc, ogg, ogf, ops, spt, wav, wma, wmal, wmap, wvp 
 
 DSD, MQA are not supported
+
+Streaming from Qobuz works with the limitation that skipping/pausing within a track will cause the player to move onto the next track.
  
 depending upon player output is 24 bit flac or 16 bit wav file
 
