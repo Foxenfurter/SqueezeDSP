@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.10";
+	my $configrevision = "0.0.11";
 	return $configrevision;
 }
 
@@ -23,6 +23,7 @@ sub get_config_revision
 # v.08 aif not being used in preference to default, change command header
 # v.09 amended settings for Spotty, use URL not FILE fixed bit rate and removed reliance on SoX for PCM to Wav conversion
 # v.10 amended settings for mp3, use sox instead of lame as problem with skipping within a track.
+# v.11 amended settings for aif, use sox instead of flac for 24 bit, wasn't working and brings it into line with 16 bit.
 
 sub template_WAV16
 {
@@ -108,9 +109,8 @@ aac flc * $CLIENTID$
 	[faad] -q -w -f 1 $FILE$ | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 aif flc * $CLIENTID$
-	# IFT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -cs --totally-silent $START$ $END$ -- $FILE$ | [sox] -q -t flac - -t wav - | [$CONVAPP$]  --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
-
+	# IF
+	[sox] -t aiff $FILE$ -t wav - | [$CONVAPP$]  --id="$CLIENTID$" --wav=true --wavo=true --d=24| [flac] -cs -0 --totally-silent -
 
 alc flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
