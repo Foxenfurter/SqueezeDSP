@@ -6,7 +6,7 @@
   <plugins>
     <plugin name="SqueezeDSP" version="0.1.08d" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.08d) - provides EQ and DSP. Spotty fix for casting, mp3 & aif change too</desc>
+      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.08d) - provides EQ and DSP. Spotty fix for casting, mp3, aif change too</desc>
 
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.08d.zip</url>
       <sha>d51a59c69f9c8a65800442529459f9a8599da56b</sha>
