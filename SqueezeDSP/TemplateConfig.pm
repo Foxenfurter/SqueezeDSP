@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.08";
+	my $configrevision = "0.0.09";
 	return $configrevision;
 }
 
@@ -21,6 +21,7 @@ sub get_config_revision
 # amended aif file, now playing (bit of a long path); added mp4x and alcx
 # v.07 added in mapping for ogf and corrected spt wav mapiing for 16 bit
 # v.08 aif not being used in preference to default, change command header
+# v.09 amended settings for Spotty, use URL not FILE fixed bit rate and removed reliance on SoX for PCM to Wav conversion
 
 sub template_WAV16
 {
@@ -80,7 +81,7 @@ ogf wav *  $CLIENTID$
 
 spt wav * $CLIENTID$
 	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
+	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$ | [SqueezeDSP] --id=$CLIENTID$ --wav=false --r=44100 --wavo=true --d=16
 
 wav wav * $CLIENTID$
 	# FT:{START=-skip %t}
@@ -161,10 +162,9 @@ ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
 	[sox] -q -t opus $FILE$ -t wav - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
-
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $FILE$ --disable-discovery --disable-audio-cache $START$ | [sox]  -q -t raw -b 16 -e signed -c 2 -r 44.1k -L - -t wav  - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
+	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache  $START$ | [SqueezeDSP] --id=$CLIENTID$ --wav=false --r=44100 --wavo=true --d=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
 
 wav flc * $CLIENTID$
 	# FT:{START=-skip %t}

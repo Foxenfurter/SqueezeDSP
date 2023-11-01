@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.08	Fox: Amended templates for Spotty and prettified the JSON settings at last
 	0.1.07	Fox: Amended mechanism for deriving the settings folder by passing it from the plugin script to the binary via the config file. This should enable MacOs install to work
 	0.1.06	Fox: Revised Binary, impulse loaded and resampled via SoX with no temp file used, SoX resampler was more accurate than new internal one.
 				Convolver code for Impulses revised to use Externl FFT.Calculation as this seems more accurate
@@ -50,9 +51,10 @@ use File::Spec::Functions qw(:ALL);
 use File::Path;
 use File::Copy;
 use FindBin qw($Bin);
-use XML::Simple;
+#use XML::Simple;
 #use JSON;
-use JSON::XS::VersionOneAndTwo;
+#use JSON::XS::VersionOneAndTwo;
+use JSON::XS;
 #use JSON::XS qw(decode_json);
 use Data::Dumper;
 use Slim::Utils::Log;
@@ -76,7 +78,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.07";
+my $revision = "0.1.08";
 my $binversion = "0_1_07";
 use vars qw($VERSION);
 $VERSION = $revision;
@@ -542,10 +544,9 @@ sub SaveJSONFile
 	my $myoutputJSONfile = shift;
 	
 	open my $fh, ">",$myoutputJSONfile;
-#	print $fh to_json($myinputData);
-	print $fh encode_json($myinputData);
+	#print $fh encode_json($myinputData);
 	#above works, but we want nice formatting - so, which unfortunately is not installed on LMS
-	#print $fh JSON->new->pretty->encode($myinputData);
+	print $fh  JSON::XS->new->utf8->pretty->encode($myinputData);
 	
 	close $fh;
 	return ;
