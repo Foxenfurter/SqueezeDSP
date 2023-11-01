@@ -22,6 +22,7 @@ sub get_config_revision
 # v.07 added in mapping for ogf and corrected spt wav mapiing for 16 bit
 # v.08 aif not being used in preference to default, change command header
 # v.09 amended settings for Spotty, use URL not FILE fixed bit rate and removed reliance on SoX for PCM to Wav conversion
+# v.10 amended settings for mp3, use sox instead of lame as problem with skipping within a track.
 
 sub template_WAV16
 {
@@ -57,7 +58,7 @@ mov wav * $CLIENTID$
 
 mp3 wav * $CLIENTID$
 	# IFD:{RESAMPLE=--resample %D}
-	[lame] --mp3input --decode $RESAMPLE$ --silent $FILE$ - - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
+	[sox] -t mp3 $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --d=16
 
 mp4 wav * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
@@ -134,7 +135,7 @@ mov flc * $CLIENTID$
 
 mp3 flc * $CLIENTID$
 	# IFD:{RESAMPLE=--resample %D}
-	[lame] --mp3input --decode $RESAMPLE$ --silent $FILE$ - - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
+	[sox] -t mp3 $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$] --id="$CLIENTID$" --wav=true --wavo=true --d=24 | [flac] -cs -0 --totally-silent -
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
