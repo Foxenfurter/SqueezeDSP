@@ -4,12 +4,12 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.08b" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.08c" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.08b) - provides EQ and DSP. Spotty fix for casting, mp3 change too</desc>
+      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.08c) - provides EQ and DSP. Spotty fix for casting, mp3 change too</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.08b.zip</url>
-      <sha>b49e72bb39ca31ad2b09cd10dbee9ff49bc84a8a</sha>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.08c.zip</url>
+      <sha>25e0b8a27b165641de6598cb345da9b6832c0eed</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	</plugin>

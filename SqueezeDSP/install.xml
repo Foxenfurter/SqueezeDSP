@@ -3,7 +3,7 @@
   <name>PLUGIN_SQUEEZEDSP_DISPLAYNAME</name>
   <description>PLUGIN_SQUEEZEDSP_MODULEDESC</description>
   <module>Plugins::SqueezeDSP::Plugin</module>
-  <version>0.1.08b</version>
+  <version>0.1.08c</version>
 
   <creator>Jonathan Fox (Foxenfurter/Foxesden)</creator>
   <email></email>
