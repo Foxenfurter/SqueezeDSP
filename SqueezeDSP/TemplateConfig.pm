@@ -5,7 +5,7 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.0.09";
+	my $configrevision = "0.0.10";
 	return $configrevision;
 }
 
