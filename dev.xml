@@ -4,7 +4,7 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.08d" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.09a" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.09a) - provides EQ and DSP. Spotty fix for casting, mp3, aif change too</desc>
 
