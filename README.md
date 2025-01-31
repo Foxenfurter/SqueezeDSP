@@ -43,4 +43,4 @@ Support crossover design
 Support multi-channel audio
 re-write processor in Rust
 
-
+See WIKI for more info https://github.com/Foxenfurter/SqueezeDSP/wiki
