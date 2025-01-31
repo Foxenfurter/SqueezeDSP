@@ -13,6 +13,8 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	
+	0.1.09	Fox: Cleaned up code for updating the preset for a player, so that it won't keep updating for Smart TVs that run polling processes. Added cleanup for preset files deleted bands.
 	0.1.08	Fox: Amended templates for Spotty and prettified the JSON settings at last
 	0.1.07	Fox: Amended mechanism for deriving the settings folder by passing it from the plugin script to the binary via the config file. This should enable MacOs install to work
 	0.1.06	Fox: Revised Binary, impulse loaded and resampled via SoX with no temp file used, SoX resampler was more accurate than new internal one.
@@ -78,7 +80,7 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.08";
+my $revision = "0.1.09";
 my $binversion = "0_1_07";
 use vars qw($VERSION);
 $VERSION = $revision;
@@ -504,10 +506,19 @@ sub initPlugin
 	$logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
 
 	amendPluginConfig($appConfig, 'logFile',$logfile);
+
+
 	# Subscribe to player connect/disconnect messages
+=pod
 	Slim::Control::Request::subscribe(
 		\&clientEvent,
 		[['client'],['new','reconnect','disconnect']]
+	);
+=cut
+# new works for the first time a client /  server is connected this session or for brand new clients
+		Slim::Control::Request::subscribe(
+		\&clientEvent,
+		[['client'],['new']]
 	);
 }
 
@@ -689,11 +700,7 @@ sub initConfiguration
 	my $client = shift;
 	debug( "client " . $client->id() ." name " . $client->name ." initializing" );
 
-	# Check the current and previous installed versions of the plugin,
-	# in case we need to upgrade the prefs store (for this client)
-	#
-	my $prevrev = $prefs->client($client)->get( 'version' ) || '0.0.0.0';
-	
+
 
 	# Write this .conf with sections for every client
 	# (because the convolver needs clientID as parameter)
@@ -719,6 +726,16 @@ sub initConfiguration
 	# Is there an existing transcode configuration file?
 	@origLines = ();
 	$configPath = newConfigPath();
+	 sleep 1; # Wait for 1 second - been issues with the check for configpath not working and then getting stuck in a loop
+	debug ( "Config Path: " . $configPath) ;  # Print the path
+
+if ( ! -e $configPath ) { # Check if the file or directory exists at all
+    debug ( "Error:" .  $configPath . " does not exist." );
+}
+if ( ! -f $configPath ) {
+    debug ( "Error: " . $configPath ." is not a regular file." ); # More specific
+}
+
 	if( -f $configPath )
 	{
 		# Does the convert file need to be upgraded?
@@ -797,7 +814,7 @@ sub initConfiguration
 		@foundClients = @clientIDs;
 	}
 		
-	upgradePrefs( $prevrev, $PRE_0_9_21, @foundClients );
+	upgradePrefs(  $PRE_0_9_21, @foundClients );
 	removeNativeConversion();
 	return unless $needUpgrade;
 
@@ -1169,7 +1186,7 @@ sub setBandCount
 		# Delete any unused prefs
 		if ( $prevcount > $bandcount )
 		{
-			for( my $n=$bandcount; $n<$prevcount; $n++ )
+			for( my $n=$bandcount; $n<=$prevcount; $n++ )
 			{
 				$myBand = 'EQBand_' . $n;
 				debug( "Delete Band" . $myBand );
@@ -1179,6 +1196,28 @@ sub setBandCount
 		}
 	}
 	$myConfig->{Client}->{EQBands} = $bandcount;
+
+	#Cleanup - there was a bug in the previous version that left a lot of blank bands undeleted.
+# Find the maximum 'n' in EQ_Band_n
+
+my $max_n = 0;
+my $myBand = "";
+foreach my $key (keys %{$myConfig->{Client}}) {
+    if ($key =~ /^EQBand_(\d+)$/) { 
+        my $n = $1; 
+        $max_n = $n if $n > $max_n; 
+    }
+}
+
+# Delete any unused prefs
+if ( $max_n  > $bandcount ) {
+    for( my $n = $bandcount; $n <= $max_n; $n++ ) { 
+        $myBand = 'EQBand_' . $n;
+        debug( "Delete Band" . $myBand );
+        delete $myConfig->{Client}->{$myBand};
+    }
+}
+
 	SaveJSONFile ($myConfig, $myJSONFile );
 }
 
@@ -1219,16 +1258,28 @@ sub upgradePrefs
 {
 	# Going to run this each time the server starts and update revision number for each active client
 	# 
-	my ( $prevrev, $PRE_0_9_21, @clientIDs ) = @_;
-	debug( "upgrade from " . $prevrev . " to " . $revision );
+	my ( $PRE_0_9_21, @clientIDs ) = @_;
+	
 	#return if ( $prevrev eq $revision ) && !$PRE_0_9_21;
 	
 	foreach my $clientID ( @clientIDs )
 	{
 		debug( "client " . $clientID );
 		my $client = Slim::Player::Client::getClient( $clientID );
+# Check IMMEDIATELY after getClient()
+    unless (defined($client)) 
+		{  # Or if (not defined $client) {
+        print "Error: Could not get client object for ID: " . $clientID;
+        next; # Skip to the next client ID
+    	}	
+		# Check the current and previous installed versions of the plugin,
+		# in case we need to upgrade the prefs store (for this client)
+		#
+		my $myJSONFile = getPrefFile( $client );
+		
+		# debug( "client " . $client->id() ." previous version " . $prevrev );
 		#create a player json file with default settings.
-		my $myJSONFile = catdir( $pluginSettingsDataDir, join('_', split(/:/, $clientID)) . ".settings.json" );
+
 		#my $myJSONFile = getPrefFile( $client );
 		unless( -f $myJSONFile )
 		{
@@ -1239,13 +1290,26 @@ sub upgradePrefs
 			SaveJSONFile ($myDefault, $myJSONFile );
 			defaultPrefs( $client );
 		}
+
+		my $myConfig = LoadJSONFile ($myJSONFile);
+		debug ( $clientID . " Config File " . $myJSONFile . " loaded" );
+		my $prevrev = $myConfig->{Client}->{Version};
+		# my $prevrev = $prefs->client($client)->get( 'Version' ) || '0.0.0.0';
+		
 	
 		#Now touch the version numbers	
 		if( defined( $client ) )
 		{
-			#unless( $prevrev eq $revision )
+			if ( $prevrev eq $revision )
 			{
+				debug ( "upgrade from " . $prevrev . " not required " )	;
+			}
+		
+			else   
+			{
+				debug( "upgrade from " . $prevrev . " to " . $revision );
 				setPref( $client, "Version", $revision );
+			
 			}
 		}
 	}
@@ -1323,8 +1387,8 @@ sub currentQuery
 	$request->addResult("Lowshelf.gain" , $myConfig->{Client}->{Lowshelf}->{gain}) ;
 	$request->addResult("Lowshelf.slope" , $myConfig->{Client}->{Lowshelf}->{slope}) ;
 	
-	
-	# The current EQ freq/gain values
+	$request->addResult("Last_preset", $myConfig->{Client}->{Last_preset});
+		# The current EQ freq/gain values
 	my $myBand = "";
 	my $cnt = 0;
 	for( my $n = 0; $n < $bandcount; $n++ )

@@ -18,8 +18,8 @@
 <!--Now let's split out the libraries and stylese-->
 <link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_03.css"/>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_07.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_03.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_08.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_04.js"></script>
 <style>
 
 
@@ -114,7 +114,7 @@
 					</div>
 				</TD>
 			<TD class="rowBody">
-				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.json','');  NewFieldValue('Preset', this, true); outputlist(''); "  >
+				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.json','');  NewFieldValue('Last_preset', edt_NewPreset, false); NewFieldValue('Preset', this, true);  outputlist(''); "  >
 					<option value="-">None</option>
 				</select>
 			</TD>
@@ -134,7 +134,7 @@
 				<input class="sqdsp-edit" id="edt_NewPreset" value="None" />
 				<BR>
 				<BR>
-				<input class="sqdsp-click  button button-blue" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset)"/>
+				<input class="sqdsp-click  button button-blue" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset);  NewFieldValue('Last_preset', edt_NewPreset, false);"/>
 				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 				<input class="sqdsp-click  button button-blue" type="button" name="btn_ClearAll" value="Reset" onclick="LocalClearSettings(); outputlist('');"/>
 				
@@ -158,8 +158,9 @@
 			
 			</TD>
 			<TD class="rowBody">
-				<select class="sqdsp-select" id="sel_FIRWavFile" onchange="NewFieldValue('FIRWavFile', this, false)" >
-					<option value="-">None</option>
+	
+				<select class="sqdsp-select" id="sel_FIRWavFile" onchange="NewFieldValue('FIRWavFile', this, false);"   >
+				<option value="-">None</option>
 				</select>
 			</TD>
 			<TD class="rowSuffix"></TD >
@@ -168,6 +169,8 @@
 	</TABLE>
 	<hr>
 	<BR>
+
+	
 
 	<TABLE class="table-container" >
 		<TR id="control_Indicator" inc="0.1">	
@@ -652,7 +655,6 @@
 	</DIV>
 
 
-
 	<!-- end of page -->
 	[% END %]
 
@@ -663,7 +665,7 @@ myPlayer.value = playerid;
 
 window.setTimeout( function() {
 	Initialise();
-	GetCurrentPlayerSettings();
+	GetCurrentPlayerSettings();	
 },500);
 //initial call to view log
 GetLogSummary();
@@ -678,6 +680,7 @@ document.getElementById('rewpicker').addEventListener('change', function(e) {
 	e.target.files[0] = '';
   }
 })
+
 
 </script>
 
