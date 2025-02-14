@@ -4,7 +4,7 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-       <plugin name="SqueezeDSP" version="0.1.09a" minTarget="7.8.0" maxTarget="*">
+       <plugin name="SqueezeDSP" version="0.1.10" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server Test version 0.1.10) - provides EQ and DSP. Upgraded binary to .net 9. improvements to error handling for logging and reading prefs</desc>
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.10.zip</url>
