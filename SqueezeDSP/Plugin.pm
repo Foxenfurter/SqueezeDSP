@@ -13,7 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
-	
+	0.1.10	Fox: Initialises log file, added better error handling where it is not created as this was causing failures, added better error handling for JSON reads that were failing
 	0.1.09	Fox: Cleaned up code for updating the preset for a player, so that it won't keep updating for Smart TVs that run polling processes. Added cleanup for preset files deleted bands.
 	0.1.08	Fox: Amended templates for Spotty and prettified the JSON settings at last
 	0.1.07	Fox: Amended mechanism for deriving the settings folder by passing it from the plugin script to the binary via the config file. This should enable MacOs install to work
@@ -80,8 +80,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.09";
-my $binversion = "0_1_07";
+my $revision = "0.1.10";
+my $binversion = "0_1_08";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -120,18 +120,7 @@ my $LOUDNESSKEY = 'L';
 my $SETTINGSKEY = "-s-";
 my $PRESETSKEY = "-p-";
 my $ERRORKEY = "-";
-=pod no ambi stuff
-my $FLATNESSKEY = 'F';
-my $DEPTHKEY = 'D';     # depth   (matrix filter time alignment, under "settings")
-my $WIDTHKEY = 'W';     # width   (mid/side amplitude alignment)
 
-my $AMBANGLEKEY = "X1";
-my $AMBDIRECTKEY = "X2";
-my $AMBJWKEY = "X3";
-my $AMBROTATEZKEY = "XR1";
-my $AMBROTATEYKEY = "XR2";
-my $AMBROTATEXKEY = "XR3";
-=cut
 # the usual convolver controlled by this plugin is called SqueezeDSP - this is
 # the command inserted in custom-convert.conf
 #
@@ -143,40 +132,6 @@ my $myconfigrevision = get_config_revision();
 	
 
 
-# ------ equalization channel stuff ------
-
-
-# The Bark scale: 0, 100, 200, 300, 400, 510, 630, 770, 920, 1080, 1270, 1480, 1720, 2000, 2320, 2700, 3150, 3700, 4400, 5300, 6400, 7700, 9500, 12000, 15500
-# Or there are lots of choices for octave scales, although they maybe have less-than-optimal resolution in high mids:
-#  a440      55    110  220  440   880  1760  3520  7040  14080
-#  or ISO    62.5  125  250  500  1000  2000  4000  8000  16000     (notice the quaintly round numbers)
-#  or,       60    120  240  480   960  1920  3840  7680  15360     (we use this one, for no particular reason)
-# (of course the octaves could be subdivided to 1/3 (classic 31-band EQ) or 2/3 (15-band EQ), but that just seems silly here)
-#
-# The choices here are
-#      2-band:  bass        (0)       treble
-#      3-band:  bass        mid       treble
-#      5-band:   1     2     3     4     5
-#      9-band:   1  2  3  4  5  6  7  8  9
-# For 2-band EQ we approximate the classic Baxandall tone control by assuming "mid" is fixed at 0dB.
-# For higher numbers of bands, each band level is individually adjustable. Interpolation should use cosine shelves.
-#
-=pod
-# Lists of center frequencies for each mode
-my @fq0 = ( 60 );
-# original values
-my @fq1 = ( 960 );
-my @fq2 = ( 60, 15360 );
-my @fq3 = ( 60, 960, 15360 );
-my @fq5 = ( 60, 240, 960, 3840, 15360 );
-my @fq9 = ( 60, 120, 240, 480, 960, 1920, 3840, 7680, 15360 );
-# 15 and 31 for good measure - NOT the standard centers though
-my @fq15 = ( 25, 40, 63, 100, 160, 250, 400, 630, 1000, 1600, 2500, 4000, 6300, 10000, 16000 );
-my @fq31 = ( 20, 25, 31.5, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150, 4000, 5000, 6300, 8000, 10000, 12500, 16000, 20000 );
-=cut
-
-# ------ other globals this module ------
-
 
 my %noFunctions = ();  # const
 my $needUpgrade = 0;
@@ -186,7 +141,7 @@ my $pluginSettingsDataDir;    # <appdata>\squeezedsp\Settings     used for setti
 my $pluginImpulsesDataDir;    # <appdata>\squeezedsp\Impulses     used for room correction impulse filters
 my $pluginMatrixDataDir;      # <appdata>\squeezedsp\Matrix       used for cross-feed matrix impulse filters
 #no measurements made
-#my $pluginMeasurementDataDir; # <appdata>\squeezedsp\Measurement  used for measurement sweeps and noise samples
+
 my $pluginTempDataDir;        # <appdata>\squeezedsp\Temp         used for any temporary stuff
 my @presetsMenuChoices;
 my @presetsMenuValues;
@@ -252,64 +207,7 @@ sub valuelabel
 	return  $valu . $labl . $extra;
 }
 
-=pod
 
-sub defaultFreq
-{
-	my $client = shift;
-	my $item = shift;
-	my $bandcount = shift || getPref( $client, 'EQBands' );
-	my @bandfreqs = defaultFreqs( $client, $bandcount );
-	return $bandfreqs[$item];
-}
-
-sub defaultFreqs
-{
-	my $client = shift;
-	# re-use the existing defaults but fill in the gaps by using the next highest default set
-	# easier than re-writing or putting a full set of defaults in that no-one will use
-	# given that we are either going to increment/decrement the number of bands by one or physically overwrite the frequencies via file upload,
-	# the historic approach of defaults freqs for a set number of bands doesn't work any more.
-	
-	my $bandcount = shift || getPref( $client, 'EQBands' ) || 2;
-	my @bandfreqs = @fq2;
-	if( $bandcount==0 )
-	{
-		@bandfreqs = @fq0;
-	}
-	elsif($bandcount<=2 )
-	{
-		@bandfreqs = @fq2;
-	}
-	elsif( $bandcount==3 )
-	{
-		@bandfreqs = @fq3;
-	}
-	elsif( $bandcount<=5 )
-	{
-		@bandfreqs = @fq5;
-	}
-	elsif( $bandcount<=9 )
-	{
-		@bandfreqs = @fq9;
-	}
-	elsif( $bandcount<=15 )
-	{
-		@bandfreqs = @fq15;
-	}
-	elsif( $bandcount<=31 )
-	{
-		@bandfreqs = @fq31;
-	}
-	else
-	{
-		@bandfreqs = @fq31;
-		# Some silly number of bands.
-		# Divide up the range from 60 to 15360 anyway.  TBD
-	}
-	return @bandfreqs;
-}
-=cut
 sub newConfigPath
 {
 	my @rootdirs = Slim::Utils::PluginManager::dirsFor($thisapp,'enabled');
@@ -402,9 +300,6 @@ sub initPlugin
 
 	debug( "plugin " . $revision . " enabled" );
 	
-	# AMB and UHJ file types really are WAV
-	#Slim::Formats::Playlists->registerParser('amb', 'Slim::Formats::Wav');
-	#Slim::Formats::Playlists->registerParser('uhj', 'Slim::Formats::Wav');
 
 	# Register json/CLI functions
 	#                                                                                         |requires Client
@@ -418,9 +313,6 @@ sub initPlugin
 	Slim::Control::Request::addDispatch([$thistag . '.seteq'],                               [1, 1, 1, \&seteqCommand]);		# set an EQ value pair
 	Slim::Control::Request::addDispatch([$thistag . '.saveas'],                              [1, 1, 1, \&saveasCommand]);		# save as preset-file
 	Slim::Control::Request::addDispatch([$thistag . '.logsummary'],                          [1, 1, 0, \&logsummaryQuery]);		# read log for current player
-	#Slim::Control::Request::addDispatch([$thistag . '.topmenu'],                             [1, 1, 1, \&topmenuCommand]);		# top menu for Jive
-	#Slim::Control::Request::addDispatch([$thistag . '.settingsmenu', '_index', '_quantity'], [1, 1, 1, \&settingsmenuCommand]);	# settings sub-menu for Jive
-	#Slim::Control::Request::addDispatch([$thistag . '.ambimenu', '_index', '_quantity'],     [1, 1, 1, \&ambimenuCommand]);		# amb settings sub-menu for Jive
 
 	my $appdata;
 	#This is where preferences are stored.
@@ -444,9 +336,6 @@ sub initPlugin
 
 	$pluginMatrixDataDir = catdir( $pluginDataDir, 'MatrixImpulses' );
 	mkdir( $pluginMatrixDataDir );
-
-#	$pluginMeasurementDataDir = catdir( $pluginDataDir, 'Measurement' );
-#	mkdir( $pluginMeasurementDataDir );
 
 	$pluginTempDataDir = catdir( $pluginDataDir, 'Temp' );
 	mkdir( $pluginTempDataDir );
@@ -504,17 +393,18 @@ sub initPlugin
 	# find folder for log file
 
 	$logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
+	# create the log file if it does not exists
+if (! -e $logfile) {  # Check if the file exists
+    open my $fh, '>', $logfile or die "Could not create log file: $!";
+    close $fh; # Important to close the file handle after creation
+    debug ( 'Log file created: ' . $logfile)  ;
+} else {
+    debug ('Log file already exists: ' . $logfile)  ;
+}
 
 	amendPluginConfig($appConfig, 'logFile',$logfile);
 
 
-	# Subscribe to player connect/disconnect messages
-=pod
-	Slim::Control::Request::subscribe(
-		\&clientEvent,
-		[['client'],['new','reconnect','disconnect']]
-	);
-=cut
 # new works for the first time a client /  server is connected this session or for brand new clients
 		Slim::Control::Request::subscribe(
 		\&clientEvent,
@@ -531,7 +421,7 @@ sub housekeeping
 	unlink grep { !/\current.json/ } glob catdir ( $pluginTempDataDir , "/", '*.json');
 }
 
-sub LoadJSONFile
+sub LoadJSONFileOld
 {
 	my $myinputJSONfile = shift;
 	debug( "SqueezeDSP Loading JSON File : " . $myinputJSONfile  );
@@ -547,6 +437,33 @@ sub LoadJSONFile
 	
 	return ($myoutputData);
 	
+}
+
+sub LoadJSONFile {
+    my $myinputJSONfile = shift;
+    debug( "SqueezeDSP Loading JSON File : " . $myinputJSONfile  );
+
+    my $txt;
+	my $myoutputData;
+    eval {
+        local $/;                              			# slurp entire file
+        open my $fh, "<", $myinputJSONfile or die $!;  	# open for reading
+        $txt = <$fh>;                                 			# read and return file content
+    };
+    if ($@) {
+        debug("Error reading JSON file: $myinputJSONfile. $@");
+        return undef;
+    }
+
+    eval {
+        $myoutputData = decode_json($txt);
+    };
+    if ($@) {
+        debug("Error decoding JSON: $myinputJSONfile. $@");
+        return undef;
+    }
+
+    return ($myoutputData);
 }
 
 sub SaveJSONFile
@@ -608,9 +525,6 @@ sub clientEvent {
 		debug( $thistag . " node registered" );
 		$doneJiveInit = 1;
 	}
-
-	#my @menuItems = jiveTopMenu( $client );
-	#Slim::Control::Jive::registerPluginMenu( \@menuItems, $thistag, $client );
 
 }
 
@@ -1429,6 +1343,13 @@ sub logsummaryQuery
 	#$myfile = 'C:\ProgramData\Squeezebox\Logs\squeezedsp.log';
 	#$myfile =~ s#\\#/#g;
 	debug( "Opening log file " . $logfile . " for "  . $clientID   );
+	 # Check if the file exists BEFORE attempting to open it
+    if (! -e $logfile) {
+        debug("Log file does not exist: $logfile"); # Log the event
+        $request->addResult("trackcount", 0); # Report zero tracks
+        $request->setStatusDone();
+        return; # Return immediately with an empty dataset
+    }
 
 	open(FILE, "<$logfile") or
  	die("Could not open log file. $!\n");
