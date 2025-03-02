@@ -1231,7 +1231,7 @@ sub upgradePrefs
 			}
 		}
 	}
-)
+}
 
 
 
