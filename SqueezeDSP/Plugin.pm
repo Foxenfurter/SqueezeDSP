@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.11	Fox: New Binary experimental sopport for MacOS arm 64 native
 	0.1.10	Fox: Initialises log file, added better error handling where it is not created as this was causing failures, added better error handling for JSON reads that were failing
 	0.1.09	Fox: Cleaned up code for updating the preset for a player, so that it won't keep updating for Smart TVs that run polling processes. Added cleanup for preset files deleted bands.
 	0.1.08	Fox: Amended templates for Spotty and prettified the JSON settings at last
@@ -80,8 +81,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.10";
-my $binversion = "0_1_08";
+my $revision = "0.1.11";
+my $binversion = "0_1_09";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -260,7 +261,11 @@ sub binaries {
 	}	
 	
 	if ($os->{'os'} eq 'Darwin') {
-		return qw(/publishOsx-x64/SqueezeDSP );
+		if ($os->{'osArch'} =~ /arm64/) {
+			return qw(/publishOSX-arm64/SqueezeDSP);
+		} 
+		return qw(/publishOSX-x64/SqueezeDSP);
+		
 	}
 		
 	if ($os->{'os'} eq 'Windows') {
@@ -268,7 +273,6 @@ sub binaries {
 	}	
 	
 }
-
 
 
 # ------ slimserver delegates and initialization ------
@@ -1227,7 +1231,7 @@ sub upgradePrefs
 			}
 		}
 	}
-}
+)
 
 
 
