@@ -356,6 +356,10 @@ sub initPlugin
 	# set extension for windows
 	if (Slim::Utils::OSDetect::details()->{'os'} ne 'Windows') {
 		$binExtension = ""	;
+		# This is to make it easier to copy impulse across, not needed on windowsa
+		chmod(0777, $pluginImpulsesDataDir);
+		
+		chmod(0777, $pluginTempDataDir);
 	}		
 	if (!-e $exec) {
 		$log->warn("$exec not executable");
