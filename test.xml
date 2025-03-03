@@ -10,7 +10,7 @@
 		<change>0.1.11 - .net 9 enhanced binary compilation, improved impulse resampler normaliser with caching. Experimental OSX Arm64 native binary</change>
 	 </desc>
 <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.11c.zip</url>
-      <sha>b6247b6749175cb31d3aa6ae1d34cdae032c999b</sha>
+      <sha>2a612a596cce1b78fbbc0b1da5a516b47fbc2b13</sha>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 		<changes>
 			  <change>0.1.11 - .net 9 enhanced binary compilation, improved impulse resampler normaliser with caching. Experimental OSX Arm64 native binary
