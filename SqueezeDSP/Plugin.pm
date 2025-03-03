@@ -799,7 +799,7 @@ sub webPages
 		Slim::Web::Pages->addPageLinks("plugins", { $class->getDisplayName => 'plugins/SqueezeDSP/index.html' });
 		
 		
-		Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/plugins/SqueezeDSP/images/SqueezeDSP_svg.png' });
+		#Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/plugins/SqueezeDSP/images/SqueezeDSP_svg.png' });
 		#Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/plugins/SqueezeDSP/images/squeezedsp_col_svg.png' });
 		
 		#Slim::Web::Pages->addPageLinks("icons",   { $class->getDisplayName => '/Plugins/SqueezeDSP/SqueezeDSP.png' });
