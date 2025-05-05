@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.20	Fox: New Binary - using golang
 	0.1.11	Fox: New Binary experimental sopport for MacOS arm 64 native
 	0.1.10	Fox: Initialises log file, added better error handling where it is not created as this was causing failures, added better error handling for JSON reads that were failing
 	0.1.09	Fox: Cleaned up code for updating the preset for a player, so that it won't keep updating for Smart TVs that run polling processes. Added cleanup for preset files deleted bands.
@@ -81,8 +82,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.11";
-my $binversion = "0_1_09";
+my $revision = "0.1.20";
+my $binversion = "0_2_00";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -394,6 +395,12 @@ sub initPlugin
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP_config.json');
 	# add settings folder, MacOS is inconsistent hence we need to pass the value
 	amendPluginConfig($appConfig, 'pluginDataFolder', $pluginDataDir);
+	# add the other folders in to avoid ambiguity
+	amendPluginConfig($appConfig, 'settingsDataFolder', $pluginSettingsDataDir);
+	amendPluginConfig($appConfig, 'impulseDataFolder', $pluginImpulsesDataDir);
+	amendPluginConfig($appConfig, 'tempDataFolder', $pluginTempDataDir);
+	
+	
 
 	my $soxbinary = Slim::Utils::Misc::findbin('sox');
 	#needs updating to amend json...
@@ -616,6 +623,7 @@ sub removeNativeConversion{
 
 sub initConfiguration
 {
+
 	# called when a client first appears
 	# (not on plugin init, because we need the client ID)
 	#
