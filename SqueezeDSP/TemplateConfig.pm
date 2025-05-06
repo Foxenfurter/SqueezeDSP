@@ -58,8 +58,8 @@ mov wav * $CLIENNTID$
 	[mov123] $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 	
 mp3 wav * $CLIENNTID$
-	# IFD:{RESAMPLE=--resample %D}
-	[sox] -t mp3 $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	# IF
+	[lame] --mp3input --decode -t --silent $FILE$ - | [SqueezeDSP] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
 mp4 wav * $CLIENNTID$
 	# FT:{START=-j %s}U:{END=-e %u}
@@ -148,13 +148,7 @@ mov flc * $CLIENTID$
 	
 mp3 flc * $CLIENTID$
 	# IF
-	[lame] --mp3input --decode -t --silent $FILE$ - | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
-
-mp3 flcx * $CLIENTID$
-	# IF
-	[lame] --mp3input --decode -t --silent $FILE$ - | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$] --channels=$CHANNELS$ --bitsin=$SAMPLESIZE$  --samplerate=$SAMPLERATE$ --be=false --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
-
-
+	[lame] --mp3input --decode -t --silent $FILE$ - | [SqueezeDSP] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
