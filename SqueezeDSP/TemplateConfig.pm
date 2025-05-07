@@ -5,11 +5,11 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.02";
+	my $configrevision = "0.1.03";
 	return $configrevision;
 }
 
-
+# 1.03 fix for pausing Qobuz
 # transcode for 24-bit FLAC output (sb2, sb3, transporter)
 # aac & mp4 added by jb
 # deleted aap entry - jb
@@ -50,8 +50,8 @@ ape wav * $CLIENNTID$
 	[mac] $FILE$ - -d | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 
 flc wav * $CLIENNTID$
-	# FRIT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	# IFT:{START=--skip=%t}U:{END=--until=%v}
+	[flac] -dcs --force-raw-format --endian=little --sign=signed $START$ $END$ -- $FILE$ | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 
 mov wav * $CLIENNTID$
 	# FR
@@ -139,8 +139,8 @@ ape flc * $CLIENTID$
 	[mac] $FILE$ - -d | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
 
 flc flc * $CLIENTID$
-	# FRIT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -dcs --totally-silent $START$ $END$ -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
+	# IFT:{START=--skip=%t}U:{END=--until=%v}
+	[flac] -dcs --force-raw-format --endian=little --sign=signed $START$ $END$ -- $FILE$ | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 mov flc * $CLIENTID$
 	# FR
