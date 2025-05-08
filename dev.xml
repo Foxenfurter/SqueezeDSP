@@ -6,10 +6,10 @@
   <plugins>
     <plugin name="SqueezeDSP" version="0.1.20" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.20c) - provides EQ and DSP. Optimised build, Impulse resampler improved and caching, Experimental support for native OSX Arm64</desc>
+      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.20d) - provides EQ and DSP. Optimised build, Impulse resampler improved and caching, Experimental support for native OSX Arm64</desc>
 
-      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.20c/SqueezeDSP-0.1.20c.zip</url>
-      <sha>66de80de642e369c39a359e483c177df4e89a921</sha>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.20d/SqueezeDSP-0.1.20d.zip</url>
+      <sha>95b58265cf7522b83a2eb4a7c058dec2389d6d3d</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	</plugin>
