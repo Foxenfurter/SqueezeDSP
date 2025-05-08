@@ -7,9 +7,8 @@
       <plugin name="SqueezeDSP" version="0.1.20d" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server Test version 0.1.20d) - provides EQ and DSP. 
-		<change>0.1.20d - complete re-write of DSP process in golang. changed converter template to work with this new version</change>
 	 </desc>
-  <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.20d/SqueezeDSP-0.1.20d.zip</url>
+		<url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.20d/SqueezeDSP-0.1.20d.zip</url>
       <sha>95b58265cf7522b83a2eb4a7c058dec2389d6d3d</sha>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	  		<changes>
