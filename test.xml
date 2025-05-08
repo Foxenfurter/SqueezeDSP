@@ -11,10 +11,9 @@
 		<url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.20d/SqueezeDSP-0.1.20d.zip</url>
       <sha>95b58265cf7522b83a2eb4a7c058dec2389d6d3d</sha>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
-	  		<changes>
-			  <change>0.1.20 - complete re-write of DSP process in golang. changed converter template to work with this new version
+	  <changes>
+		  <change>0.1.20 - complete re-write of DSP process in golang. changed converter template to work with this new version
 		  </change>
-		<changes>
 			  <change>0.1.11 - .net 9 enhanced binary compilation, improved impulse resampler normaliser with caching. Experimental OSX Arm64 native binary
 		  </change>
 		 
