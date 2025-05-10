@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.21	Fox: Performance improvements to binary following profile runs test in 60% of time
 	0.1.20	Fox: New Binary - using golang
 	0.1.11	Fox: New Binary experimental sopport for MacOS arm 64 native
 	0.1.10	Fox: Initialises log file, added better error handling where it is not created as this was causing failures, added better error handling for JSON reads that were failing
@@ -82,8 +83,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.20";
-my $binversion = "0_2_00";
+my $revision = "0.1.21";
+my $binversion = "0_2_01";
 use vars qw($VERSION);
 $VERSION = $revision;
 
