@@ -42,7 +42,7 @@
 	  </changes>
 	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
 	  </plugin
-	<plugin name="SqueezeDSP" version="0.1.11d" minTarget="7.8.0" maxTarget="*">
+	<plugin name="SqueezeDSP-1.11d" version="0.1.11d" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server version 0.1.11d) - provides EQ and DSP. Number of small tweaks </desc>
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.11d.zip</url>
