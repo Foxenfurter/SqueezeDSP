@@ -40,14 +40,9 @@
 		  <change>New Feature - Load PEQ settings from REW (Mono Only); Fixed issue with PEQ being added with odd defaults; Fixed intermittent issues resetting PEQ Bands; New Player has default Settings created on detection; Cosmetic changes; added editable outpied fields.  	
 		  </change>
 	  </changes>
-<<<<<<< HEAD
 	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
 	  </plugin
 	<plugin name="SqueezeDSP-1.11d" version="0.1.11d" minTarget="7.8.0" maxTarget="*">
-=======
-</plugin>	  
-<plugin name="SqueezeDSP" version="0.1.11d" minTarget="7.8.0" maxTarget="*">
->>>>>>> 511221d91add2b6068d07ef4740f629ea8f52434
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server version 0.1.11d) - provides EQ and DSP. Number of small tweaks </desc>
       <url>https://github.com/Foxenfurter/SqueezeDSP/raw/main/SqueezeDSP-0.1.11d.zip</url>
