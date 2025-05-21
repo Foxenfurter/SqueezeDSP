@@ -82,7 +82,7 @@ ogg flc * $CLIENTID$
 
 ogf flc * $CLIENTID$
 	# IFR
-	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
+	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$]  [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16 
 
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
@@ -172,7 +172,7 @@ ogg flc * $CLIENTID$
 
 ogf flc * $CLIENTID$
 	# IFR
-	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$"  --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
