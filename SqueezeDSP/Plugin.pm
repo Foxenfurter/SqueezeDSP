@@ -13,6 +13,12 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.22	Fox: Major bug fixes to binary, including:
+				Wav Reader now handles PCM and AIF correctly as well as detecting end of data section for WAV files, this stope early termination
+				Fixed issue with Wav Reader, reading only frame samples rather than the intended block loading of 1/5 second this fixed issue with stuttering
+				Fixed issue with Convolver setting signal length = impulse length. This could cause choking on large impulses as buffers were emptied
+				Reduced buffer sizes for GO Channel processing as no longer needed, reduces memory footprint
+				
 	0.1.21	Fox: Performance improvements to binary following profile runs test in 60% of time
 	0.1.20	Fox: New Binary - using golang
 	0.1.11	Fox: New Binary experimental sopport for MacOS arm 64 native
@@ -83,8 +89,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.21";
-my $binversion = "0_2_01";
+my $revision = "0.1.22";
+my $binversion = "0_2_02";
 use vars qw($VERSION);
 $VERSION = $revision;
 

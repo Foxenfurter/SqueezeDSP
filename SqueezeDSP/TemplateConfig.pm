@@ -5,10 +5,12 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.03";
+	my $configrevision = "0.1.05";
 	return $configrevision;
 }
 
+# 1.0.5 major tidy up. SqueezeDSP can handle raw pcm and aif properly now so no need for intermediate Sox process. fixed some typos and formatting errors too, mainly on 16 bit.
+# 1.0.4 one off beta fix
 # 1.03 fix for pausing Qobuz
 # transcode for 24-bit FLAC output (sb2, sb3, transporter)
 # aac & mp4 added by jb
@@ -29,86 +31,87 @@ sub template_WAV16
 {
 	return <<'EOF1';
 
-aac wav * $CLIENNTID$
+aac flc * $CLIENTID$
 	# IF
-	[faad] -q -w -f 1 $FILE$ | [sox] -q --ignore-length -t wav - -t wav - | [$CONVAPP$] --Clientid="$CLIENTID$"  --bitsout=16
+	[faad] -q -f 2 -w $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
-aif wav * $CLIENNTID$
+aif flc * $CLIENTID$
 	# IF
-	[sox] -t aiff $FILE$ -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 
-alc wav * $CLIENNTID$
+alc flc * $CLIENTID$
 	# IFT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
-alcx wav * $CLIENNTID$
+alcx flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
-ape wav * $CLIENNTID$
+ape flc * $CLIENTID$
 	# F
-	[mac] $FILE$ - -d | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[mac] $FILE$ - -d | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
-flc wav * $CLIENNTID$
+flc flc * $CLIENTID$
 	# IFT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -dcs --force-raw-format --endian=little --sign=signed $START$ $END$ -- $FILE$ | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[flac] -dcs --force-raw-format --endian=little --sign=signed $START$ $END$ -- $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16-ignore-chunk-sizes -
 
-mov wav * $CLIENNTID$
+mov flc * $CLIENTID$
 	# FR
-	[mov123] $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[mov123] $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 	
-mp3 wav * $CLIENNTID$
+mp3 flc * $CLIENTID$
 	# IF
-	[lame] --mp3input --decode -t --silent $FILE$ - | [SqueezeDSP] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[lame] --mp3input --decode -t --silent $FILE$ - | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
-mp4 wav * $CLIENNTID$
+mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 2 -w $START$ $END$ $FILE$ | [$CONVAPP$]  [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
-mpc wav * $CLIENNTID$
+mpc flc * $CLIENTID$
 	# IR
-	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[mppdec] --silent --prev --gain 3 - - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
-ogg wav * $CLIENNTID$
+ogg flc * $CLIENTID$
 	# IFRD:{RESAMPLE=-r %D}
-	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
 ogf flc * $CLIENTID$
-	# IFRD:{RESAMPLE=-r %d}
-	[flac] --ogg -dcs -- $FILE$ | [sox] -q --ignore-length -t wav - -t wav -C 0 $RESAMPLE$ - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16  
+	# IFR
+	[flac] --ogg -dcs --force-raw-format -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
-ops wav * $CLIENNTID$
+ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
-	[sox] -q -t opus $FILE$ -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[sox] -q -t opus $FILE$ -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
-spt wav * $CLIENNTID$
+spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$  | [$CONVAPP$] --Clientid="$CLIENTID$" --formatin=PCM  --samplerate=44100 --bitsin=16  --channels=2 --bitsout=16
+	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
-wav wav * $CLIENNTID$
+wav flc * $CLIENTID$
 	# IFT:{START=-skip %t}
-	[$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
+	[$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16 
 
-wma wav * $CLIENNTID$
+wma flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
 	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 	
-wmal wav * $CLIENNTID$
+wmal flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
+	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 	
-wmap wav * $CLIENNTID$
+wmap flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
+	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
 
-wvp wav * $CLIENNTID$
+wvp flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
+	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
+
 
 EOF1
 }
@@ -120,19 +123,19 @@ sub template_FLAC24
 
 aac flc * $CLIENTID$
 	# IF
-	[faad] -q -w -f 1 $FILE$ | [sox] -q --ignore-length -t wav - -t wav - | [$CONVAPP$] --Clientid="$CLIENTID$"  --bitsout=24 | [flac] -cs --totally-silent --compression-level-0 --ignore-chunk-sizes -
+	[faad] -q -f 2 -w $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent --compression-level-0 --ignore-chunk-sizes -
 
 aif flc * $CLIENTID$
 	# IF
-	[sox] -t aiff $FILE$ -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
+	[$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 alc flc * $CLIENTID$
 	# IFT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 alcx flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 ape flc * $CLIENTID$
 	# F
@@ -140,7 +143,7 @@ ape flc * $CLIENTID$
 
 flc flc * $CLIENTID$
 	# IFT:{START=--skip=%t}U:{END=--until=%v}
-	[flac] -dcs --force-raw-format --endian=little --sign=signed $START$ $END$ -- $FILE$ | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
+	[flac] -dcs --force-raw-format --endian=little --sign=signed $START$ $END$ -- $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent --ignore-chunk-sizes -
 
 mov flc * $CLIENTID$
 	# FR
@@ -148,15 +151,15 @@ mov flc * $CLIENTID$
 	
 mp3 flc * $CLIENTID$
 	# IF
-	[lame] --mp3input --decode -t --silent $FILE$ - | [SqueezeDSP] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
+	[lame] --mp3input --decode -t --silent $FILE$ - | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 2 -w $START$ $END$ $FILE$ | [$CONVAPP$]  [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mpc flc * $CLIENTID$
 	# IR
@@ -167,8 +170,8 @@ ogg flc * $CLIENTID$
 	[sox] -t ogg $FILE$ -t wav $RESAMPLE$ - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
 
 ogf flc * $CLIENTID$
-	# IFRD:{RESAMPLE=-r %d}
-	[flac] --ogg -dcs -- $FILE$ | [sox] -q --ignore-length -t wav - -t wav -C 0 $RESAMPLE$ - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	# IFR
+	[flac] --ogg -dcs --force-raw-format -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
@@ -176,7 +179,7 @@ ops flc * $CLIENTID$
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
-	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$  | [sox] -r $SAMPLERATE$ -b  $SAMPLESIZE$ -e signed-integer -c $CHANNELS$ --endian little  -t raw - -t wav - | [$CONVAPP$] --Clientid="$CLIENTID$" |  [flac] -cs -0 --totally-silent -
+	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 wav flc * $CLIENTID$
 	# IFT:{START=-skip %t}
@@ -198,6 +201,7 @@ wmap flc * $CLIENTID$
 wvp flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
 	[wvunpack] $FILE$ -wq $START$ $END$ -o - | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
+
 
 
 EOF1
