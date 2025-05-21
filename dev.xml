@@ -11,7 +11,7 @@
 	   <sha>425ada3f0769ae72f2744fbb83fd65c728e8cd74</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
-	  	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
+		<info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
 		  <changes>Optimised transcoder, fixes to wav, pcm and aiff file loads, convolver now more efficient, reduced latency and memory footprint</changes>
 	</plugin>
   </plugins>
