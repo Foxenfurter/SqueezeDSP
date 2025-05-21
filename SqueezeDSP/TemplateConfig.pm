@@ -5,10 +5,11 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.05";
+	my $configrevision = "0.1.06";
 	return $configrevision;
 }
 
+# 1.0.6 Correction to ogf format
 # 1.0.5 major tidy up. SqueezeDSP can handle raw pcm and aif properly now so no need for intermediate Sox process. fixed some typos and formatting errors too, mainly on 16 bit.
 # 1.0.4 one off beta fix
 # 1.03 fix for pausing Qobuz
@@ -81,7 +82,7 @@ ogg flc * $CLIENTID$
 
 ogf flc * $CLIENTID$
 	# IFR
-	[flac] --ogg -dcs --force-raw-format -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
+	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
 
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
@@ -171,7 +172,7 @@ ogg flc * $CLIENTID$
 
 ogf flc * $CLIENTID$
 	# IFR
-	[flac] --ogg -dcs --force-raw-format -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}
