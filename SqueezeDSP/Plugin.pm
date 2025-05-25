@@ -13,6 +13,13 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.23	Fox: Changes to binary, Bug fixes - Disable Low/High Pass amd :ow/High Shelf filters no longer build filters
+				Loudness filter working
+				width filter gain neutral, before gain was super-boosted
+				FIR Filters are now trimmed to the point where level is -70 dBFS with a margin and windowing.
+				Fixed Minor issue with convolver when merging fir and PEQ filters
+				This seems to fix the Housecurve filter issue and results in smaller filters that are just as effective
+
 	0.1.22	Fox: Major bug fixes to binary, including:
 				Wav Reader now handles PCM and AIF correctly as well as detecting end of data section for WAV files, this stope early termination
 				Fixed issue with Wav Reader, reading only frame samples rather than the intended block loading of 1/5 second this fixed issue with stuttering
@@ -89,8 +96,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.22";
-my $binversion = "0_2_02";
+my $revision = "0.1.23";
+my $binversion = "0_2_03";
 use vars qw($VERSION);
 $VERSION = $revision;
 

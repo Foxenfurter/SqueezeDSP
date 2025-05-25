@@ -4,15 +4,15 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.22" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.23" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.22) - provides EQ and DSP</desc>
-      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.22/SqueezeDSP-0.1.22.zip</url>
-	   <sha>425ada3f0769ae72f2744fbb83fd65c728e8cd74</sha>
+      <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.23) - provides EQ and DSP</desc>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.23/SqueezeDSP-0.1.23.zip</url>
+	   <sha>5eeed51aa062303540708daca33df88329fdaf35</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 		<info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
-		  <changes>Optimised transcoder, fixes to wav, pcm and aiff file loads, convolver now more efficient, reduced latency and memory footprint</changes>
+		  <changes>Disabling and activating filters now working properly, fir filters now windowed properly</changes>
 	</plugin>
   </plugins>
 </extensions>
