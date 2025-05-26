@@ -8,11 +8,11 @@
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.23) - provides EQ and DSP</desc>
       <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.23/SqueezeDSP-0.1.23.zip</url>
-	   <sha>5eeed51aa062303540708daca33df88329fdaf35</sha>
+	   <sha>3681684ae850794c8f8b7942617e51a41e3a6da0</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 		<info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
-		  <changes>Disabling and activating filters now working properly, fir filters now windowed properly</changes>
+		  <changes>Disabling and activating filters now working properly, fir filters now windowed properly, binary shrunk</changes>
 	</plugin>
   </plugins>
 </extensions>

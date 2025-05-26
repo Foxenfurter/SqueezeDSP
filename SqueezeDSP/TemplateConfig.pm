@@ -5,10 +5,11 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.06";
+	my $configrevision = "0.1.07";
 	return $configrevision;
 }
 
+# 1.0.7 Correction to mp4 and mp4x, alc, alcx formats
 # 1.0.6 Correction to ogf format
 # 1.0.5 major tidy up. SqueezeDSP can handle raw pcm and aif properly now so no need for intermediate Sox process. fixed some typos and formatting errors too, mainly on 16 bit.
 # 1.0.4 one off beta fix
@@ -42,11 +43,11 @@ aif flc * $CLIENTID$
 
 alc flc * $CLIENTID$
 	# IFT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 alcx flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 ape flc * $CLIENTID$
 	# F
@@ -66,11 +67,11 @@ mp3 flc * $CLIENTID$
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$ | [$CONVAPP$]  [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 1 -w $START$ $END$ $FILE$ | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 mpc flc * $CLIENTID$
 	# IR
@@ -132,11 +133,11 @@ aif flc * $CLIENTID$
 
 alc flc * $CLIENTID$
 	# IFT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 alcx flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 ape flc * $CLIENTID$
 	# F
@@ -156,11 +157,11 @@ mp3 flc * $CLIENTID$
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$ | [$CONVAPP$]  [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 1 -w $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 2 -w $START$ $END$ $FILE$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mpc flc * $CLIENTID$
 	# IR
