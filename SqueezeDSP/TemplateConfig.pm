@@ -9,7 +9,7 @@ sub get_config_revision
 	return $configrevision;
 }
 
-# 1.0.8 Change to mp3 as raw format caused chipmunk chatter on talkSport
+# 1.0.8 Change to mp3 as raw format caused chipmunk chatter on talkSport, issue with wmadec decoding addressed
 # 1.0.7 Correction to mp4 and mp4x, alc, alcx formats
 # 1.0.6 Correction to ogf format
 # 1.0.5 major tidy up. SqueezeDSP can handle raw pcm and aif properly now so no need for intermediate Sox process. fixed some typos and formatting errors too, mainly on 16 bit.
@@ -100,15 +100,15 @@ wav flc * $CLIENTID$
 
 wma flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
+	[wmadec] $PATH$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM --Clientid="$CLIENTID$" --bitsout=16
 	
 wmal flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
+	[wmadec] $PATH$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM --Clientid="$CLIENTID$" --bitsout=16 
 	
 wmap flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16 
+	[wmadec] $PATH$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM --Clientid="$CLIENTID$" --bitsout=16 
 
 
 wvp flc * $CLIENTID$
@@ -190,15 +190,15 @@ wav flc * $CLIENTID$
 
 wma flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
+	[wmadec] $PATH$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 	
 wmal flc * $CLIENTID$
 	# F:{PATH=%f}R:{PATH=%F}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
+	[wmadec] $PATH$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
 	
 wmap flc * $CLIENTID$
 	# FT:{START=--skip=%t}U:{END=--until=%v}
-	[wmadec] -w $PATH$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
+	[wmadec] $PATH$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --channels=$CHANNELS$ --formatin=PCM --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
 
 
 wvp flc * $CLIENTID$
