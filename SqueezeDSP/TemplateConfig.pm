@@ -95,7 +95,7 @@ spt flc * $CLIENTID$
 	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
 wav flc * $CLIENTID$
-	# IFT:{START=-skip %t}
+	# IF
 	[$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16 
 
 wma flc * $CLIENTID$
@@ -185,7 +185,7 @@ spt flc * $CLIENTID$
 	[spotty] -n Squeezebox -c "$CACHE$" --single-track $URL$ --bitrate 320 --disable-discovery --disable-audio-cache $START$  | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 wav flc * $CLIENTID$
-	# IFT:{START=-skip %t}
+	# IF
 	[$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24  | [flac] -cs -0 --totally-silent -
 
 wma flc * $CLIENTID$
