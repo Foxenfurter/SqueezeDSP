@@ -5,10 +5,11 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.07";
+	my $configrevision = "0.1.08";
 	return $configrevision;
 }
 
+# 1.0.8 Change to mp3 as raw format caused chipmunk chatter on talkSport
 # 1.0.7 Correction to mp4 and mp4x, alc, alcx formats
 # 1.0.6 Correction to ogf format
 # 1.0.5 major tidy up. SqueezeDSP can handle raw pcm and aif properly now so no need for intermediate Sox process. fixed some typos and formatting errors too, mainly on 16 bit.
@@ -63,7 +64,7 @@ mov flc * $CLIENTID$
 	
 mp3 flc * $CLIENTID$
 	# IF
-	[lame] --mp3input --decode -t --silent $FILE$ - | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[lame] --mp3input --decode --silent $FILE$ - | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
@@ -153,7 +154,7 @@ mov flc * $CLIENTID$
 	
 mp3 flc * $CLIENTID$
 	# IF
-	[lame] --mp3input --decode -t --silent $FILE$ - | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
+	[lame] --mp3input --decode --silent $FILE$ - | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}

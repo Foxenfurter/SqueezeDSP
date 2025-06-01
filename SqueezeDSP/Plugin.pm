@@ -13,6 +13,9 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.24	Fox: Fixed issue with cleanup vs REW filters being wrong, now detects where impulse peak is at start of the file and trims accordingly
+				Extended length of PEQ filter, likely inaudible but should be more effective
+				Amended mp3 transcoder so that it works with talkSport. (lame now outputs wav rather than raw)
 	0.1.23	Fox: Changes to binary, Bug fixes - Disable Low/High Pass amd :ow/High Shelf filters no longer build filters
 				Loudness filter working
 				width filter gain neutral, before gain was super-boosted
@@ -96,8 +99,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.23";
-my $binversion = "0_2_03";
+my $revision = "0.1.24";
+my $binversion = "0_2_04";
 use vars qw($VERSION);
 $VERSION = $revision;
 
