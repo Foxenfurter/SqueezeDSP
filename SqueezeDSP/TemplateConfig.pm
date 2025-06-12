@@ -44,7 +44,7 @@ aif flc * $CLIENTID$
 	[$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 
 alc flc * $CLIENTID$
-	# IFT:{START=-j %s}U:{END=-e %u}
+	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 alcx flc * $CLIENTID$
@@ -134,7 +134,7 @@ aif flc * $CLIENTID$
 	[$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 alc flc * $CLIENTID$
-	# IFT:{START=-j %s}U:{END=-e %u}
+	# FT:{START=-j %s}U:{END=-e %u}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 alcx flc * $CLIENTID$
