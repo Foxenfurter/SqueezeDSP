@@ -8,7 +8,7 @@
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server (Dev version 0.1.25) - provides EQ and DSP</desc>
       <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.25/SqueezeDSP-0.1.25.zip</url>
-	   <sha>68d0f916eedb5809473ee60676cf38f8370f71b0</sha>
+	   <sha>5294024d4f3b4577be70bc79b2b8b9459fee153f</sha>
       <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 		<info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
