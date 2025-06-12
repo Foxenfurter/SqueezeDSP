@@ -5,10 +5,11 @@
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.08";
+	my $configrevision = "0.1.09";
 	return $configrevision;
 }
 
+# 1.0.9 alc format is sensitive to where the parameters are for faad, standardised for all faad based transcoding
 # 1.0.8 Change to mp3 as raw format caused chipmunk chatter on talkSport, issue with wmadec decoding addressed
 # 1.0.7 Correction to mp4 and mp4x, alc, alcx formats
 # 1.0.6 Correction to ogf format
@@ -36,7 +37,7 @@ sub template_WAV16
 
 aac flc * $CLIENTID$
 	# IF
-	[faad] -q -f 2 -w $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -w -f 2 $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16
 
 aif flc * $CLIENTID$
 	# IF
@@ -44,11 +45,11 @@ aif flc * $CLIENTID$
 
 alc flc * $CLIENTID$
 	# IFT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 alcx flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -w -f 1$START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 ape flc * $CLIENTID$
 	# F
@@ -68,11 +69,11 @@ mp3 flc * $CLIENTID$
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$ | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16
 
 mpc flc * $CLIENTID$
 	# IR
@@ -126,7 +127,7 @@ sub template_FLAC24
 
 aac flc * $CLIENTID$
 	# IF
-	[faad] -q -f 2 -w $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent --compression-level-0 --ignore-chunk-sizes -
+	[faad] -q -w -f 2 $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent --compression-level-0 --ignore-chunk-sizes -
 
 aif flc * $CLIENTID$
 	# IF
@@ -134,11 +135,11 @@ aif flc * $CLIENTID$
 
 alc flc * $CLIENTID$
 	# IFT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 alcx flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 ape flc * $CLIENTID$
 	# F
@@ -158,11 +159,11 @@ mp3 flc * $CLIENTID$
 
 mp4 flc * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mp4x flc  * $CLIENTID$
 	# FT:{START=-j %s}U:{END=-e %u}
-	[faad] -q -f 1 -w $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
+	[faad] -q -w -f 1 $START$ $END$ $FILE$  | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs --totally-silent -0 --ignore-chunk-sizes -
 
 mpc flc * $CLIENTID$
 	# IR

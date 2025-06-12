@@ -13,6 +13,8 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.25	Fox: Binary using sox for resampling, now that I have figured out the highest quality settings. Normaliser is based off FFT peak, as more accurate - code cleaned
+				Transcoder, fixing issue with alc where the parameter order affects whether transcoding works. 
 	0.1.24	Fox: Fixed issue with cleanup vs REW filters being wrong, now detects where impulse peak is at start of the file and trims accordingly
 				Extended length of PEQ filter, likely inaudible but should be more effective
 				Amended mp3 transcoder so that it works with talkSport. (lame now outputs wav rather than raw)
@@ -99,8 +101,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.24";
-my $binversion = "0_2_04";
+my $revision = "0.1.25";
+my $binversion = "0_2_05";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -404,10 +406,11 @@ sub initPlugin
 		}
 		#now remove the file
 		unlink $binversion;
+			#do any cleanup - this removes temp files created by the old binary
+		housekeeping();	
 	}
 	
-	#do any cleanup
-	housekeeping();
+
 	#do any app config settings, simplifies handover to SqueezeDSP app
 	my $appConfig = catdir(Slim::Utils::PluginManager->allPlugins->{$thisapp}->{'basedir'}, 'Bin',"/", 'SqueezeDSP_config.json');
 	# add settings folder, MacOS is inconsistent hence we need to pass the value
@@ -449,27 +452,12 @@ sub housekeeping
 	# Clean up temp directory as it tends to get full. Only want to get rid of filters and some json files
 	unlink glob catdir ( $pluginTempDataDir, "/",  '*.filter');
 	unlink glob catdir ( $pluginTempDataDir, "/",  '*.filter.wav');
+	# remove temp wav files as the new version has a better resampler.
+	unlink glob catdir ( $pluginTempDataDir, "/",  '*.wav');
 	# the grep step filters out files matching current.json pattern as these we want to keep!
 	unlink grep { !/\current.json/ } glob catdir ( $pluginTempDataDir , "/", '*.json');
 }
 
-sub LoadJSONFileOld
-{
-	my $myinputJSONfile = shift;
-	debug( "SqueezeDSP Loading JSON File : " . $myinputJSONfile  );
-	my $txt = do {                             			# do block to read file into variable
-		local $/;                              			# slurp entire file
-		open my $fh, "<", $myinputJSONfile or die $!;  	# open for reading
-		<$fh>;                                 			# read and return file content
-		
-	};
-	#my $myoutputData = from_json($txt);
-	my $myoutputData = decode_json($txt);
-	#print Dumper $myoutputData;
-	
-	return ($myoutputData);
-	
-}
 
 sub LoadJSONFile {
     my $myinputJSONfile = shift;
