@@ -44,7 +44,7 @@ aif flc * $CLIENTID$
 	[$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=16
 
 alc flc * $CLIENTID$
-# FT:{START=-j %s}U:{END=-e %u}D:{RESAMPLE=-r %d}
+	# FT:{START=-j %s}U:{END=-e %u}D:{RESAMPLE=-r %d}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=16 | [sox] -q -t wav - -t wav -C 0 $RESAMPLE$ -
 
 alcx flc * $CLIENTID$
@@ -134,7 +134,7 @@ aif flc * $CLIENTID$
 	[$CONVAPP$]  --Clientid="$CLIENTID$" --bitsout=24 | [flac] -cs -0 --totally-silent -
 
 alc flc * $CLIENTID$
-# FT:{START=-j %s}U:{END=-e %u}D:{RESAMPLE=-r %d}
+	# FT:{START=-j %s}U:{END=-e %u}D:{RESAMPLE=-r %d}
 	[faad] -q -w -f 1 $START$ $END$ $FILE$ | [$CONVAPP$] --Clientid="$CLIENTID$" --bitsout=24 | [sox] -q -t wav - -t flac -C 0 $RESAMPLE$ -
 
 alcx flc * $CLIENTID$
