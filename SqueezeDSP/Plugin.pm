@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.26	Fox: Found issue where there is no filter of any kind. Output runs but with zero gain.
 	0.1.25	Fox: Binary using sox for resampling, now that I have figured out the highest quality settings. Normaliser is based off FFT peak, as more accurate - code cleaned
 				Transcoder, fixing issue with alc where the parameter order affects whether transcoding works. 
 	0.1.24	Fox: Fixed issue with cleanup vs REW filters being wrong, now detects where impulse peak is at start of the file and trims accordingly
@@ -101,8 +102,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.25";
-my $binversion = "0_2_05";
+my $revision = "0.1.26";
+my $binversion = "0_2_06";
 use vars qw($VERSION);
 $VERSION = $revision;
 
