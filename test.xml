@@ -4,14 +4,15 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-      <plugin name="SqueezeDSP" version="0.1.25" minTarget="7.8.0" maxTarget="*">
+      <plugin name="SqueezeDSP" version="0.1.26" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server Test version (0.1.25) - provides EQ and DSP.</desc>
-      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.25/SqueezeDSP-0.1.25.zip</url>
-	   <sha>d38c98d5e923cce08b1db1c77ea5ed9bdc761532</sha>
-      <creator>Jonathan Fox</creator>
+      <desc lang="EN">DSP for Squeezebox server Test version (0.1.26) - provides EQ and DSP.</desc>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.26/SqueezeDSP-0.1.26.zip</url>
+	   <sha>c36964914dc63e1435ab44eee68d615a161ee2ad</sha>
+	   <creator>Jonathan Fox</creator>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	  <changes>
+		<change>0.1.26 - Fixed Error in binary where no filter selected defaults to a filter with a single zero value sample, which if used will silence the output</change>
 		<change>0.1.25 - Binary using sox for resampling, now that I have figured out the highest quality settings. Normaliser is based off FFT peak, as more accurate. Code tidy up. Transcoder, fixing issue with alc where the parameter order affects whether transcoding work</change>
 	
 	  	  <change>0.1.24 - Fixed issue with cleanup vs REW filters being wrong, Extended length of PEQ filter, minor corrections to  mp3, wmal, wav transcoder 
