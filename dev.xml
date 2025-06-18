@@ -11,7 +11,7 @@
 	  <sha>118cdf2e0c82f4a5334b6a2e22e36f54ec6fb582</sha>
 	  <changes>Error in binary where no filter selected exits early, when first convolver finishes as it tres to write tail file - fixed</changes>
       <creator>Jonathan Fox</creator>
-	  <icon>https://github.com/Foxenfurter/SqueezeDSP/blob/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp_col_svg.png</icon>
+	  <icon>https://raw.githubusercontent.com/michaelherger/Spotty-Plugin/master/HTML/EN/plugins/Spotty/html/images/93aac68fb06348598c1e67734dfaceee.png</icon>
 	  <category>tools</category>
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	<info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
