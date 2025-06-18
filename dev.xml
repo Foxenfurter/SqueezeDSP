@@ -9,7 +9,7 @@
       <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
       <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.27/SqueezeDSP-0.1.27.zip</url>
 	  <sha>118cdf2e0c82f4a5334b6a2e22e36f54ec6fb582</sha>
-	  <changes>Error in binary where no filter selected exits early, when first convolver finishes as it tres to write tail file - fixed</changes>
+	  <changes>Error in binary where no filter selected exits early, when first convolver finishes as it tries to write tail file - fixed</changes>
       <creator>Jonathan Fox</creator>
 	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>
 	  <category>tools</category>
