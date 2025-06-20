@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.28	Fox: Found issue where there is only a PEQ filter, then the checks for FIR filter cause early termination.
 	0.1.27	Fox: Found issue where there is no filter of any kind, end of processing tail handler fails and closes prematurely.
 	0.1.26	Fox: Found issue where there is no filter of any kind. Output runs but with zero gain.
 	0.1.25	Fox: Binary using sox for resampling, now that I have figured out the highest quality settings. Normaliser is based off FFT peak, as more accurate - code cleaned
@@ -103,8 +104,8 @@ use Plugins::SqueezeDSP::TemplateConfig;
 # Anytime the revision number is incremented, the plugin will rewrite the
 # slimserver-convert.conf, requiring restart.
 #
-my $revision = "0.1.27";
-my $binversion = "0_2_07";
+my $revision = "0.1.28";
+my $binversion = "0_2_08";
 use vars qw($VERSION);
 $VERSION = $revision;
 
