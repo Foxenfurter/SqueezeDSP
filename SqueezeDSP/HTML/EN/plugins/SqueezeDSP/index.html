@@ -22,7 +22,7 @@
 <!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_utils_v00_01a.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_core_v00_01a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_01a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_01b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_file_v00_01a.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_init_v00_01a.js"></script>
 
@@ -114,7 +114,8 @@ print ( $myversion );
 			<TD class="rowSuffix"><button class="sqdsp-click  button button-teal" type="button" id="btn_LoadPreset" value="Load" 
                 onclick="
                 SqueezeDSPFetchPresetSettings(sel_Preset.value, [
-                        LocalUpdateSettings,
+				NewFieldValue('Last_preset', sel_Preset.value, false),
+				LocalUpdateSettings,
                         (function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal') }),
                         SqueezeDSPSaveAll(),
                         DisplayAlert('Preset', 'Applied', 2000)
