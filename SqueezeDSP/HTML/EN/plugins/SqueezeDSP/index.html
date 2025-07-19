@@ -14,70 +14,70 @@
 
 <!-- Script for the model -->
 <script type="text/javascript" src="/html/prototype.js"></script>
- 
+<!--link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"-->
+
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_03.css"/>
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_04f.css"/>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_08a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_04.js"></script>
-<style>
-
-
-
-</style>
-
-<script>
+<!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_utils_v00_01a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_core_v00_01a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_01a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_file_v00_01a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_init_v00_01a.js"></script>
 
 
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05a.js"></script>
 
+[% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
+<!-- the style-police -->
+    
+<div style="width: 100%; min-width: 300px;margin-bottom: 6px;">
+<div class="bubble" id="myMessage">To use please select Squeeze DSP on Extras Menu</div>
+<Output><span>
+[% "PLUGIN_SQUEEZEDSP_DISPLAYNAME" | string %] 
+</span><span id="version"> 
+[% PERL %]
+my $myversion=Plugins::SqueezeDSP::Plugin->getpluginVersion();
+print ( $myversion );
+[% 	END %]
+</span>
+</Output>
+<span style="float: right;text-align: right;">
+    <Output id="ClientName"></Output><br>
+    <Output id="myPlayer"></Output>
+</span>
 
-</script>
-
-	[% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
-	<!-- the style-police -->
-		
-	<div>
-	<div class="bubble" id="myMessage">To use please select Squeeze DSP on Extras Menu</div>
-	<Output>
-	[% "PLUGIN_SQUEEZEDSP_DISPLAYNAME" | string %]  
-	[% PERL %]
-	my $myversion=Plugins::SqueezeDSP::Plugin->getpluginVersion();
-	print ( $myversion );
-	[% END %]
-	</Output>
-	<Output style="float: right;" id="ClientName"></Output>
-	<BR>
-	<Output style="float: right;" id="myPlayer"></Output>
-	<!--Output style="float: right;" id="myPlayerName">[% "PLAYER_NAME" | string %]</Output-->
-	</div>
-	<table style="width:100%;padding:0; display:none;" zzz_onresize="resizeContainer()">
-		<tr><td>
-			<div id="RestTestHost" style="margin-right:20px; height:20px; width:95%;"></div>
-		</td></tr>
-	</table>
+<!--Output style="float: right;" id="myPlayerName">[% "PLAYER_NAME" | string %]</Output-->
+</div>
+<!--table style="width:100%;padding:0; display:none;" zzz_onresize="resizeContainer()">
+    <tr><td>
+        <div id="RestTestHost" style="margin-right:20px; height:20px; width:95%;"></div>
+    </td></tr>
+</table>-->
 <!-- for Testing Rest Calls-->
 <DIV style="display : none;" id="TEST REST" style="bottom:5px;"   >
 <!-- this should help pass strings into functions within the scripts-->
 <Input id = "Freq_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]' >
 <Input id = "Gain_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]' >
 <Input id = "Q_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]' >
+<Input id = "Slope_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP" | string %]' >
+<Input id = "HighPass_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHPASS_HELP" | string %]' >
+<Input id = "LowPass_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWPASS_HELP" | string %]' >
+<Input id = "LowShelf_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWSHELF_HELP" | string %]' >
+<Input id = "HighShelf_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHSHELF_HELP" | string %]' >
+<Input id = "Peak_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_PEAK_HELP" | string %]' >
+<Input id = "Peak_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_PEAK" | string %]' >
+<Input id = "HighPass_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHPASS" | string %]' >
+<Input id = "LowPass_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWPASS" | string %]' >
+<Input id = "LowShelf_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWSHELF" | string %]' >
+<Input id = "HighShelf_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHSHELF" | string %]' >
 
-	<!--input type ="Button" onclick="InguzGetList(LocalBuildLists)" value="Get List" >
-	<input type ="Button" onclick="InguzGetSettings(LocalUpdateSettings) " value = "Get Settings" >
-	<input type ="Button" onclick="LocalShowSettings() " value = "Show Settings">
-	<input type ="Button" onclick="LocalsetValue()" value = "Set Value" >
-	<input type ="Button" onclick="LocalSaveEQBand()" value = "Save EQ Band" >
-	<input type ="Button" onclick="InguzSelectPreset()" value = "Select Preset" >
-	<input type ="Button" onclick="Initialise()" value = "Initialise" >
-
-	<input type ="Button" onclick="LocalDisplayEQ()" value="Display EQ Sliders" >
-	<input type ="Button" onclick="RestTestHost.innerText = checkInguzLib();" value = "Check Inguz" >	
-	<input type ="Button" onclick="control_NewPreset.className='Boring';" value = "Reset Animation" -->
 </DIV>
-	<!-- settings fields -->
-	<!--PRESETS-->
-	<BR>
-	<hr>
+<!-- settings fields -->
+<!--PRESETS-->
+
+ 
 	<TABLE class="table-container" >
 		<TR id="control_Bypass" >
 			<TD class="rowTitle">
@@ -89,21 +89,12 @@
 				           <input class="Check" type="checkbox" 
 							name="val_Bypass" id="DSP"
 							value="1" onclick="SwitchCheckbox(this, true); NewFieldValue ('Bypass', this, false);  ToggleControl(this, 'DSP_container', true ); " > <label for="DSP" class="Toggle" >Toggle</label>
-			
-				<!--div class="switch switch-blue">
-				<input type="radio" class="switch-input"  name="val_Bypass"  value="1" id="DSPOff" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this, 'DSP_container', true );">
-				<label for="DSPOff" class="switch-label switch-label-off">Off</label>	
-				<input type="radio" class="switch-input" name="val_Bypass"  value="0"  id="DSPOn" onclick="NewFieldValue ('Bypass', this, true); ToggleControl(this, 'DSP_container', true ); " >
-				<label for="DSPOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span>
-				</div-->
 			</TD>
-			<TD >
+			<TD class="rowSuffix">
+				<button class="sqdsp-click  button button-blue" type="button" id="btn_Apply" value="Apply" onclick="SqueezeDSPSaveAll();DisplayAlert('All Settings', 'Applied', 2000);  ">Apply</button>
 			</TD >
-			
 		</TR>
     </TABLE>
-		<BR>
 	<DIV id="DSP_container" >
 	<TABLE class="table-container" >
 		<TR  id="control_Preset">
@@ -111,17 +102,27 @@
 				<div class="tooltip"  >
 					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CHOOSE_PRESET" | string %]</Output>
 					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
-					</div>
+					</div>   
 				</TD>
 			<TD class="rowBody">
-				<select class="sqdsp-select" id="sel_Preset" onchange="edt_NewPreset.value = this.value.replace('.preset.json','');  NewFieldValue('Last_preset', edt_NewPreset, false); NewFieldValue('Preset', this, true);  outputlist(''); "  >
-					<option value="-">None</option>
-				</select>
+                <select class="sqdsp-select" id="sel_Preset" 
+                onchange="reStyleElement('btn_LoadPreset', 'button-teal', 'button-amber')">
+            <option value="-">None</option>
+        </select>
 			</TD>
-			<TD class="rowSuffix">
-			</TD >
+            
+			<TD class="rowSuffix"><button class="sqdsp-click  button button-teal" type="button" id="btn_LoadPreset" value="Load" 
+                onclick="
+                SqueezeDSPFetchPresetSettings(sel_Preset.value, [
+                        LocalUpdateSettings,
+                        (function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal') }),
+                        SqueezeDSPSaveAll(),
+                        DisplayAlert('Preset', 'Applied', 2000)
+               
+                ])
+                ">Load</button></TD >
 		</TR>
-		<TR><TD class="rowTitle"/><TD class="rowBody"/><TD class="rowSuffix"/></TR>
+		
 		<TR id="control_NewPreset">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
@@ -129,26 +130,20 @@
 				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
 				</div>	
 			</TD>
-		
 			<TD class="rowBody">
 				<input class="sqdsp-edit" id="edt_NewPreset" value="None" />
-				<BR>
-				<BR>
-				<input class="sqdsp-click  button button-blue" type="button" name="btn_NewPreset" value="Save" onclick="SetNewPreset(edt_NewPreset);  NewFieldValue('Last_preset', edt_NewPreset, false);"/>
-				&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-				<input class="sqdsp-click  button button-blue" type="button" name="btn_ClearAll" value="Reset" onclick="LocalClearSettings(); outputlist('');"/>
-				
 			</TD>
 			<TD class="rowSuffix">
-			
+                <!--We load the preset and then save it again, this ensures that the latest format is used, and the preset is
+                applied-->
+				<button class="sqdsp-click  button button-green" type="button" name="btn_NewPreset" value="Save" onclick="
+                    NewFieldValue('Last_preset', edt_NewPreset, false); 
+                    SqueezeDSPSaveAll();
+                    SetNewPreset(edt_NewPreset);  
+                ">Save</button>
 			</TD >
 		</TR>
-	</TABLE>	
-	<hr>
-	<BR>
-	
-		<!--Convolver Type Filters -->
-	<TABLE class="table-container" >
+
 		<TR id="control_FIRWavFile">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
@@ -158,19 +153,19 @@
 			
 			</TD>
 			<TD class="rowBody">
-	
-				<select class="sqdsp-select" id="sel_FIRWavFile" onchange="NewFieldValue('FIRWavFile', this, false);"   >
-				<option value="-">None</option>
-				</select>
+                <!-- For FIR Wav File -->
+                <select class="sqdsp-select" id="sel_FIRWavFile" 
+                onchange="NewFieldValue('FIRWavFile', this, false)">
+                <option value="-">None</option>
+                </select>   
 			</TD>
-			<TD class="rowSuffix"></TD >
+			<TD class="rowSuffix">                
+
+
 		</TR>
 
 	</TABLE>
-	<hr>
-	<BR>
 
-	
 
 	<TABLE class="table-container" >
 		<TR id="control_Indicator" inc="0.1">	
@@ -180,10 +175,10 @@
 					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_CLIPPING_HELP" | string %]</span>
 				</div>	
 				</TD>
-				<TD class="rowSwitch"><label for="logSummary"  class="infoTitle"></label>
+				<TD class="rowBody"><label for="logSummary"  class="infoTitle"></label>
 					<span id="logSummary"></span>
 				</TD >
-				<TD class="rowSuffix"></TD>
+				<TD class="rowSuffix">	<button class="sqdsp-click  button button-red" type="button" name="btn_ClearAll" value="Reset" onclick="LocalClearSettings(); outputlist('');">Reset</button></TD>
 			
 		</TR>
 	
@@ -199,7 +194,7 @@
 				<input  class="range" type="range"   orient="horizontal"  min="-30" max="0" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" onchange="iSlide(this)" id="Preamp" ></Input>
 				<output id="PreampBubble" class="bubble" ></output></TD>
 						
-			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-30" max="0" step="0.1"   id="val_Preamp"  ></Input></TD>
+			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-30" max="0" step="0.1"   id="val_Preamp" onchange="valInputDecimal(this);" ></Input></TD>
 			
 		</TR>
 
@@ -247,15 +242,12 @@
 			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Width" onChange="valInputDecimal(this);" ></Input></TD>
 		</TR>
 
-	</TABLE>
-	<TABLE class="table-container"   >	
 		<TR id="control_Loudness.enabled" >
 			<TD class="rowTitle">
 				<div class="tooltip"  >
 				<label for="val_Loudness.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_LOUDNESS" | string %]</label>
 										<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOUDNESS_HELP" | string %]</span>
 				</div>	
-			
 			</TD>
 
 			<TD class="rowSwitch">
@@ -264,25 +256,14 @@
 						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Loudness.enabled', this, false);  ToggleControl(this, 'control_Loudness'); " > 
 						
 				<label for="Loudness" class="Toggle" >Toggle</label>
-
-			
-				<!--div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="LoudnessOff" name="val_Loudness.enabled"  value="0"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this, 'control_Loudness' );">
-				<label for="LoudnessOff" class="switch-label switch-label-off">Off</label>
-				
-				<input type="radio"  class="switch-input" id="LoudnessOn" name="val_Loudness.enabled"  value="1"  onclick="NewFieldValue ('Loudness.enabled', this, true);ToggleControl(this, 'control_Loudness' );">
-				<label for="LoudnessOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span-->
-				</div>
-				
+			</div>				
 			</TD>
-
 			<TD>
 			</TD>
 		</TR>
-	</TABLE>
-	 <TABLE class="table-container"  id="control_Loudness"  >	
-		<TR>
+	
+	 <TR   id="control_Loudness"  >	
+		
 		
 			<TD class="rowSubTitle">
 				<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL_HELP" | string %]</span>
@@ -294,393 +275,72 @@
 			 </TD>
 			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="50" max="85" step="0.1" id="val_Loudness.listening_level" onChange="valInputDecimal(this);" ></Input></TD>
 		</TR>
-<TR>
-
-
 
 	</TABLE>
-	<TABLE id="control_Loudness" class="table-container" >
-			<!-- Placeholder -->	
-	</TABLE>
 
-	<hr>
-	<BR>
-	<!--EQ Selector -->
-	<TABLE class="table-container"   >
-		<TR  id="control_EQBands">
-
+	<TABLE class="table-container">
+		<TR id="control_PEQHeader">
 			<TD class="rowTitle">
-			<div class="tooltip"  >
-				<label for="val_EQBands" class="infoTitle" >[% "PLUGIN_SQUEEZEDSP_EQUALIZER" | string %]</label>
-				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_EQUALIZER_HELP" | string %]</span>
-			</div>	
-			</TD>
-
-				<TD>
-				<Input type="number" readonly style="width:50px" class="OutputVal" name="val_EQBands" id="val_EQBands" ></Input>&nbsp;&nbsp;
-				<input class="sqdsp-click button button-blue " type="button" name="btn_delBand" value="-" onclick="DelEQBand();"/>&nbsp;&nbsp;
-				<input class="sqdsp-click  button button-blue " type="button" name="btn_addBand" value="+" onclick="AddEQBand();"/>
-				</TD>
-				<TD>
-
-				</TD>
-		
-				<!--TD><input type="radio" name="val_EQBands" value="0"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> Off </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="2"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> 2 </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="3"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> 3 </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="5"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );">&emsp;<Output> 5 </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="9"  onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 9 </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="15" onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 15 </Output></input></TD>
-				<TD><input type="radio" name="val_EQBands" value="31" onclick="NewFieldValue ('EQBands', this, true);ToggleControl(this.value, 'control_EQ' );"> &emsp;<Output> 31 </Output></input></TD-->
-
-		</TR>
-	</TABLE>
-	<!--Equalizer -->
-		<TABLE id="control_EQ" class="table-container" >
-			<!-- This stuff will all be replaced by new EQ -->	
-		</TABLE>
-	<!--Advanced Stuff -->
-
-	<hr>
-	<BR>
-
-	<TABLE class="table-container"   >	
-		<TR id="control_Highpass.enabled"  >
-			<TD class="rowTitle" >
-				<div class="tooltip"  >
-							<label for="val_Highpass.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_HIGHPASS" | string %]</label>
-							<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_HIGHPASS_HELP" | string %]</span>
-				</div>	
-			</TD>
-
-			<TD class="rowSwitch">
-				<input class="Check" type="checkbox" 
-						name="val_Highpass.enabled" id="Highpass"
-						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Highpass.enabled', this, false);  ToggleControl(this, 'control_Highpass' ); " > 
-						
-				<label for="Highpass" class="Toggle" >Toggle</label>
-			
-			
-			<!--div class="switch switch-blue">
-				<input type="radio" class="switch-input" id="HighpassOff"  name="val_Highpass.enabled"  value="0"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this, 'control_Highpass' );"/>
-				<label for="HighpassOff" class="switch-label switch-label-off">Off</label>
-				
-				<input type="radio" class="switch-input" id="HighpassOn"  name="val_Highpass.enabled"  value="1"  onclick="NewFieldValue ('Highpass.enabled', this, true); ToggleControl(this, 'control_Highpass' );"/>
-				<label for="HighpassOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span>
-			</div-->
-				
-			</TD>
-			<TD ></TD>
-		</TR>
-
-	</TABLE>
-	<TABLE class="table-container"  id="control_Highpass"  >	
-		<TR >
-				<TD class="rowSubTitle" >
-				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]				
-				</TD>
-				<TD class="Slide">
-					<!--Frequncy slider value converted to log value-->
-					<Input  class="range" type="range"  orient="horizontal" min="0" max="100" step=".01" value=""  id="Highpass.freq"  onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this);" ></Input>
-					<output id="Highpass.freqBubble" class="bubble" ></output>
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Highpass.freq"></Input>
-					
-					<BR>
-					
-				</TD>
-			</TR>
-						<TR>
-				<TD class="rowSubTitle" >
-					<div class="tooltip"  >Q<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]</span>
-					</div>
-				</TD>
-				<TD class="Slide">
-					<input  class="range" type="range" orient="horizontal" min="0" max="12" step="0.01" value="0" onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Highpass.q"  ></Input>
-					<output id="Highpass.qBubble" class="bubble" ></output>
-					
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal" min="0" max="12" step="0.01"  id="val_Highpass.q"></Input>
-				</TD>
-				
-			</TR>
-	</TR>
-	</TABLE>
-	<hr>
-	<BR>
-	
-	<TABLE class="table-container"   >	
-		<TR id="control_Lowshelf.enabled"  >
-			<TD class="rowTitle" >
-				<div class="tooltip"  >
-					<label for="val_Lowshelf.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_LOWSHELF" | string %]</label>
-						<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOWSHELF_HELP" | string %]</span>
-				</div>	
-			</TD>
-
-			<TD class="rowSwitch">
-				<input class="Check" type="checkbox" 
-						name="val_Lowshelf.enabled" id="Lowshelf"
-						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Lowshelf.enabled', this, false);  ToggleControl(this, 'control_Lowshelf' ); " > 
-						
-				<label for="Lowshelf" class="Toggle" >Toggle</label>
-			
-				<!--div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="LowshelfOff" name="val_Lowshelf.enabled"  value="0"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this, 'control_Lowshelf' );"/>
-				<label for="LowshelfOff" class="switch-label switch-label-off">Off</label>
-
-				<input type="radio"  class="switch-input"  id="LowshelfOn"  name="val_Lowshelf.enabled"  value="1"  onclick="NewFieldValue ('Lowshelf.enabled', this, true); ToggleControl(this, 'control_Lowshelf' );"/>
-				<label for="LowshelfOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span>
-				</div-->
-			</TD>
-			<TD ></TD>
-		</TR>
-
-	</TABLE>	
-	<TABLE class="table-container"  id="control_Lowshelf"  >	
-
-			<TR >
-				<TD class="rowSubTitle">
-				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
-				</TD>
-				<TD class="Slide">
-					<!--Frequncy slider value converted to log value-->
-					<Input  class="range" type="range"  orient="horizontal" min="0" max="100" step=".01" value=""  id="Lowshelf.freq"  onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this);" ></Input>
-					<output id="Lowshelf.freqBubble" class="bubble" ></output>
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Lowshelf.freq"></Input>
-					<BR>
-					
-				</TD>
-			</TR>
-			<TR>
-				<TD class="rowSubTitle">
-				[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]
-				</TD>
-				<TD class="Slide">
-					<input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="0" onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Lowshelf.gain" ></Input>
-					<output id="Lowshelf.gainBubble" class="bubble" ></output>
-				</TD>
-			
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="-15" max="15" step="0.1" id="val_Lowshelf.gain"></Input>
-				</TD>
-			</TR>
-			<TR>
-				<TD class="rowSubTitle">				
-					<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_SLOPE" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP" | string %]</span>
-					</div>
-				</TD>
-				<TD class="Slide">
-					<input  class="range" type="range" orient="horizontal" min="0.1" max="1" step="0.1" value="0.3" onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Lowshelf.slope"  ></Input>
-					<output id="Lowshelf.slopeBubble" class="bubble" ></output>
-					
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="0.1" max="1" step="0.1" id="val_Lowshelf.slope"></Input>
-				</TD>
-				
-			</TR>
-
-	</TABLE>
-	<hr>
-	<BR>	
-
-	<TABLE class="table-container"   >	
-		<TR id="control_Highshelf.enabled"  >
-			<TD class="rowTitle" >
-				<div class="tooltip"  >
-					<label for="val_Highshelf.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_HIGHSHELF" | string %]</label>
-					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_HIGHSHELF_HELP" | string %]</span>
-				</div>	
-			</TD>
-
-			<TD class="rowSwitch" >
-						
-				<input class="Check" type="checkbox" 
-						name="val_Highshelf.enabled" id="Highshelf"
-						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Highshelf.enabled', this, false);  ToggleControl(this, 'control_Highshelf' ); " > 
-						
-				<label for="Highshelf" class="Toggle" >Toggle</label>
-			
-			
-				<!--div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="HighshelfOff" name="val_Highshelf.enabled"  value="0"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this, 'control_Highshelf' );"/>
-				<label for="HighshelfOff" class="switch-label switch-label-off">Off</label>
-
-				<input type="radio"  class="switch-input"  id="HighshelfOn"  name="val_Highshelf.enabled"  value="1"  onclick="NewFieldValue ('Highshelf.enabled', this, true); ToggleControl(this, 'control_Highshelf' );"/>
-				<label for="HighshelfOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span>
-				</div-->
-			</TD>
-			<TD ></TD>
-		</TR>
-
-	</TABLE>	
-	<TABLE class="table-container"  id="control_Highshelf"  >	
-		<TR >
-				<TD class="rowSubTitle">
-				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
-				</TD>
-				<TD class="Slide">
-					<!--Frequncy slider value converted to log value-->
-					<Input  class="range" type="range"  orient="horizontal" min="0" max="100" step=".01" value=""  id="Highshelf.freq"  onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this);" ></Input>
-					<output id="Highshelf.freqBubble" class="bubble" ></output>
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Highshelf.freq"></Input>
-					<BR>
-					
-				</TD>
-			</TR>
-			<TR>
-				<TD class="rowSubTitle">
-				[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]
-				</TD>
-				<TD class="Slide">
-					<input  class="range" type="range" orient="horizontal"  min="-15" max="15" step="0.1" value="0" onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Highshelf.gain" ></Input>
-					<output id="Highshelf.gainBubble" class="bubble" ></output>
-				</TD>
-			
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="-15" max="15" step="0.1" id="val_Highshelf.gain"></Input>
-				</TD>
-			</TR>
-			<TR>
-				<TD class="rowSubTitle">
-					<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_SLOPE" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP" | string %]</span>
-					</div>		
-				</TD>
-				<TD class="Slide">
-					<input  class="range" type="range" orient="horizontal" min="0.1" max="1" step="0.1" value="0.3" onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Highshelf.slope"  ></Input>
-					<output id="Highshelf.slopeBubble" class="bubble" ></output>
-					
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputDecimal(this);"  class="OutputVal"  min="0.1" max="1" step="0.1" id="val_Highshelf.slope"></Input>
-				</TD>
-				
-			</TR>
-
-	</TABLE>
-	<hr>
-	<BR>
-	
-	<TABLE class="table-container"   >	
-		<TR id="control_Lowpass.enabled"  >
-			<TD class="rowTitle" >
-				<div class="tooltip"  >
-					<label for="val_Lowpass.enabled"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_LOWPASS" | string %]</label>
-					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOWPASS_HELP" | string %]</span>
-				</div>	
-	
-			</TD>
-
-			<TD class="rowSwitch" >
-									
-				<input class="Check" type="checkbox" 
-						name="val_Lowpass.enabled" id="Lowpass"
-						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Lowpass.enabled', this, false);  ToggleControl(this, 'control_Lowpass' ); " > 
-						
-				<label for="Lowpass" class="Toggle" >Toggle</label>
-				
-				<!--div class="switch switch-blue">
-				<input type="radio"  class="switch-input" id="LowpassOff" name="val_Lowpass.enabled"  value="0"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this, 'control_Lowpass' );"/>
-				<label for="LowpassOff" class="switch-label switch-label-off">Off</label>
-
-				<input type="radio"  class="switch-input"  id="LowpassOn"  name="val_Lowpass.enabled"  value="1"  onclick="NewFieldValue ('Lowpass.enabled', this, true); ToggleControl(this, 'control_Lowpass' );"/>
-				<label for="LowpassOn" class="switch-label switch-label-on">On</label>
-				<span class="switch-selection"></span>
-				</div-->
-			</TD>
-			<TD ></TD>
-			</TR>
-
-		</TABLE>	
-	<TABLE class="table-container"  id="control_Lowpass"  >	
-		<TR >
-				<TD class="rowSubTitle">
-				[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]
-				</TD>
-				<TD class="Slide">
-					<!--Frequncy slider value converted to log value-->
-					<Input  class="range" type="range"  orient="horizontal" min="0" max="100" step=".01" value=""  id="Lowpass.freq"  onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this);" ></Input>
-					<output id="Lowpass.freqBubble" class="bubble" ></output>
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputLog(this);" min="20" max="20000"  class="OutputVal"   id="val_Lowpass.freq"></Input>
-
-					<BR>
-					
-				</TD>
-			</TR>
-						<TR>
-				<TD class="rowSubTitle">
-					<div class="tooltip"  >Q<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]</span>
-					</div>		
-				</TD>
-				<TD class="Slide">
-					<input  class="range" type="range" orient="horizontal" min="0" max="12" step="0.01" value="0" onpointerdown="showBubble(this)"  onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Lowpass.q"  ></Input>
-					<output id="Lowpass.qBubble" class="bubble" ></output>
-					
-				</TD>
-				<TD class="rowSuffix">
-					<Input type="number" onChange="valInputDecimal(this);" min="0" max="12" step="0.01" class="OutputVal"   id="val_Lowpass.q"></Input>
-				</TD>
-				
-			</TR>
-	</TR>
-
-	</TABLE>
-	<hr>
-				<div id="FileDrop" class = "drop_zone"
-						ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
-						ondragover="event.stopPropagation(); event.preventDefault();"
-						ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
-						DROP REW FILE HERE...<BR> -or- <BR>
-						 <label class="button  button-blue" for="rewpicker">Choose REW File</label>
-						<input
-						  type="file"
-						  id="rewpicker"
-						  accept=".txt"
-						  class = ' button button-blue'
-						/><BR>
-						<Output id="LastFile"></Output>
+				<div class="tooltip">
+					<label for="peqContainer" class="infoTitle">
+						[% "PLUGIN_SQUEEZEDSP_EQUALIZER" | string %]
+					</label>
+					<span class="tooltiptext">
+						[% "PLUGIN_SQUEEZEDSP_EQUALIZER_HELP" | string %]
+					</span>
 				</div>
-	</DIV>
-
-
+			</TD>
+			<TD class="rowBody">
+				<div id="PEQ-filter-selector" class="filter-group">
+					<!-- Filter Type Selector - goes here -->
+				</div>
+			</TD>
+			<TD class="rowSuffix">
+				<!-- Additional controls if needed -->
+				<button  class="sqdsp-click button button-blue" 
+			
+				value="New" 
+				onclick="AddPEQBand();">Add</button>
+			</TD>
+		</TR>
+	</TABLE>
+</TABLE>
+<!--Equalizer -->
+	<div id="peqContainer">
+		<!-- This stuff will all be replaced by new EQ -->	
+	</div>
+<!--Advanced Stuff -->
+<div id="FileDrop" class="drop_zone"
+    ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
+    ondragover="event.stopPropagation(); event.preventDefault();"
+    ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
+    DROP REW OR FIR WAV FILE HERE...<BR> -or- <BR>
+    <label class="button button-blue" style="width:185px;" for="filePicker">Choose REW or WAV File</label>
+    <input
+        type="file"
+        id="rewpicker"
+        accept=".txt,.wav"
+        class='button button-blue'
+    /><BR>
+    <output id="LastFile"></output>
+</div>
+    
 	<!-- end of page -->
 	[% END %]
 
 <script>
 
-
-myPlayer.value = playerid;
-
-window.setTimeout( function() {
-	Initialise();
-	GetCurrentPlayerSettings();	
-},500);
-//initial call to view log
-GetLogSummary();
-//we want to get log every subsequent 0s
-var myDelay = 30 * 1000;
-setInterval(GetLogSummary, myDelay);
-// add event listner for file 
-document.getElementById('rewpicker').addEventListener('change', function(e) {
-  if (e.target.files[0]) {
-    //alert('You selected ' + e.target.files[0].name);
-	readFile(e.target.files[0], ConfirmREW);
-	e.target.files[0] = '';
-  }
-})
-
+// Start initialization when DOM is ready
+document.observe('dom:loaded', function() {
+    updateTextConstants();
+    initializeApp();
+    
+    // Setup file picker
+    $('filePicker').observe('change', handleFileSelection);
+    
+    // Setup unsaved changes warning
+    window.addEventListener('beforeunload', handleUnsavedChanges);
+});
 
 </script>
 
