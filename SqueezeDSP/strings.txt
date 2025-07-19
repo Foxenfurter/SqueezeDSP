@@ -98,6 +98,12 @@ PLUGIN_SQUEEZEDSP_DELAY_HELP
 PLUGIN_SQUEEZEDSP_DEPTH
 	EN	Depth
 
+PLUGIN_SQUEEZEDSP_PEAK
+	EN	Peak
+	
+PLUGIN_SQUEEZEDSP_PEAK_HELP
+	EN	Peak - Allows you to increase or decrease the gain at a specified frequency, Q is used to define how wide the peak is. Use the sliders to select the peak frequency, gain and Q
+
 PLUGIN_SQUEEZEDSP_HIGHSHELF
 	EN	High Shelf
 	
