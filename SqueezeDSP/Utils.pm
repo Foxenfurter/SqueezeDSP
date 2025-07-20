@@ -2,6 +2,7 @@ package Plugins::SqueezeDSP::Utils;
 use strict;
 use File::Spec::Functions qw(:ALL);
 use File::Path;
+use File::Copy;
 use JSON::XS;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
