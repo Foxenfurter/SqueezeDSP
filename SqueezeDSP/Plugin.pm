@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+    0.1.31	Fox: Revised Binary, fixed gapless playback by caching latest player filter and fixed issue with 24 bit aiff file not being read correctly
 	0.1.30	Fox: Revised behaviour so that player settings are created on the UI and saved here rather than managed here. This simlifies design and communication between the UI and the binary.
 
 	0.1.28	Fox: Found issue where there is only a PEQ filter, then the checks for FIR filter cause early termination.
@@ -102,8 +103,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.30";
-$binversion = "0_2_09";
+my $revision = "0.1.31";
+$binversion = "0_2_10";
 use vars qw($VERSION);
 $VERSION = $revision;
 
