@@ -14,8 +14,7 @@
 	  <category>tools</category>
 	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
 	  <changes>
-	  <change>0.1.32 - Revised Binary, fixed gapless playback by caching latest player filter and fft, Fixed gain drop fixed moved tail saver to eradicate race condition. Tweaked preset load logic so that clientname, ID and Last-Preset are corrected. Amended dynamic application of amended settings so that it will only work if a track is playing.</change>
-	  <change>0.1.31 - Fixed Gapless, Fixed aiff issue</change>
+	  <change>0.1.32 - Revised Binary, another gapless playback fix, Fixed gain drop. Tweaked preset load logic so that clientname, ID and Last-Preset are corrected. Amended dynamic application of amended settings so that it will only work if a track is playing.</change>
 	  <change>0.1.31 - Fixed Gapless, Fixed aiff issue</change>
 	  <change>0.1.30 - Revised UI for usabliltity - see wiki.</change>
 	  <change>0.1.28 - Fixed issue where there is only a PEQ filter, then the checks for FIR filter cause early termination</change>
