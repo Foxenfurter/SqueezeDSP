@@ -13,6 +13,10 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+    0.1.32	Fox: Revised Binary, fixed gapless playback by caching latest player filter & fft, 
+                Fixed gain drop fixed moved tail saver to eradicate race condition. 
+                Tweaked preset load logic so that clientname, ID and Last-Preset are corrected.
+                Amended dynamic application of amended settings so that it will only work if a track is playing.
     0.1.31	Fox: Revised Binary, fixed gapless playback by caching latest player filter and fixed issue with 24 bit aiff file not being read correctly
 	0.1.30	Fox: Revised behaviour so that player settings are created on the UI and saved here rather than managed here. This simlifies design and communication between the UI and the binary.
 
@@ -103,8 +107,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.31";
-$binversion = "0_2_10";
+my $revision = "0.1.32";
+$binversion = "0_2_11";
 use vars qw($VERSION);
 $VERSION = $revision;
 

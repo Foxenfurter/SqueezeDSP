@@ -4,6 +4,7 @@ use JSON::XS;
 use MIME::Base64;
 use File::Copy;
 use File::Spec::Functions qw(catdir catfile);  # ADD THIS IMPORT
+use File::Basename;
 
 sub filtersQuery {
     my $request = shift;
@@ -228,7 +229,7 @@ sub saveallCommand {
     my $current_position = $controller->playingSongElapsed();
     my $track_duration = $controller->playingSongDuration();
     # Validate seek conditions
-    return unless defined $current_position && defined $track_duration;
+    return unless $was_playing && defined $current_position && defined $track_duration;
     return if $track_duration <= 0;
     
     # Calculate new position (0.5s forward)
@@ -363,6 +364,10 @@ sub readClientSettings {
     }
 }
 
+
+=pod
+Amended to update client information to match current client
+=cut
 sub readPresetSettings {
     my $request = shift;
     my $client = $request->client();
@@ -384,10 +389,31 @@ sub readPresetSettings {
         my $jsonContent = <$fh>;
         close $fh;
         $settings = decode_json($jsonContent);
-        $request->addResult('json', $jsonContent);
-        $request->addResult('clientName', $client->name);
-        $request->addResult('revision', $Plugins::SqueezeDSP::Plugin::revision);
-        $request->setStatusDone();
+        # Extract just the preset name from the full path
+        my $presetName = fileparse($presetFileName, qr/\.preset\.json$/);
+        
+
+
+        # Update client information to match current client
+        $settings->{ClientName} = $client->name;
+        $settings->{Client}->{Name} = $client->name;
+        $settings->{Client}->{ID} = $client->id;
+        $settings->{PresetName} = $presetName;
+        # Write the updated settings back to the file
+        if (open(my $fh_out, '>', $myJSONFile)) {
+            my $updatedJsonContent = encode_json($settings);
+            print $fh_out $updatedJsonContent;
+            close $fh_out;
+            
+            $request->addResult('json', $updatedJsonContent);
+            $request->addResult('clientName', $client->name);
+            $request->addResult('revision', $Plugins::SqueezeDSP::Plugin::revision);
+            $request->setStatusDone();
+        } else {
+            my $error = "Couldn't write updated settings to $myJSONFile: $!";
+            Plugins::SqueezeDSP::Utils::debug("ERROR: $error");
+            $request->setStatusBadParams($error);
+        }
     } else {
         my $error = "Couldn't read $myJSONFile after copy: $!";
         Plugins::SqueezeDSP::Utils::debug("ERROR: $error");
