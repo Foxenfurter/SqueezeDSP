@@ -164,6 +164,7 @@ sub saveallCommand {
     my $request = shift;
     my $client = $request->client();
     Plugins::SqueezeDSP::Utils::debug("Saving settings");
+    
     if($request->isNotQuery([[ $Plugins::SqueezeDSP::Plugin::thistag . '.saveall' ]])) {
         Plugins::SqueezeDSP::Utils::oops($client, undef, "saveall not command");
         $request->setStatusBadDispatch();
@@ -176,81 +177,81 @@ sub saveallCommand {
         Plugins::SqueezeDSP::Utils::debug("JSON decode failed: $@");
         return $request->setStatusBadParams("Invalid JSON");
     }
+    
     my $myJSONFile = Plugins::SqueezeDSP::Utils::getPrefFile($client);
     Plugins::SqueezeDSP::Utils::debug("Saving settings to: $myJSONFile");
     Plugins::SqueezeDSP::Utils::debug("JSON length: " . length($json));
     Plugins::SqueezeDSP::Utils::SaveJSONFile($data, $myJSONFile);
-    $request->setStatusDone();
 
-     # Force DSP reload by seeking (if player available)
-    return unless $client;
-
-    # Use controller-based methods for reliable position/duration - FIXED
-    my $controller = $client->controller();
-    return unless $controller;
-    # Get current song and track
-    my $song = $controller->playingSong();
-    return unless $song;
-    my $current_track = $song->track();
-    return unless $current_track;
-     # Define included protocols
-    my @included_protocols = qw(file http https smb nfs afp tidal spotify deezer qobuz);
-    # Define excluded file extensions
-    my @excluded_extensions = qw(wma wmal wmap);
-    # Get track URL
-    my $current_url = $current_track->url;
-    my $source = '';
-    my $extension = '';
-    # Extract protocol and extension
-    if ($current_url) {
-        ($source) = $current_url =~ m{^(\w+):};
-        $source = lc($source) if defined $source;
-        ($extension) = $current_url =~ /\.([a-z0-9]+)$/i;
-        $extension = lc($extension) if defined $extension;
-    }
-     # Check if protocol is allowed
-    my $is_allowed_protocol = 0;
-    if ($source) {
-        $is_allowed_protocol = grep { $_ eq $source } @included_protocols;
-    }
-    # Skip if not an allowed protocol
-    unless ($is_allowed_protocol) {
-        Plugins::SqueezeDSP::Utils::debug("Skipping seek for non-included protocol: $source");
-        return;
-    }
-    
-    if ($extension && grep { $_ eq $extension } @excluded_extensions) {
-        Plugins::SqueezeDSP::Utils::debug("Skipping seek for excluded extension: $extension");
-        return;
-    }
-    
-    # Get player state using controller methods - FIXED UNITS
-    my $was_playing = $client->isPlaying();
-    my $current_position = $controller->playingSongElapsed();
-    my $track_duration = $controller->playingSongDuration();
-    # Validate seek conditions
-    return unless $was_playing && defined $current_position && defined $track_duration;
-    return if $track_duration <= 0;
-    
-    # Calculate new position (0.5s forward)
-    my $seek_amount = 0.5;
-    my $new_position = $current_position + $seek_amount;
-    
-    # Only seek if we're not at/near end of track
-    if ($new_position < $track_duration - 0.1) {
-        if ($was_playing) {
-            $client->execute(['time', $new_position]);
-        } else {
-            $client->execute(['pause', 0]);
-            $client->execute(['time', $new_position]);
-            $client->execute(['pause', 1]);
+    # Force DSP reload by seeking (if player available) - DO THIS BEFORE setStatusDone
+    if ($client) {
+        my $controller = $client->controller();
+        if ($controller) {
+            my $song = $controller->playingSong();
+            if ($song) {
+                my $current_track = $song->track();
+                if ($current_track) {
+                    # Define included protocols
+                    my @included_protocols = qw(file http https smb nfs afp tidal spotify deezer qobuz);
+                    # Define excluded file extensions
+                    my @excluded_extensions = qw(wma wmal wmap);
+                    # Get track URL
+                    my $current_url = $current_track->url;
+                    my $source = '';
+                    my $extension = '';
+                    # Extract protocol and extension
+                    if ($current_url) {
+                        ($source) = $current_url =~ m{^(\w+):};
+                        $source = lc($source) if defined $source;
+                        ($extension) = $current_url =~ /\.([a-z0-9]+)$/i;
+                        $extension = lc($extension) if defined $extension;
+                    }
+                    
+                    # Check if protocol is allowed
+                    my $is_allowed_protocol = 0;
+                    if ($source) {
+                        $is_allowed_protocol = grep { $_ eq $source } @included_protocols;
+                    }
+                    
+                    # Only proceed if allowed protocol and not excluded extension
+                    if ($is_allowed_protocol && (!$extension || !grep { $_ eq $extension } @excluded_extensions)) {
+                        # Get player state using controller methods
+                        my $was_playing = $client->isPlaying();
+                        my $current_position = $controller->playingSongElapsed();
+                        my $track_duration = $controller->playingSongDuration();
+                        
+                        # Validate seek conditions
+                        if ($was_playing && defined $current_position && defined $track_duration && $track_duration > 0) {
+                            # Calculate new position (0.5s forward)
+                            my $seek_amount = 0.5;
+                            my $new_position = $current_position + $seek_amount;
+                            
+                            # Only seek if we're not at/near end of track
+                            if ($new_position < $track_duration - 0.1) {
+                                if ($was_playing) {
+                                    $client->execute(['time', $new_position]);
+                                } else {
+                                    $client->execute(['pause', 0]);
+                                    $client->execute(['time', $new_position]);
+                                    $client->execute(['pause', 1]);
+                                }
+                                Plugins::SqueezeDSP::Utils::debug("DSP reload triggered: " . ($was_playing ? "Playing" : "Paused") . " track advanced to $new_position");
+                            } else {
+                                Plugins::SqueezeDSP::Utils::debug("Skipping seek near end of track (position: $current_position, duration: $track_duration sec)");
+                            }
+                        }
+                    } else {
+                        Plugins::SqueezeDSP::Utils::debug("Skipping seek for protocol: $source, extension: $extension");
+                    }
+                }
+            }
         }
-        Plugins::SqueezeDSP::Utils::debug("DSP reload triggered: " . ($was_playing ? "Playing" : "Paused") . " track advanced to $new_position");
-    } else {
-        Plugins::SqueezeDSP::Utils::debug("Skipping seek near end of track (position: $current_position, duration: $track_duration sec)");
     }
-}
 
+    # NOW set the request as done - this sends the response to the client
+    $request->addResult('_done', 1);
+    $request->setStatusDone();
+}
 # Set a value for a specific key - contains some deprecated code
 sub setvalCommand {
     my $request = shift;
@@ -336,6 +337,7 @@ sub saveasCommand {
     Plugins::SqueezeDSP::Utils::debug("command: saveas($key)");
     my $file = catdir($Plugins::SqueezeDSP::Plugin::pluginSettingsDataDir, join('_', split(/:/, $key)) . '.preset.json');
     Plugins::SqueezeDSP::Utils::setPref($client, 'Preset', $file);
+    Plugins::SqueezeDSP::Utils::setPref($client, 'Last_preset', $file);
     Plugins::SqueezeDSP::Utils::savePreset($client, $file);
     my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED');
     $client->showBriefly({ 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 });

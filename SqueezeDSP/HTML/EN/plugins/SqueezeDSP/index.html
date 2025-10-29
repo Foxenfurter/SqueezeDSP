@@ -21,13 +21,13 @@
 
 <!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_utils_v00_01a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_core_v00_01a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_01b.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_file_v00_01a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_init_v00_01a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_core_v00_02c.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_02a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_file_v00_02b.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_init_v00_01b.js"></script>
 
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05d.js"></script>
 
 [% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
 <!-- the style-police -->
@@ -91,7 +91,7 @@ print ( $myversion );
 							value="1" onclick="SwitchCheckbox(this, true); NewFieldValue ('Bypass', this, false);  ToggleControl(this, 'DSP_container', true ); " > <label for="DSP" class="Toggle" >Toggle</label>
 			</TD>
 			<TD class="rowSuffix">
-				<button class="sqdsp-click  button button-blue" type="button" id="btn_Apply" value="Apply" onclick="SqueezeDSPSaveAll();DisplayAlert('All Settings', 'Applied', 2000);  ">Apply</button>
+				<button class="sqdsp-click  button button-blue" type="button" id="btn_Apply" value="Apply" onclick="SqueezeDSPSaveAll(); DisplayAlert('All Settings', 'Applied', 2000);  ">Apply</button>
 			</TD >
 		</TR>
     </TABLE>
@@ -114,7 +114,8 @@ print ( $myversion );
 			<TD class="rowSuffix"><button class="sqdsp-click  button button-teal" type="button" id="btn_LoadPreset" value="Load" 
                 onclick="
                 SqueezeDSPFetchPresetSettings(sel_Preset.value, [
-				NewFieldValue('Last_preset', sel_Preset.value, false),
+				NewFieldValue('Last_preset', sel_Preset, false),
+				edt_NewPreset.value = sel_Preset.value,
 				LocalUpdateSettings,
                         (function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal') }),
                         SqueezeDSPSaveAll(),
@@ -139,8 +140,8 @@ print ( $myversion );
                 applied-->
 				<button class="sqdsp-click  button button-green" type="button" name="btn_NewPreset" value="Save" onclick="
                     NewFieldValue('Last_preset', edt_NewPreset, false); 
-                    SqueezeDSPSaveAll();
-                    SetNewPreset(edt_NewPreset);  
+					//alert(edt_NewPreset.value);
+                    SqueezeDSPSaveAll( SetNewPreset(edt_NewPreset)  ) ;												
                 ">Save</button>
 			</TD >
 		</TR>
@@ -319,7 +320,7 @@ print ( $myversion );
     <label class="button button-blue" style="width:185px;" for="filePicker">Choose REW or WAV File</label>
     <input
         type="file"
-        id="rewpicker"
+        id="filePicker"
         accept=".txt,.wav"
         class='button button-blue'
     /><BR>
@@ -342,6 +343,7 @@ document.observe('dom:loaded', function() {
     // Setup unsaved changes warning
     window.addEventListener('beforeunload', handleUnsavedChanges);
 });
+
 
 </script>
 

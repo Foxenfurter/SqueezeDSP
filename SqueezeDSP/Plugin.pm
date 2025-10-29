@@ -13,6 +13,8 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+    0.1.33	Fox: Revised Binary, new residual cache with expiry time for delay, and convolver leftovers -   
+                Fixed issues with saving and loading presets not retaining preset names
     0.1.32	Fox: Revised Binary, fixed gapless playback by caching latest player filter & fft, 
                 Fixed gain drop fixed moved tail saver to eradicate race condition. 
                 Tweaked preset load logic so that clientname, ID and Last-Preset are corrected.
@@ -107,8 +109,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.32";
-$binversion = "0_2_11";
+my $revision = "0.1.33";
+$binversion = "0_2_12";
 use vars qw($VERSION);
 $VERSION = $revision;
 

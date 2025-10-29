@@ -4,11 +4,11 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.32" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.33" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
-     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/V0.1.32/SqueezeDSP-0.1.32.zip</url>
-	  <sha>3b004b5ad11fd40753192b38fc71d0d4fdae151e</sha>
+     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.33/SqueezeDSP-0.1.33.zip</url>
+	  <sha>3a8ecca90a5da521c9c1f635eb2806a06bebd192</sha>
 	  <changes>binary changed to fix gapless issues fix to loading presets</changes>
       <creator>Jonathan Fox</creator>
 	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>
