@@ -47,12 +47,14 @@ function LocalDisplayVals() {
     DisplayVal('Balance', replaceNull(SqueezeDSPData.Client.Balance, 0));
     DisplayVal('Preamp', replaceNull(SqueezeDSPData.Client.Preamp, 0));
     DisplayVal('Loudness.listening_level', replaceNull(SqueezeDSPData.Client.Loudness.listening_level,85));
-    document.getElementById('edt_NewPreset').value = SqueezeDSPData.Client.Last_preset;
+    const presetPath = SqueezeDSPData.Client.Preset || 'none';
+  
+    document.getElementById('edt_NewPreset').value = getBaseFilename(presetPath);
     
     const firPath = SqueezeDSPData.Client.FIRWavFile || 'none';
     highlightMatchingOption('sel_FIRWavFile', firPath);
     
-    const presetPath = SqueezeDSPData.Client.Preset || 'none';
+  
     document.getElementById('ClientName').value = SqueezeDSPData.ClientName;
 }
 
@@ -181,6 +183,16 @@ function LocalDisplayLogSummary(logData) {
     document.getElementById('logSummary').innerHTML = myHTML;
 }
 
+function getBaseFilename(fullPath) {
+    // Extract filename with extension using both Windows and Unix path separators
+    const filenameWithExt = fullPath.split(/[\\/]/).pop();
+    
+    // Remove all extensions (everything after the first dot)
+    const baseFilename = filenameWithExt.split('.')[0];
+    
+    return baseFilename;
+}
+
 function highlightMatchingOption(selectElementId, targetFullPath) {
     const selectElement = document.getElementById(selectElementId);
     if (!selectElement) {
@@ -193,15 +205,12 @@ function highlightMatchingOption(selectElementId, targetFullPath) {
         return;
     }
 
+    // Use getBaseFilename to extract the short name (keeps original case)
+    const targetBaseName = getBaseFilename(targetFullPath);
     const normalizePath = path => path.replace(/\\/g, '/');
-    const normalizeFilename = filename => filename.toLowerCase();
     
-    // Extract just the filename from the target path
-    const targetPath = normalizePath(targetFullPath);
-    const targetFile = normalizeFilename(targetPath.split('/').pop());
-    
-    console.log(`Matching target: ${targetPath}`);
-    console.log(`Normalized filename: ${targetFile}`);
+    console.log(`Matching target: ${targetFullPath}`);
+    console.log(`Base filename: ${targetBaseName}`);
 
     const isMaterialUI = selectElement.classList.contains('MuiSelect-nativeInput') || 
                         selectElement.closest('.MuiInputBase-root');
@@ -230,12 +239,12 @@ function highlightMatchingOption(selectElementId, targetFullPath) {
         }
     };
 
-    // First try: match by filename in option text (this is what's displayed in dropdown)
+    // First try: match by base filename in option text
     if (!isMaterialUI) {
         for (let i = 0; i < selectElement.options.length; i++) {
-            const optionText = selectElement.options[i].text;
-            if (normalizeFilename(optionText) === targetFile) {
-                console.log(`Matched by filename in text: ${optionText}`);
+            const optionBaseName = getBaseFilename(selectElement.options[i].text);
+            if (optionBaseName === targetBaseName) {
+                console.log(`Matched by base filename in text: ${selectElement.options[i].text}`);
                 setValue(selectElement, selectElement.options[i].value);
                 return;
             }
@@ -243,29 +252,27 @@ function highlightMatchingOption(selectElementId, targetFullPath) {
     }
 
     // Second try: match by full path in option value
-    const targetLower = targetPath.toLowerCase();
+    const targetPath = normalizePath(targetFullPath);
     for (let i = 0; i < selectElement.options.length; i++) {
         const optionValue = normalizePath(selectElement.options[i].value);
-        if (optionValue.toLowerCase() === targetLower) {
+        if (optionValue === targetPath) {
             console.log(`Matched by full path: ${optionValue}`);
             setValue(selectElement, selectElement.options[i].value);
             return;
         }
     }
 
-    // Third try: match by filename in option value
+    // Third try: match by base filename in option value
     for (let i = 0; i < selectElement.options.length; i++) {
-        const optionValue = normalizePath(selectElement.options[i].value);
-        const optionFile = normalizeFilename(optionValue.split('/').pop());
-        if (optionFile === targetFile) {
-            console.log(`Matched by filename in value: ${optionValue}`);
+        const optionBaseName = getBaseFilename(selectElement.options[i].value);
+        if (optionBaseName === targetBaseName) {
+            console.log(`Matched by base filename in value: ${selectElement.options[i].value}`);
             setValue(selectElement, selectElement.options[i].value);
             return;
         }
     }
 
     console.warn('No matching option found for:', targetFullPath);
-    console.log('Available options:', Array.from(selectElement.options).map(opt => ({text: opt.text, value: opt.value})));
 }
 
 function ListenForSlide() {
