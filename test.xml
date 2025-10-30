@@ -4,16 +4,17 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-      <plugin name="SqueezeDSP" version="0.1.32" minTarget="7.8.0" maxTarget="*">
+      <plugin name="SqueezeDSP" version="0.1.33" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (test version)</desc>
-     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/V0.1.32/SqueezeDSP-0.1.32.zip</url>
-	  <sha>3b004b5ad11fd40753192b38fc71d0d4fdae151e</sha>
+     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.33/SqueezeDSP-0.1.33.zip</url>
+	  <sha>64771545b9064cf32b882755fcbe1bdae2b5add6</sha>
 	   <creator>Jonathan Fox</creator>      
 	   <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
 	  <category>tools</category>
 	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
 	  <changes>
+	  <change>0.1.33 - Revised Binary, enhanced gapless cache. Tweaked preset save logic so that Last-Preset are corrected. </change>
 	  <change>0.1.32 - Revised Binary, another gapless playback fix, Fixed gain drop. Tweaked preset load logic so that clientname, ID and Last-Preset are corrected. Amended dynamic application of amended settings so that it will only work if a track is playing.</change>
 	  <change>0.1.31 - Fixed Gapless, Fixed aiff issue</change>
 	  <change>0.1.30 - Revised UI for usabliltity - see wiki.</change>
