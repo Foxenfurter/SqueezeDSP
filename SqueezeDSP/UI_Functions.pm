@@ -335,10 +335,13 @@ sub saveasCommand {
     }
 
     Plugins::SqueezeDSP::Utils::debug("command: saveas($key)");
+
+
     my $file = catdir($Plugins::SqueezeDSP::Plugin::pluginSettingsDataDir, join('_', split(/:/, $key)) . '.preset.json');
     Plugins::SqueezeDSP::Utils::setPref($client, 'Preset', $file);
-    Plugins::SqueezeDSP::Utils::setPref($client, 'Last_preset', $file);
+    
     Plugins::SqueezeDSP::Utils::savePreset($client, $file);
+        Plugins::SqueezeDSP::Utils::setPref($client, 'Last_preset', $key);
     my $line = $client->string('PLUGIN_SQUEEZEDSP_PRESET_SAVED');
     $client->showBriefly({ 'line' => [ undef, $line ], 'jive' => { 'type' => 'popupinfo', text => [ $line ] }, }, { 'duration' => 2 });
     $request->setStatusDone();
