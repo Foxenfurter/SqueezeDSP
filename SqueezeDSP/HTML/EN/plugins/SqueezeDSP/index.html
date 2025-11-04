@@ -17,7 +17,7 @@
 <!--link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"-->
 
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_04f.css"/>
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_04k.css"/>
 
 <!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_utils_v00_01a.js"></script>
@@ -113,7 +113,15 @@ print ( $myversion );
             
 			<TD class="rowSuffix"><button class="sqdsp-click  button button-teal" type="button" id="btn_LoadPreset" value="Load" 
                 onclick="
-                SqueezeDSPFetchPresetSettings(sel_Preset.value, [
+				SqueezeDSPFetchPresetSettings(sel_Preset.value, [
+    function() { NewFieldValue('Last_preset', sel_Preset, false); },
+    function() { edt_NewPreset.value = sel_Preset.value; },
+    LocalUpdateSettings,
+    function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal'); },
+    function() { SqueezeDSPSaveAll(); },
+    function() { DisplayAlert('Preset', 'Applied', 2000); }
+]);
+   /*             SqueezeDSPFetchPresetSettings(sel_Preset.value, [
 				NewFieldValue('Last_preset', sel_Preset, false),
 				edt_NewPreset.value = sel_Preset.value,
 				LocalUpdateSettings,
@@ -121,7 +129,7 @@ print ( $myversion );
                         SqueezeDSPSaveAll(),
                         DisplayAlert('Preset', 'Applied', 2000)
                
-                ])
+                ])*/
                 ">Load</button></TD >
 		</TR>
 		

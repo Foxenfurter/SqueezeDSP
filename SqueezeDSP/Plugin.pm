@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+    0.1.34	Fox: Fix to loading presets, should apply them. Styling change to tooltips.
     0.1.33	Fox: Revised Binary, new residual cache with expiry time for delay, and convolver leftovers -   
                 Fixed issues with saving and loading presets not retaining preset names
     0.1.32	Fox: Revised Binary, fixed gapless playback by caching latest player filter & fft, 
@@ -109,7 +110,7 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.33";
+my $revision = "0.1.34";
 $binversion = "0_2_12";
 use vars qw($VERSION);
 $VERSION = $revision;
