@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<extensions>
+  <details>
+    <title lang="EN">SqueezeDSP</title>
+  </details>
+  <plugins>     
+      <plugin name="SqueezeDSP" version="0.1.30" minTarget="7.8.0" maxTarget="*">
+      <title lang="EN">SqueezeDSP</title>
+      <desc lang="EN">DSP for Lyrion Music Server - provides EQ and DSP.</desc>
+      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.30/SqueezeDSP-0.1.30.zip</url>
+	  <sha>ee1eb8c0617ab57fc77e0447aaabd032705f567b</sha>
+	  <changes>Fixed issue where there is only a PEQ filter, then the checks for FIR filter cause early termination</changes>
+      <creator>Jonathan Fox</creator>
+	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>
+	  <category>tools</category>
+	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
+	</plugin>	 
+  </plugins>
+</extensions>
