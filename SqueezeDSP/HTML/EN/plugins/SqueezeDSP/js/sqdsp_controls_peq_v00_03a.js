@@ -144,7 +144,7 @@ function LocalbuildPEQ(filters, labeltype) {
             return `
             <TABLE class="table-container" id="control_${labeltype}_${bandIndex}" >
                 <TR>
-                    <TD class="rowTitle"><span style="font-weight: bold;">Filter ${bandIndex + 1}</span></TD>
+                    <TD class="rowTitle"><span style="font-weight: bold;">Band ${bandIndex + 1}</span></TD>
                     <TD class="rowBody" > 
                         <div class="filter-group-alt">
                             ${filterTypes.map(type => `
@@ -152,7 +152,7 @@ function LocalbuildPEQ(filters, labeltype) {
                                     <label class="filter-type">
                                         <input type="radio" name="${labeltype}.${bandIndex}.filtertype" 
                                                 value="${type.value}" ${filterType === type.value ? 'checked' : ''}
-                                                onchange="handleFilterTypeChange(this, ${bandIndex})">
+                                                onchange="handleFilterTypeChange(this, ${bandIndex}); updateFilterGraphFromControl(this)">
                                         <span class="full-label">${type.label}</span>
                                         <span class="abbr-label">${type.abbr}</span>
                                     </label>
@@ -175,12 +175,12 @@ function LocalbuildPEQ(filters, labeltype) {
                                onpointerdown="showBubble(this)" 
                                onpointerup="hideBubble(this)" 
                                ondblclick="SliderReset.call(this)"
-                               onchange="iSlide(this)" 
+                               onchange="iSlide(this); updateFilterGraphFromControl(this)" 
                                id="${labeltype}.${bandIndex}.Frequency">
                         <output id="${labeltype}.${bandIndex}.FrequencyBubble" class="bubble"></output>
                     </TD>
                     <TD class="rowSuffix">
-                        <Input type="number" onChange="valInputLog(this, true);" 
+                        <Input type="number" onChange="valInputLog(this, true); updateFilterGraphFromControl(this)" 
                                min="20" max="20000" step="1" 
                                class="OutputVal" id="val_${labeltype}.${bandIndex}.Frequency" 
                                value="${filter.Frequency}">
@@ -196,12 +196,12 @@ function LocalbuildPEQ(filters, labeltype) {
                                onpointerdown="showBubble(this)" 
                                onpointerup="hideBubble(this)" 
                                ondblclick="SliderReset.call(this)"
-                               onchange="iSlide(this)" 
+                               onchange="iSlide(this); updateFilterGraphFromControl(this)" 
                                id="${labeltype}.${bandIndex}.Gain">
                         <output id="${labeltype}.${bandIndex}.GainBubble" class="bubble"></output>
                     </TD>
                     <TD class="rowSuffix">
-                        <Input type="number" onChange="valInputDecimal(this, false);" 
+                        <Input type="number" onChange="valInputDecimal(this, false); updateFilterGraphFromControl(this)" 
                                min="-25" max="15" step="0.1" 
                                class="OutputVal" id="val_${labeltype}.${bandIndex}.Gain" 
                                value="${filter.Gain}">
@@ -219,12 +219,12 @@ function LocalbuildPEQ(filters, labeltype) {
                                onpointerdown="showBubble(this)" 
                                onpointerup="hideBubble(this)" 
                                ondblclick="SliderReset.call(this)"
-                               onchange="iSlide(this)" 
+                               onchange="iSlide(this); updateFilterGraphFromControl(this)" 
                                id="${labeltype}.${bandIndex}.Slope">
                         <output id="${labeltype}.${bandIndex}.SlopeBubble" class="bubble"></output>
                     </TD>
                     <TD class="rowSuffix">
-                        <Input type="number" onChange="valInputDecimal(this, false);" 
+                        <Input type="number" onChange="valInputDecimal(this, false); updateFilterGraphFromControl(this)" 
                                min="${slopeMin}" max="${slopeMax}" step="${slopeStep}" 
                                class="OutputVal" id="val_${labeltype}.${bandIndex}.Slope" 
                                value="${filter.Slope}">
@@ -251,6 +251,7 @@ function LocalbuildPEQ(filters, labeltype) {
         return '<div class="error">Error building PEQ controls</div>';
     }
 }
+
 
 function AddPEQBand() {
     const client = SqueezeDSPData.Client;
@@ -328,11 +329,29 @@ function rebuildPEQUI(containerId = 'peqContainer') {
     const container = document.getElementById(containerId);
     if (!container) return;
     
-    container.innerHTML = LocalbuildPEQ(
-        SqueezeDSPData.Client.Filters, 
-        "Filters"
-    );
-    ListenForSlide();
+    const hasFilters = SqueezeDSPData.Client.Filters && SqueezeDSPData.Client.Filters.length > 0;
+    
+    // Update container visibility based on filter count
+    if (container) {
+        container.style.display = hasFilters ? 'block' : 'none';
+    }
+    
+    // Update graph visibility based on both loudness AND filters
+    updateGraphVisibility();
+    
+    // Only build UI and update graph if we have filters
+    if (hasFilters) {
+        container.innerHTML = LocalbuildPEQ(
+            SqueezeDSPData.Client.Filters, 
+            "Filters"
+        );
+        ListenForSlide();
+        updatePEQGraph();
+    } else {
+        container.innerHTML = ''; // Clear any existing content
+        // Still update graph in case loudness is enabled
+        updatePEQGraph();
+    }
 }
 
 function handleFilterTypeChange(radio, bandIndex) {

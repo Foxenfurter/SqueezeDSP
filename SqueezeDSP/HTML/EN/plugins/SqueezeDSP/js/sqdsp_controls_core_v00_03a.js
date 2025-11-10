@@ -2,6 +2,29 @@
 Core UI Controls and Display Logic
 -----------------------------------------------------*/
 
+function logParentTheme() {
+    const body = document.body;
+    const textColor = getComputedStyle(body).color;
+    
+    console.log('=== THEME DETECTION LOG ===');
+    console.log('Body classes:', body.className);
+    console.log('Body computed color:', textColor);
+    
+    // Simple rule: if text color is light, we're in dark mode. If dark, we're in light mode.
+    const rgb = textColor.match(/\d+/g);
+    let isDark = false;
+    
+    if (rgb && rgb.length >= 3) {
+        const [r, g, b] = rgb;
+        const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+        isDark = brightness > 128; // Light text = dark theme
+    }
+    
+    console.log('Decision: Using', isDark ? 'DARK' : 'LIGHT', 'theme based on text color');
+    return isDark ? 'dark' : 'light';
+}
+
+
 function LocalBuildLists(data) {
     LocalBuildList('FIRWavFile', data);
     LocalBuildList('Preset', data);
@@ -84,14 +107,42 @@ function LocalSetupToggle(myControl, newValue, InvertToggle = false) {
 
 function ToggleControl(myElement, myControltoToggle, InvertToggle = false) {
     var myValue = myElement.value;
+    var element = document.getElementById(myControltoToggle);
 
     if (InvertToggle) {
-        if (myValue == 1) document.getElementById(myControltoToggle).style.display = 'none';
+        if (myValue == 1) {
+            element.style.display = 'none';
+            
+        } else {
+            element.style.display = ''; // or 'block' depending on your layout
+            
+        }
     } else {
-        if (myValue == 0) document.getElementById(myControltoToggle).style.display = 'none';
-        else document.getElementById(myControltoToggle).style.display = '';
+        if (myValue == 0) {
+            element.style.display = 'none';
+            
+        } else {
+            element.style.display = '';
+            
+        }
     }
 }
+
+function updateLoudnessToggle() {
+    const loudnessEnabled = SqueezeDSPData.Client.Loudness && SqueezeDSPData.Client.Loudness.enabled == 1;
+    const loudnessControl = document.getElementById('control_Loudness');
+    
+    if (loudnessControl) {
+        loudnessControl.style.display = loudnessEnabled ? '' : 'none';
+    }
+    
+    // Update graph visibility and content
+    updateGraphVisibility();
+    updatePEQGraph();
+}
+
+
+
 
 function reStyleElement(ElementId, fromStyle, toStyle) {
     const myElement = document.getElementById(ElementId);
@@ -309,4 +360,40 @@ function showBubble(myObj) {
 
 function hideBubble(myObj) {
     document.getElementById(myObj.id + 'Bubble').style.display = 'none';
+}
+
+function improveMobileSliders() {
+    const sliders = document.querySelectorAll('.range');
+    
+    sliders.forEach(slider => {
+        // Prevent accidental changes on mobile
+        slider.addEventListener('touchstart', function(e) {
+            this.setAttribute('data-touch-start', this.value);
+        });
+        
+        slider.addEventListener('touchend', function(e) {
+            const startValue = this.getAttribute('data-touch-start');
+            if (Math.abs(this.value - startValue) < 0.5) {
+                // Small change, might be accidental
+                console.log('Potential accidental touch on slider');
+            }
+        });
+    });
+}
+
+// Simplified mobile initialization
+function initializeTouchProtection() {
+    if ('ontouchstart' in window) {
+        console.log('Initializing touch protection for mobile');
+        
+        const ranges = document.querySelectorAll('.range');
+        ranges.forEach(range => {
+            range.addEventListener('touchstart', function(e) {
+                // Small delay to prevent accidental changes
+                setTimeout(() => {
+                    this.focus();
+                }, 100);
+            });
+        });
+    }
 }

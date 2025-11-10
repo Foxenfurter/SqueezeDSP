@@ -17,21 +17,25 @@
 <!--link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"-->
 
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_04k.css"/>
+<link rel="stylesheet" type="text/css" href="css/sqdsp_style_v00_05a.css"/>
 
 <!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_utils_v00_01a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_core_v00_02f.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_02a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_core_v00_03a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_peq_v00_03a.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_file_v00_02b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_init_v00_01b.js"></script>
-
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_lib_v00_01b.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_graph_v00_01b.js"></script>
 
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05d.js"></script>
 
 [% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
 <!-- the style-police -->
-    
+<style>
+
+
+</style>    
 <div style="width: 100%; min-width: 300px;margin-bottom: 6px;">
 <div class="bubble" id="myMessage">To use please select Squeeze DSP on Extras Menu</div>
 <Output><span>
@@ -263,7 +267,7 @@ print ( $myversion );
 			<TD class="rowSwitch">
 	           <input class="Check" type="checkbox" 
 						name="val_Loudness.enabled" id="Loudness"
-						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue ('Loudness.enabled', this, false);  ToggleControl(this, 'control_Loudness'); " > 
+						value="0" onclick="SwitchCheckbox(this, false); NewFieldValue('Loudness.enabled', this, false); updateLoudnessToggle();" > 
 						
 				<label for="Loudness" class="Toggle" >Toggle</label>
 			</div>				
@@ -280,13 +284,17 @@ print ( $myversion );
 				</div>		
 			</TD>
 			<TD class="Slide">
-					<input  class="range" type="range"   orient="horizontal"  min="50" max="85" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Loudness.listening_level" ></Input>
+					<input  class="range" type="range"   orient="horizontal"  min="50" max="85" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this);updatePEQGraph();" id="Loudness.listening_level" ></Input>
 					<Output id="Loudness.listening_levelBubble" class="bubble" ></Output>
 			 </TD>
-			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="50" max="85" step="0.1" id="val_Loudness.listening_level" onChange="valInputDecimal(this);" ></Input></TD>
+			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="50" max="85" step="0.1" id="val_Loudness.listening_level" onChange="valInputDecimal(this);updatePEQGraph();" ></Input></TD>
 		</TR>
 
 	</TABLE>
+<div id="peqGraphContainer" class="panel" stylex="width: 100%; height: 400px; margin: 20px 0; border: 1px solid #ccc; padding: 10px;">
+    <div id="peqGraph"></div>
+
+</div>
 
 	<TABLE class="table-container">
 		<TR id="control_PEQHeader">
@@ -315,10 +323,18 @@ print ( $myversion );
 		</TR>
 	</TABLE>
 </TABLE>
+
+
+<!--div style="text-align: center; margin: 10px;">
+    <button class="sqdsp-click button button-blue" onclick="updatePEQGraph()">Test Graph</button>
+    <button class="sqdsp-click button button-blue" onclick="checkDataAvailability()">Check Data</button>
+	<button class="sqdsp-click button button-blue" onclick="testGraph()">Test Graph Now</button>
+    <button class="sqdsp-click button button-blue" onclick="updatePEQGraph()">Update Graph</button>
+</div>-->
 <!--Equalizer -->
-	<div id="peqContainer">
+<div id="peqContainer">
 		<!-- This stuff will all be replaced by new EQ -->	
-	</div>
+</div>
 <!--Advanced Stuff -->
 <div id="FileDrop" class="drop_zone"
     ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
@@ -334,21 +350,95 @@ print ( $myversion );
     /><BR>
     <output id="LastFile"></output>
 </div>
-    
+    </DIV> <!-- DSP Container -->
 	<!-- end of page -->
 	[% END %]
 
 <script>
+
+    
+
+// Plotting functions for SqueezeDSP integration
+// Debug function to check if data is available
+function checkDataAvailabilityDeprecated() {
+    console.log('SqueezeDSPData:', typeof SqueezeDSPData);
+    if (typeof SqueezeDSPData !== 'undefined') {
+        console.log('Client:', SqueezeDSPData.Client);
+        console.log('Filters:', SqueezeDSPData.Client?.Filters);
+        console.log('Filters count:', SqueezeDSPData.Client?.Filters?.length);
+    }
+}
+
+// Call this in your console to check data
+//window.checkData = checkDataAvailability;
+
+// Add this function for testing
+function testGraphDeprecated() {
+    console.log('Testing graph with current data:');
+    console.log('Filters:', SqueezeDSPData.Client.Filters);
+    
+    try {
+        const result = SqueezeDSPHelper.generateFromAllFilters(SqueezeDSPData, 48000);
+        console.log('Generated coefficients:', result.coefficients);
+        updatePEQGraph();
+    } catch (error) {
+        console.error('Error in testGraph:', error);
+    }
+}
+
+// Make it available globally
+//window.testGraph = testGraph;
+let resizeTimeout;
+window.addEventListener('resize', function() {
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        if (typeof updatePEQGraph === 'function') {
+            updatePEQGraph();
+        }
+    }, 250); // Debounce to avoid excessive updates
+});
+// Usage examples:
+/*
+// Example 1: Plot combined response of all filters
+const svg1 = SqueezeDSPPlotter.plotCombinedResponse(SqueezeDSPData, 48000, 'plot-container-1');
+
+// Example 2: Plot single filter response
+const svg2 = SqueezeDSPPlotter.plotSingleFilter(SqueezeDSPData, 0, 48000, 'plot-container-2');
+
+// Example 3: Plot comparison between combined and single filter
+const svg3 = SqueezeDSPPlotter.plotComparison(SqueezeDSPData, 0, 48000, 'plot-container-3');
+
+// Example 4: Plot all filters individually and combined
+const svg4 = SqueezeDSPPlotter.plotAllFilters(SqueezeDSPData, 48000, 'plot-container-4');
+
+// Example 5: Direct usage with custom coefficients
+const plotter = new FrequencyResponsePlotter();
+const response = plotter.calculateFrequencyResponse(myCoefficients, 48000);
+const svg = plotter.generateSVGPlot([response], ['My Filter'], 'Custom Filter Response');
+document.getElementById('container').innerHTML = svg;
+*/
+
+// Use your existing handleSystemThemeChange function and enhance it
+// Enhanced theme detection
+// Simple theme logger - call this once on page load
+
+
+
 
 // Start initialization when DOM is ready
 document.observe('dom:loaded', function() {
     updateTextConstants();
     initializeApp();
     
-    // Setup file picker
-    $('filePicker').observe('change', handleFileSelection);
+    // Log the theme and apply it
+    const theme = logParentTheme();
+    applyThemeClass(theme);
     
-    // Setup unsaved changes warning
+    // Initialize graph
+    initializePEQGraph();
+    
+    // Setup file picker and other essentials
+    $('filePicker').observe('change', handleFileSelection);
     window.addEventListener('beforeunload', handleUnsavedChanges);
 });
 

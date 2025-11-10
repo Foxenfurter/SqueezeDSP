@@ -339,13 +339,16 @@ Label
 }
 
 
+
+
 /* ===== TABLE STYLES ===== */
 .table-container {
    /* Base styles */
    border-radius: var(--border-radius);
    border-collapse: collapse;
    margin-bottom: 6px;
-   width: 100%;
+    width: calc(100% - 15px); /* Compensate for scrollbar */
+    box-sizing: border-box;
    min-width: 300px; /* Minimum card width */
    table-layout: fixed; /* Equal column distribution */
    overflow: visible;
@@ -405,6 +408,69 @@ Label
           background-color: var(--hover-bg) !important;
           color: #f0f0f0 !important;
       }
+
+/* Make the PEQ band tables full width within their container */
+#peqContainer .table-container {
+    width: 100%;
+}
+
+#peqContainer {
+    height: auto;
+    max-height: 400px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-right: 8px;
+    scrollbar-width: 12px;
+}
+
+/* Base styling that will work for both themes initially */
+#peqGraphContainer {
+    min-height: 200px;
+    height: 300px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    background: #f5f5f5;
+    margin: 1px 0;
+    box-sizing: border-box;
+    width: calc(100% - 15px);
+    overflow: hidden;
+    position: relative;
+    color: #212121;
+}
+
+/* Dark theme - we'll apply this class via JavaScript */
+#peqGraphContainer.dark {
+    background: #303030;
+    color: #ffffff;
+    border-color: #424242;
+}
+
+/* Light theme - explicit */
+#peqGraphContainer.light {
+    background: #f5f5f5;
+    color: #212121;
+    border-color: #d0d0d0;
+}
+
+/* Graph styling - consistent colors regardless of theme */
+#peqGraph {
+    background: inherit;
+    color: inherit;
+    width: 100%;
+    height: 100%;
+    min-height: 184px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#peqGraph svg {
+    max-width: 100%;
+    max-height: 100%;
+    display: block;
+    background: inherit;
+}
 
 /* Target the Material wrapper container for combo box */
 .custom-select-container {
@@ -1271,8 +1337,19 @@ z-index: 1;
 	background-color: yellow;	
 }
 
+
 /* Further adjustments for  small screens */
 @media (max-width: 768px) {
+
+    #peqContainer {
+        max-height: 500px;
+    }
+    
+    #peqGraphContainer {
+        min-height: 180px;
+        height: 250px;
+        padding: 6px;
+    }
   .rowSuffix {
       width: auto !important;
       min-width: 70px;
@@ -1298,9 +1375,14 @@ z-index: 1;
 
 }
 
-
 /* Further adjustments for very small screens */
 @media (max-width: 480px) {
+
+  #peqGraphContainer {
+     min-height: 150px;
+     height: 200px;
+     padding: 4px;
+    }
   .rowBody {
       width: 60% !important;
   }
@@ -1313,8 +1395,7 @@ background-color: #d32f2f;
 border-radius: 0.5rem;
 height: 0.5rem;
 }
-
-  
+ 
   .button {
       padding: 1px 1px;
       font-size: 10px;
