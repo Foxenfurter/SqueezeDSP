@@ -14,7 +14,7 @@
 	  <category>tools</category>
 	  <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
 	  <changes>
-	  <change>0.1.40 - Added visualiser to user interface, this shows plots of current and combined filter & loudness settings </change>
+	  <change>0.1.40 - Added visualiser to user interface, this shows plots of current, combined filter and loudness settings </change>
 	  <change>0.1.34 - preset should load and apply in one go. tooltip colours fixed </change>
 	  <change>0.1.33 - Revised Binary, enhanced gapless cache. Tweaked preset save logic so that Last-Preset are corrected. </change>
 	  <change>0.1.32 - Revised Binary, another gapless playback fix, Fixed gain drop. Tweaked preset load logic so that clientname, ID and Last-Preset are corrected. Amended dynamic application of amended settings so that it will only work if a track is playing.</change>
