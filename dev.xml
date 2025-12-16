@@ -4,7 +4,7 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.41" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.42" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.42/SqueezeDSP-0.1.42.zip</url>
