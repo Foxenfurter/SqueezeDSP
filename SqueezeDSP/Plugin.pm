@@ -13,8 +13,8 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
-    0.1.42  Fox: css changes to fix minor issues with the UI
-	0.1.40	Fox: Adding a visualiser for PEQ and Loudness Settings
+    0.1.41  	Fox: css changes to fix minor issues with the UI
+    0.1.40	Fox: Adding a visualiser for PEQ and Loudness Settings
     0.1.34	Fox: Fix to loading presets, should apply them. Styling change to tooltips.
     0.1.33	Fox: Revised Binary, new residual cache with expiry time for delay, and convolver leftovers -   
                 Fixed issues with saving and loading presets not retaining preset names
@@ -112,7 +112,7 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.42";
+my $revision = "0.1.41";
 $binversion = "0_2_12";
 use vars qw($VERSION);
 $VERSION = $revision;
