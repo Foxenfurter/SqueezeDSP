@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.50  	Fox: Added a clear log function and added HLS to the fully supported list of formats for transcoding, this should allow support for streaming services that use HLS such as Apple Music and Amazon Music.
     0.1.41  	Fox: css changes to fix minor issues with the UI
     0.1.40	Fox: Adding a visualiser for PEQ and Loudness Settings
     0.1.34	Fox: Fix to loading presets, should apply them. Styling change to tooltips.
@@ -112,8 +113,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.41";
-$binversion = "0_2_12";
+my $revision = "0.1.50";
+$binversion = "0_2_20";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -188,6 +189,7 @@ sub initPlugin {
     Slim::Control::Request::addDispatch([$thistag . '.readclientSettings'], [1, 1, 1, \&Plugins::SqueezeDSP::UI_Functions::readClientSettings]);
     Slim::Control::Request::addDispatch([$thistag . '.readpresetSettings'], [1, 1, 1, \&Plugins::SqueezeDSP::UI_Functions::readPresetSettings]);
     Slim::Control::Request::addDispatch([$thistag . '.importwav'], [1, 1, 1, \&Plugins::SqueezeDSP::UI_Functions::importwavCommand]);
+    Slim::Control::Request::addDispatch([$thistag . '.clearlog'], [1, 1, 0, \&Plugins::SqueezeDSP::UI_Functions::clearlogCommand]);
 
     # Binary setup and housekeeping
     Plugins::SqueezeDSP::Binary::setup_binary($class);

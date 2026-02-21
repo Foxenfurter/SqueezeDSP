@@ -21,13 +21,13 @@
 <!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_utils_v00_01a.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_core_v00_03a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_ctl_v00_03a.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_ctl_v00_03b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_file_v00_02b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_init_v00_01b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_lib_v00_01b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_graph_v00_02q.js"></script>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05d.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05f.js"></script>
 
 [% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
 <!-- the style-police -->
@@ -37,8 +37,10 @@
 </style>    
 <div style="width: 100%; min-width: 300px;margin-bottom: 6px;">
 <div class="bubble" id="myMessage">To use please select Squeeze DSP on Extras Menu</div>
-<Output><span>
+<Output>
+
 [% "PLUGIN_SQUEEZEDSP_DISPLAYNAME" | string %] 
+
 </span><span id="version"> 
 [% PERL %]
 my $myversion=Plugins::SqueezeDSP::Plugin->getpluginVersion();
@@ -46,9 +48,13 @@ print ( $myversion );
 [% 	END %]
 </span>
 </Output>
-<span style="float: right;text-align: right;">
-    <Output id="ClientName"></Output><br>
-    <Output id="myPlayer"></Output>
+<span style="float: right; display:flex; align-items:flex-start; gap:4px;">
+    <span style="text-align: right;">
+        <Output id="ClientName"></Output><br>
+        <Output id="myPlayer"></Output>
+    </span>
+    <button class="sqdsp-click minibutton button-green text-button" 
+        onclick="window.open('https://github.com/Foxenfurter/SqueezeDSP/wiki', '_blank');">?</button>
 </span>
 
 <!--Output style="float: right;" id="myPlayerName">[% "PLAYER_NAME" | string %]</Output-->
@@ -123,22 +129,14 @@ print ( $myversion );
 			<TD class="rowSuffix"><button class="sqdsp-click  button button-teal" type="button" id="btn_LoadPreset" value="Load" 
                 onclick="
 				SqueezeDSPFetchPresetSettings(sel_Preset.value, [
-    function() { NewFieldValue('Last_preset', sel_Preset, false); },
-    function() { edt_NewPreset.value = sel_Preset.value; },
-    LocalUpdateSettings,
-    function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal'); },
-    function() { SqueezeDSPSaveAll(); },
-    function() { DisplayAlert('Preset', 'Applied', 2000); }
-]);
-   /*             SqueezeDSPFetchPresetSettings(sel_Preset.value, [
-				NewFieldValue('Last_preset', sel_Preset, false),
-				edt_NewPreset.value = sel_Preset.value,
-				LocalUpdateSettings,
-                        (function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal') }),
-                        SqueezeDSPSaveAll(),
-                        DisplayAlert('Preset', 'Applied', 2000)
-               
-                ])*/
+    	                    function() { NewFieldValue('Last_preset', sel_Preset, false); },
+    	                    function() { edt_NewPreset.value = sel_Preset.value; },
+    	                    LocalUpdateSettings,
+    	                    function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal'); },
+    	                    function() { SqueezeDSPSaveAll(); },
+    	                    function() { DisplayAlert('Preset', 'Applied', 2000); }
+                ]);
+
                 ">Load</button></TD >
 		</TR>
 		
@@ -158,7 +156,7 @@ print ( $myversion );
 				<button class="sqdsp-click  button button-green" type="button" name="btn_NewPreset" value="Save" onclick="
                     NewFieldValue('Last_preset', edt_NewPreset, false); 
 					//alert(edt_NewPreset.value);
-                    SqueezeDSPSaveAll( SetNewPreset(edt_NewPreset)  ) ;												
+                    SqueezeDSPSaveAll( SetNewPreset(edt_NewPreset) );												
                 ">Save</button>
 			</TD >
 		</TR>
@@ -197,7 +195,20 @@ print ( $myversion );
 				<TD class="rowBody"><label for="logSummary"  class="infoTitle"></label>
 					<span id="logSummary"></span>
 				</TD >
-				<TD class="rowSuffix"></TD>
+				<TD class="rowSuffix">
+					 <!--We load the preset and then save it again, this ensures that the latest format is used, and the preset is
+                applied-->
+				<button class="sqdsp-click  button button-amber" type="button" name="btn_ClearLog" value="Clear" onclick="SqueezeDSPClearLog(function(success, msg) { 
+    if (success) {
+		DisplayAlert('Clear', 'Log Cleared', 2000)
+        
+        // Optionally refresh log display
+    	GetLogSummary();
+    } else {
+        DisplayAlert('Clear', 'Error: ' + msg, 2000);
+    }
+})">Clear Log</button>
+				</TD>
 			
 		</TR>
 	
@@ -231,6 +242,7 @@ print ( $myversion );
 			<output id="Delay.delayBubble" class="bubble" ></output>
 		</TD>
 		<TD class="rowSuffix"><Input type="number"   class="OutputVal"  min="-20" max="20" step="0.1"  id="val_Delay.delay" onChange="valInputDecimal(this);" ></Input></TD >
+		
 	 </TR>
 
 		
@@ -246,7 +258,7 @@ print ( $myversion );
 					<Output id="BalanceBubble" class="bubble" ></Output>
 			 </TD>
 			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Balance" onChange="valInputDecimal(this);" ></Input></TD>
-		</TR>
+			
 		<TR id="control_Width" inc="0.1">
 			<TD class="rowTitle">
 				<div class="tooltip"  >
@@ -259,7 +271,7 @@ print ( $myversion );
 					<Output id="WidthBubble" class="bubble" ></Output>
 			 </TD>
 			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Width" onChange="valInputDecimal(this);" ></Input></TD>
-		</TR>
+			
 <tr id="control_Loudness.enabled">
     <td class="rowTitle">
         <div class="tooltip">
@@ -353,19 +365,22 @@ print ( $myversion );
 		<!-- This stuff will all be replaced by new EQ -->	
 </div>
 <!--Advanced Stuff -->
-<div id="FileDrop" class="drop_zone"
-    ondragenter="document.getElementById('output').textContent = ''; event.stopPropagation(); event.preventDefault();"
-    ondragover="event.stopPropagation(); event.preventDefault();"
-    ondrop="event.stopPropagation(); event.preventDefault(); dodrop(event);">
+<div id="FileDrop" class="drop_zone">
     DROP REW OR FIR WAV FILE HERE...<BR> -or- <BR>
     <label class="button button-blue" style="width:185px;" for="filePicker">Choose REW or WAV File</label>
     <input
         type="file"
         id="filePicker"
-        accept=".txt,.wav"
+        accept=".txt,.wav,text/plain,audio/wav"
         class='button button-blue'
     /><BR>
     <output id="LastFile"></output>
+</div>
+<div id="kofi-float" style="position:fixed; bottom:12px; right:12px; opacity:0.75; z-index:999;"
+     onmouseover="this.style.opacity='1'" 
+     onmouseout="this.style.opacity='0.75'">
+    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+    <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'Y8Y31UOE3D');kofiwidget2.draw();</script>
 </div>
     </DIV> <!-- DSP Container -->
 	<!-- end of page -->
@@ -373,13 +388,8 @@ print ( $myversion );
 
 <script>
 
-    
-
 // Plotting functions for SqueezeDSP integration
 
-
-// Make it available globally
-//window.testGraph = testGraph;
 let resizeTimeout;
 window.addEventListener('resize', function() {
     clearTimeout(resizeTimeout);
@@ -390,27 +400,71 @@ window.addEventListener('resize', function() {
     }, 250); // Debounce to avoid excessive updates
 });
 
-
-
+function handleFileSelection(event) {
+    const files = event.target.files;
+    
+    if (!files || files.length === 0) {
+        return;
+    }
+    
+    if (files.length > 1) {
+        outputlist('Only 1 file at a time Please');
+        return;
+    }
+    
+    const file = files[0];
+    const extension = file.name.split('.').pop().toLowerCase();
+    
+    if (extension === 'txt') {
+        readFile(file, ConfirmREW);
+    } else if (extension === 'wav') {
+        importWavFile(file, outputlist, refreshFIRWavList);
+    } else {
+        outputlist('Unsupported file type: ' + extension);
+    }
+}
 
 // Start initialization when DOM is ready
-document.observe('dom:loaded', function() {
+document.addEventListener('DOMContentLoaded', function() {
     updateTextConstants();
     initializeApp();
     
-    // Log the theme and apply it
     const theme = logParentTheme();
     applyThemeClass(theme);
     
-    // Initialize graph
     initializePEQGraph();
+    GetLogSummary();
  
-    // Setup file picker and other essentials
-    $('filePicker').observe('change', handleFileSelection);
+    // Setup file picker
+    const filePicker = document.getElementById('filePicker');
+    if (filePicker) {
+        filePicker.addEventListener('change', handleFileSelection);
+    }
+    
+    // Setup drag and drop
+    const dropZone = document.getElementById('FileDrop');
+    if (dropZone) {
+        dropZone.addEventListener('dragenter', function(e) {
+            const output = document.getElementById('output');
+            if (output) output.textContent = '';
+            e.stopPropagation();
+            e.preventDefault();
+        });
+        
+        dropZone.addEventListener('dragover', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+        });
+        
+        dropZone.addEventListener('drop', function(e) {
+            e.stopPropagation();
+            e.preventDefault();
+            dodrop(e);
+        });
+    }
+    
     window.addEventListener('beforeunload', handleUnsavedChanges);
 });
-// Copied
-
 
 </script>
 

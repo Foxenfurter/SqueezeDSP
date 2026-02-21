@@ -192,7 +192,7 @@ sub saveallCommand {
                 my $current_track = $song->track();
                 if ($current_track) {
                     # Define included protocols
-                    my @included_protocols = qw(file http https smb nfs afp tidal spotify deezer qobuz);
+                    my @included_protocols = qw(file http https smb nfs afp tidal spotify deezer qobuz hls);
                     # Define excluded file extensions
                     my @excluded_extensions = qw(wma wmal wmap);
                     # Get track URL
@@ -490,6 +490,62 @@ sub loadPresetFile {
     } else {
         Plugins::SqueezeDSP::Utils::debug("Can't set, file $path does not exist");
     }
+}
+
+sub clearlogCommand {
+    my $request = shift;
+    my $client = $request->client();
+    Plugins::SqueezeDSP::Utils::debug("command: clearlog");
+
+    if($request->isNotQuery([[ $Plugins::SqueezeDSP::Plugin::thistag . '.clearlog' ]])) {
+        Plugins::SqueezeDSP::Utils::oops($client, undef, "clearlog not query");
+        $request->setStatusBadDispatch();
+        return;
+    }
+
+    my $logfile = $Plugins::SqueezeDSP::Plugin::logfile;
+    
+    # Check if log file exists and is writable
+    if (! -e $logfile) {
+        $request->addResult('_success', 0);
+        $request->addResult('_message', 'Log file does not exist');
+        $request->setStatusDone();
+        return;
+    }
+    
+    if (! -w $logfile) {
+        $request->addResult('_success', 0);
+        $request->addResult('_message', 'Log file is not writable');
+        $request->setStatusDone();
+        return;
+    }
+    
+    # Try to clear the log file
+    my $success = 0;
+    my $message = '';
+    
+    eval {
+        # Open in write mode to truncate (most efficient method)
+        if (open(my $fh, '>', $logfile)) {
+            # Optionally add a header/timestamp
+            print $fh "# Log cleared at " . scalar(localtime) . "\n";
+            close $fh;
+            $success = 1;
+            $message = 'Log cleared successfully';
+            Plugins::SqueezeDSP::Utils::debug("Log file cleared: $logfile");
+        } else {
+            $message = "Could not open log file for writing: $!";
+        }
+    };
+    
+    if ($@) {
+        $message = "Error clearing log: $@";
+        Plugins::SqueezeDSP::Utils::debug("ERROR: $message");
+    }
+    
+    $request->addResult('_success', $success);
+    $request->addResult('_message', $message);
+    $request->setStatusDone();
 }
 
 1;
