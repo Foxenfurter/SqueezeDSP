@@ -2,8 +2,7 @@ package Plugins::SqueezeDSP::Binary;
 use strict;
 use File::Copy;
 use File::Spec::Functions qw(:ALL);
-use Plugins::SqueezeDSP::Plugin qw($log $thisapp $pluginDataDir $pluginSettingsDataDir 
-                                   $pluginImpulsesDataDir $pluginMatrixDataDir $pluginTempDataDir);
+#use Plugins::SqueezeDSP::Plugin qw($log $thisapp $pluginDataDir $pluginSettingsDataDir $pluginImpulsesDataDir $pluginMatrixDataDir $pluginTempDataDir);
 
 sub binaries {
     my $os = Slim::Utils::OSDetect::details();
