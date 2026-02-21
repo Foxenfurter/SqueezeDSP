@@ -4,12 +4,12 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.41" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.50" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
-     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.41/SqueezeDSP-0.1.41.zip</url>
-	  <sha>ea11462d2074f69750238cc256e1e758faa6470e</sha>
-	  <changes>Visualizer added to User interface - displays filters as they are changed</changes>
+     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.50/SqueezeDSP-0.1.50.zip</url>
+	  <sha>c8f1e1bbb8a9dde6ae8d01de2dfb6eb159290355</sha>
+	  <changes>Major performance improvements  in engine, tweaks to UI</changes>
       <creator>Jonathan Fox</creator>
 	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>
 	  <category>tools</category>
