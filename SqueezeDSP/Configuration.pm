@@ -131,7 +131,11 @@ sub upgradePrefs
 			#create default file if it does not exist
 			Plugins::SqueezeDSP::Utils::debug( $client,  "Player Config File $myJSONFile not found. Creating" );
 			#need to create file first
-			my $myDefault = {Client=>{}};
+			my $myDefault = my $myDefault = {
+				Client     => { Bypass => "1" },
+				ClientName => "",
+				Revision   => 0
+			};
 			Plugins::SqueezeDSP::Utils::SaveJSONFile ($myDefault, $myJSONFile );
 			#Plugins::SqueezeDSP::Utils::defaultPrefs( $client );
 		}

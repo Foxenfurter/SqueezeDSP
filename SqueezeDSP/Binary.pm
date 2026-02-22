@@ -88,8 +88,10 @@ sub setup_binary {
 }
 
 sub housekeeping {
-    unlink glob catdir($Plugins::SqueezeDSP::Plugin::pluginTempDataDir, "/", '*.gob');
+    unlink glob catdir($Plugins::SqueezeDSP::Plugin::pluginTempDataDir, "/", '*.filter');
+    unlink glob catdir($Plugins::SqueezeDSP::Plugin::pluginTempDataDir, "/", '*.filter.wav');
     unlink glob catdir($Plugins::SqueezeDSP::Plugin::pluginTempDataDir, "/", '*.wav');
+	unlink glob catdir($Plugins::SqueezeDSP::Plugin::pluginTempDataDir, "/", '*.gob');
     unlink grep { !/\current.json/ } glob catdir($Plugins::SqueezeDSP::Plugin::pluginTempDataDir, "/", '*.json');
 }
 
