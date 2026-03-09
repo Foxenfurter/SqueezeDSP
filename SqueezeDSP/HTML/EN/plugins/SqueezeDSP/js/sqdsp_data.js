@@ -14,7 +14,7 @@ function InitialiseData()
 
     {
     return {
-        Bypass: 0,
+        Bypass: 1,
         Preamp: 0,
         Balance: 0,
         Width: 0,
@@ -45,6 +45,22 @@ function InitialiseSqueezeDSPData()
     SqueezeDSPData.ClientName = SqueezeDSPData.ClientName || "";
     SqueezeDSPData.Revision = SqueezeDSPData.Revision || 0;
 
+}
+
+function deepMerge(target, source) {
+    const result = Object.assign({}, target);
+    for (const key of Object.keys(source)) {
+        if (source[key] !== null &&
+            typeof source[key] === 'object' &&
+            !Array.isArray(source[key]) &&
+            typeof target[key] === 'object' &&
+            target[key] !== null) {
+            result[key] = deepMerge(target[key], source[key]);
+        } else if (source[key] !== undefined) {
+            result[key] = source[key];
+        }
+    }
+    return result;
 }
 
 
@@ -337,6 +353,62 @@ function SqueezeDSPSaveEQBand(myBand, myFreq, myGain, myQ)
 // Modified processing function
 // Fetch current settings from server
 function SqueezeDSPFetchCurrentSettings(callback) {
+    new Ajax.Request('/jsonrpc.js', {
+        method: 'post',
+        postBody: Object.toJSON({
+            id: 1,
+            method: 'slim.request',
+            params: [getCurrentPlayer(), ['squeezedsp.readclientSettings']]
+        }),
+        onSuccess: (response) => {
+            const data = response.responseText.evalJSON();
+            const rawJson = data.result.json;
+
+            try {
+                // Start with a fully-defaulted structure
+                const defaults = {
+                    Client: InitialiseData()
+                };
+
+                // Parse server data (may be sparse or empty for new players)
+                let serverData = {};
+                try {
+                    serverData = rawJson ? JSON.parse(rawJson) : {};
+                } catch (e) {
+                    console.warn("Could not parse server JSON, treating as fresh player:", e);
+                }
+
+                // Deep merge server data over defaults
+                SqueezeDSPData = deepMerge(defaults, serverData);
+                SqueezeDSPData.ClientName = data.result.clientName;
+
+                SqueezeDSPData.Revision = data.result.revision || 1;
+				const isFreshPlayer = data.result.fresh_player === 1;
+				delete SqueezeDSPData.fresh_player; // belt-and-braces in case it leaked into serverData
+
+
+                // Transform any legacy filter format
+                SqueezeDSPData = transformLegacyFilters(SqueezeDSPData);
+
+                // If fresh player: defaults are now in place, persist them immediately
+                if (isFreshPlayer) {
+                    console.log("Fresh player detected — saving default settings");
+                    SqueezeDSPSaveAll(function(ok) {
+                        if (!ok) console.warn("Failed to save defaults for fresh player");
+                    });
+                }
+				console.log("Post-merge SqueezeDSPData:", JSON.stringify(SqueezeDSPData, null, 2));
+				initializePEQGraph();
+                if (callback) callback();
+
+            } catch (e) {
+                console.error("JSON parsing error:", e);
+            }
+        }
+    });
+}
+
+function SqueezeDSPFetchCurrentSettingsOld(callback) {
     new Ajax.Request('/jsonrpc.js', {
         method: 'post',
         postBody: Object.toJSON({

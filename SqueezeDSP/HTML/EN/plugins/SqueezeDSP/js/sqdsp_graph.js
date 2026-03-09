@@ -64,6 +64,7 @@ function updatePEQGraph() {
     }
     
     try {
+		
         console.log('Updating PEQ Graph...');
         
         const loudnessEnabled = SqueezeDSPData.Client.Loudness && SqueezeDSPData.Client.Loudness.enabled == 1;
@@ -71,10 +72,16 @@ function updatePEQGraph() {
         const listeningLevel = SqueezeDSPData.Client.Loudness?.listening_level || 82.5;
         
         // Get container dimensions
-        const container = document.getElementById('peqGraphContainer');
-        const graphDiv = document.getElementById('peqGraph');
-        const containerWidth = graphDiv ? graphDiv.clientWidth : 800;
-        const containerHeight = graphDiv ? graphDiv.clientHeight : 400;
+		const graphDiv = document.getElementById('peqGraph');
+		const container = document.getElementById('peqGraphContainer');
+		let containerWidth = graphDiv.clientWidth || container?.clientWidth || 0;
+		let containerHeight = graphDiv.clientHeight || container?.clientHeight || 0;
+
+        // If layout hasn't settled yet, defer one frame
+        if (containerWidth === 0 || containerHeight === 0) {
+            requestAnimationFrame(() => updatePEQGraph());
+            return;
+        }
         
         const plotter = new FrequencyResponsePlotter(containerWidth, containerHeight);
         const responses = [];

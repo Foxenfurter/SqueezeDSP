@@ -34,6 +34,7 @@ function SliderReset() {
 
 function LocalClearSettings() {
     InitialiseSqueezeDSPData();
+	SqueezeDSPData.Client.Bypass = 0;  // Reset clears settings but stays active
     LocalUpdateSettings();
     highlightMatchingOption('sel_FIRWavFile', 'None');
     highlightMatchingOption('sel_Preset', 'None');

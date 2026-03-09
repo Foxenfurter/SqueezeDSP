@@ -363,9 +363,13 @@ sub readClientSettings {
         $request->addResult('revision', $Plugins::SqueezeDSP::Plugin::revision);
         $request->setStatusDone();
     } else {
-        my $error = "Couldn't read $myJSONFile: $!";
-        Plugins::SqueezeDSP::Utils::debug("ERROR: $error");
-        $request->setStatusBadParams($error);
+		# probably a new player
+        Plugins::SqueezeDSP::Utils::debug("No settings file found for $myJSONFile - returning empty defaults");
+        $request->addResult('json', '{}');
+        $request->addResult('clientName', $client->name);
+       	$request->addResult('revision', $Plugins::SqueezeDSP::Plugin::revision);
+    	$request->addResult('fresh_player', 1);  # add this
+        $request->setStatusDone();
     }
 }
 

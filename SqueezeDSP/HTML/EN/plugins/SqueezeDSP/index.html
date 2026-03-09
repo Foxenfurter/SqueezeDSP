@@ -9,7 +9,7 @@
 <!--
 	Settings page
 		
-	Modified by Jonathan Fox 2023
+	Modified by Jonathan Fox 2023-26
 -->
 
 <!-- Script for the model -->
@@ -17,8 +17,8 @@
 <!--link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"-->
 
 <!--Now let's split out the libraries and stylese-->
-<link rel="stylesheet" type="text/css" href="css/sqdsp_all_v00_05v.css">
-<!--script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_controls_v00_09b.js"></script-->
+<!--link rel="stylesheet" type="text/css" href="css/sqdsp_all_v00_05v.css">
+
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_utils_v00_01a.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_core_v00_03a.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_ctl_v00_03b.js"></script>
@@ -27,12 +27,66 @@
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_lib_v00_01b.js"></script>
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_graph_v00_02q.js"></script>
 
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05f.js"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05f.js"></script-->
+
+<link rel="stylesheet" type="text/css" href="css/sqdsp_all.css?v=[% cacheBust %]">
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_utils.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_core.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_ctl.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_file.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_init.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_lib.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_graph.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data.js?v=[% cacheBust %]"></script>
+<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_autoeq.js?v=[% cacheBust %]"></script>
 
 [% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
 <!-- the style-police -->
 <style>
+#autoeq-dropdown {
+    background: #ffffff;
+    color: #212121 !important;
+    border: 1px solid #aaa;
+    max-height: 280px;
+    overflow-y: auto;
+    scroll-behavior: smooth;
 
+}
+
+.autoeq-option {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 6px 10px;
+    cursor: pointer;
+    gap: 10px;
+    border-bottom: 1px solid #ddd;
+    color: #212121 !important;
+    background: #ffffff !important;
+}
+
+.autoeq-option:hover,
+.autoeq-option.focused {
+    background: #d0e4ff !important;
+    color: #212121 !important;
+}
+
+.autoeq-name {
+    flex: 1;
+    font-size: 0.9em;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #212121 !important;
+}
+
+.autoeq-source {
+    flex-shrink: 0;
+    font-size: 0.75em;
+    opacity: 0.6;
+    white-space: nowrap;
+    color: #212121 !important;
+}
 
 </style>    
 <div style="width: 100%; min-width: 300px;margin-bottom: 6px;">
@@ -57,13 +111,9 @@ print ( $myversion );
         onclick="window.open('https://github.com/Foxenfurter/SqueezeDSP/wiki', '_blank');">?</button>
 </span>
 
-<!--Output style="float: right;" id="myPlayerName">[% "PLAYER_NAME" | string %]</Output-->
+
 </div>
-<!--table style="width:100%;padding:0; display:none;" zzz_onresize="resizeContainer()">
-    <tr><td>
-        <div id="RestTestHost" style="margin-right:20px; height:20px; width:95%;"></div>
-    </td></tr>
-</table>-->
+
 <!-- for Testing Rest Calls-->
 <DIV style="display : none;" id="TEST REST" style="bottom:5px;"   >
 <!-- this should help pass strings into functions within the scripts-->
@@ -382,7 +432,31 @@ print ( $myversion );
     <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
     <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'Y8Y31UOE3D');kofiwidget2.draw();</script>
 </div>
-    </DIV> <!-- DSP Container -->
+<table class="table-container">
+    <tr id="control_HeadphoneEQ">
+        <td class="rowTitle">
+            <div class="tooltip">
+				<label class="infoTitle">Headphone EQ <span style="font-size:0.75em; color:#e67e00;">(experimental)</span></label>
+<span class="tooltiptext">Search AutoEQ headphone profiles and Imports 48kHz FIR WAV if available. The WAV file will appear in the FIR dropdown once imported, select it to apply.</span>
+            </div>
+        </td>
+        <td class="rowBody">
+            <div id="autoeq-search-container">
+                <input type="text"
+                       id="autoeq-search"
+                       class="sqdsp-edit"
+                       placeholder="Type headphone name (min. 2 chars)..."
+                       autocomplete="off"
+                       spellcheck="false">
+                <div id="autoeq-dropdown" ></div>
+            </div>
+        </td>
+        <td class="rowSuffix">
+            <span id="autoeq-status"></span>
+        </td>
+    </tr>
+</table>
+</DIV> <!-- DSP Container -->
 	<!-- end of page -->
 	[% END %]
 
@@ -390,14 +464,15 @@ print ( $myversion );
 
 // Plotting functions for SqueezeDSP integration
 
-let resizeTimeout;
-window.addEventListener('resize', function() {
-    clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(function() {
-        if (typeof updatePEQGraph === 'function') {
-            updatePEQGraph();
+
+const _graphObserver = new ResizeObserver(function(entries) {
+    for (const entry of entries) {
+        if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
+            if (typeof updatePEQGraph === 'function') {
+                updatePEQGraph();
+            }
         }
-    }, 250); // Debounce to avoid excessive updates
+    }
 });
 
 function handleFileSelection(event) {
@@ -428,12 +503,13 @@ function handleFileSelection(event) {
 document.addEventListener('DOMContentLoaded', function() {
     updateTextConstants();
     initializeApp();
+	initAutoEQUI();
     
     const theme = logParentTheme();
     applyThemeClass(theme);
     
-    initializePEQGraph();
-    GetLogSummary();
+    //initializePEQGraph();
+    //GetLogSummary(); duplicate call
  
     // Setup file picker
     const filePicker = document.getElementById('filePicker');
@@ -461,8 +537,12 @@ document.addEventListener('DOMContentLoaded', function() {
             e.preventDefault();
             dodrop(e);
         });
-    }
     
+	}
+    const graphContainer = document.getElementById('peqGraphContainer');
+    if (graphContainer) {
+        _graphObserver.observe(graphContainer);
+    }
     window.addEventListener('beforeunload', handleUnsavedChanges);
 });
 

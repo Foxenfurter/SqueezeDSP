@@ -10,7 +10,7 @@ function initializeApp() {
     SqueezeDSPGetList(LocalBuildLists);
     BuildFilterType("PEQ-filter-selector", "peak");
     SqueezeDSPFetchCurrentSettings(LocalUpdateSettings);
-
+	
     GetLogSummary();
     setInterval(GetLogSummary, 30 * 1000);
 }
@@ -48,10 +48,10 @@ function handleUnsavedChanges(event) {
     }
 }
 
-// DOM Ready Initialization
-document.observe('dom:loaded', function() {
+// DOM Ready Initialization - handled in main page
+/*document.observe('dom:loaded', function() {
     updateTextConstants();
     initializeApp();
     $('filePicker').observe('change', handleFileSelection);
     window.addEventListener('beforeunload', handleUnsavedChanges);
-});
+});*/

@@ -13,12 +13,13 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
-	0.1.50  	Fox: Added a clear log function and added HLS to the fully supported list of formats for transcoding, this should allow support for streaming services that use HLS such as Apple Music and Amazon Music.
-    0.1.41  	Fox: css changes to fix minor issues with the UI
+	0.1.51	Fox: Proper empty structure created and returned for new player, error was causing issues on UI
+	0.1.50  Fox: Added a clear log function and added HLS to the fully supported list of formats for transcoding, this should allow support for streaming services that use HLS such as Apple Music and Amazon Music.
+    0.1.41  Fox: css changes to fix minor issues with the UI
     0.1.40	Fox: Adding a visualiser for PEQ and Loudness Settings
     0.1.34	Fox: Fix to loading presets, should apply them. Styling change to tooltips.
     0.1.33	Fox: Revised Binary, new residual cache with expiry time for delay, and convolver leftovers -   
-                Fixed issues with saving and loading presets not retaining preset names
+              Fixed issues with saving and loading presets not retaining preset names
     0.1.32	Fox: Revised Binary, fixed gapless playback by caching latest player filter & fft, 
                 Fixed gain drop fixed moved tail saver to eradicate race condition. 
                 Tweaked preset load logic so that clientname, ID and Last-Preset are corrected.
@@ -109,12 +110,13 @@ our (
     $configPath,         # Config path
     $thistag,            # Plugin tag
     $myconfigrevision,   # Config revision
-    $binversion          # Binary version
+    $binversion,          # Binary version
+	$cacheBust          # Cache busting token
 );
 
 # Revision number
-my $revision = "0.1.50";
-$binversion = "0_2_20";
+my $revision = "0.1.51";
+$binversion = "0_2_21";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -198,6 +200,11 @@ sub initPlugin {
     
     # Event subscription
     Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new']]);
+
+	# Randomize token to avoid refreshing cache
+	#$cacheBust = int(rand(99999));
+	# will clear cache on server start, so changing js files works
+	$cacheBust = time();
 }
 
 sub shutdown {
@@ -235,10 +242,13 @@ sub webPages {
     }
 }
 
+
 sub handleWebIndex {
     my ($client, $params) = @_;
+    $params->{cacheBust} = $cacheBust;
     return Slim::Web::HTTP::filltemplatefile('plugins/SqueezeDSP/index.html', $params) if $client;
 }
+
 
 sub getFunctions { return \%noFunctions; }
 sub getDisplayName { return 'PLUGIN_SQUEEZEDSP_DISPLAYNAME'; }
