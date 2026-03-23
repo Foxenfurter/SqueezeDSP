@@ -8,26 +8,10 @@
 
 <!--
 	Settings page
-		
 	Modified by Jonathan Fox 2023-26
 -->
 
-<!-- Script for the model -->
 <script type="text/javascript" src="/html/prototype.js"></script>
-<!--link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"-->
-
-<!--Now let's split out the libraries and stylese-->
-<!--link rel="stylesheet" type="text/css" href="css/sqdsp_all_v00_05v.css">
-
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_utils_v00_01a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_core_v00_03a.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_ctl_v00_03b.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_file_v00_02b.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_init_v00_01b.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_peq_lib_v00_01b.js"></script>
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_graph_v00_02q.js"></script>
-
-<script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_data_v00_05f.js"></script-->
 
 <link rel="stylesheet" type="text/css" href="css/sqdsp_all.css?v=[% cacheBust %]">
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_utils.js?v=[% cacheBust %]"></script>
@@ -41,65 +25,21 @@
 <script type="text/javascript" src="[% webroot %]plugins/SqueezeDSP/js/sqdsp_autoeq.js?v=[% cacheBust %]"></script>
 
 [% WRAPPER settingSection onmouseover="onHTMLMouseOverBody()" %]
-<!-- the style-police -->
+
 <style>
-#autoeq-dropdown {
-    background: #ffffff;
-    color: #212121 !important;
-    border: 1px solid #aaa;
-    max-height: 280px;
-    overflow-y: auto;
-    scroll-behavior: smooth;
 
-}
+</style>
 
-.autoeq-option {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding: 6px 10px;
-    cursor: pointer;
-    gap: 10px;
-    border-bottom: 1px solid #ddd;
-    color: #212121 !important;
-    background: #ffffff !important;
-}
-
-.autoeq-option:hover,
-.autoeq-option.focused {
-    background: #d0e4ff !important;
-    color: #212121 !important;
-}
-
-.autoeq-name {
-    flex: 1;
-    font-size: 0.9em;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    color: #212121 !important;
-}
-
-.autoeq-source {
-    flex-shrink: 0;
-    font-size: 0.75em;
-    opacity: 0.6;
-    white-space: nowrap;
-    color: #212121 !important;
-}
-
-</style>    
-<div style="width: 100%; min-width: 300px;margin-bottom: 6px;">
+<!-- TOP BAR: always visible -->
+<div style="width: 100%; min-width: 300px; margin-bottom: 6px;">
 <div class="bubble" id="myMessage">To use please select Squeeze DSP on Extras Menu</div>
 <Output>
-
-[% "PLUGIN_SQUEEZEDSP_DISPLAYNAME" | string %] 
-
-</span><span id="version"> 
+[% "PLUGIN_SQUEEZEDSP_DISPLAYNAME" | string %]
+</span><span id="version">
 [% PERL %]
 my $myversion=Plugins::SqueezeDSP::Plugin->getpluginVersion();
 print ( $myversion );
-[% 	END %]
+[% END %]
 </span>
 </Output>
 <span style="float: right; display:flex; align-items:flex-start; gap:4px;">
@@ -107,267 +47,456 @@ print ( $myversion );
         <Output id="ClientName"></Output><br>
         <Output id="myPlayer"></Output>
     </span>
-    <button class="sqdsp-click minibutton button-green text-button" 
+    <button class="sqdsp-click minibutton button-green text-button"
         onclick="window.open('https://github.com/Foxenfurter/SqueezeDSP/wiki', '_blank');">?</button>
 </span>
-
-
 </div>
 
-<!-- for Testing Rest Calls-->
-<DIV style="display : none;" id="TEST REST" style="bottom:5px;"   >
-<!-- this should help pass strings into functions within the scripts-->
-<Input id = "Freq_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_FREQ" | string %]' >
-<Input id = "Gain_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_GAIN" | string %]' >
-<Input id = "Q_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_Q_HELP" | string %]' >
-<Input id = "Slope_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP" | string %]' >
-<Input id = "HighPass_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHPASS_HELP" | string %]' >
-<Input id = "LowPass_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWPASS_HELP" | string %]' >
-<Input id = "LowShelf_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWSHELF_HELP" | string %]' >
-<Input id = "HighShelf_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHSHELF_HELP" | string %]' >
-<Input id = "Peak_Help" readonly value='[% "PLUGIN_SQUEEZEDSP_PEAK_HELP" | string %]' >
-<Input id = "Peak_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_PEAK" | string %]' >
-<Input id = "HighPass_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHPASS" | string %]' >
-<Input id = "LowPass_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWPASS" | string %]' >
-<Input id = "LowShelf_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_LOWSHELF" | string %]' >
-<Input id = "HighShelf_Desc" readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHSHELF" | string %]' >
-
+<!-- Hidden string constants for JS -->
+<DIV style="display : none;" id="TEST REST">
+    <Input id="Freq_Desc"       readonly value='[% "PLUGIN_SQUEEZEDSP_FREQ"           | string %]'>
+    <Input id="Gain_Desc"       readonly value='[% "PLUGIN_SQUEEZEDSP_GAIN"           | string %]'>
+    <Input id="Q_Help"          readonly value='[% "PLUGIN_SQUEEZEDSP_Q_HELP"         | string %]'>
+    <Input id="Slope_Help"      readonly value='[% "PLUGIN_SQUEEZEDSP_SLOPE_HELP"     | string %]'>
+    <Input id="HighPass_Help"   readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHPASS_HELP"  | string %]'>
+    <Input id="LowPass_Help"    readonly value='[% "PLUGIN_SQUEEZEDSP_LOWPASS_HELP"   | string %]'>
+    <Input id="LowShelf_Help"   readonly value='[% "PLUGIN_SQUEEZEDSP_LOWSHELF_HELP"  | string %]'>
+    <Input id="HighShelf_Help"  readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHSHELF_HELP" | string %]'>
+    <Input id="Peak_Help"       readonly value='[% "PLUGIN_SQUEEZEDSP_PEAK_HELP"      | string %]'>
+    <Input id="Peak_Desc"       readonly value='[% "PLUGIN_SQUEEZEDSP_PEAK"           | string %]'>
+    <Input id="HighPass_Desc"   readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHPASS"       | string %]'>
+    <Input id="LowPass_Desc"    readonly value='[% "PLUGIN_SQUEEZEDSP_LOWPASS"        | string %]'>
+    <Input id="LowShelf_Desc"   readonly value='[% "PLUGIN_SQUEEZEDSP_LOWSHELF"       | string %]'>
+    <Input id="HighShelf_Desc"  readonly value='[% "PLUGIN_SQUEEZEDSP_HIGHSHELF"      | string %]'>
 </DIV>
-<!-- settings fields -->
-<!--PRESETS-->
 
- 
-	<TABLE class="table-container" >
-		<TR id="control_Bypass" >
-			<TD class="rowTitle">
-				<div class="tooltip"  ><!--label for="val_Bypass"  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label-->
-				<label class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label>
-				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BYPASS_HELP" | string %]</span></div>
-			</TD>
-      <TD class="rowBody" >
-      <div   class="checkbox-row" >
-         <div class="checkbox-group"> 
-			     <input class="Check" type="checkbox" 
-							name="val_Bypass" id="DSP"
-						value="1" onclick="SwitchCheckbox(this, true); NewFieldValue ('Bypass', this, false);  ToggleControl(this, 'DSP_container', true ); " > <label for="DSP" class="Toggle" >Toggle</label>
-         </div>
-            <button class="sqdsp-click button  button-red" type="button" id="btn_ClearAll" value="Reset" onclick="LocalClearSettings(); outputlist('');">Reset</button>
-      
-      </div>
-    </TD>
-			<TD class="rowSuffix">
-				<button class="sqdsp-click  button button-blue" type="button" id="btn_Apply" value="Apply" onclick="SqueezeDSPSaveAll(); DisplayAlert('All Settings', 'Applied', 2000);  ">Apply</button>
-			</TD >
-		</TR>
-    </TABLE>
-	<DIV id="DSP_container" >
-	<TABLE class="table-container" >
-		<TR  id="control_Preset">
-			<TD class="rowTitle">
-				<div class="tooltip"  >
-					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CHOOSE_PRESET" | string %]</Output>
-					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
-					</div>   
-				</TD>
-			<TD class="rowBody">
-                <select class="sqdsp-select" id="sel_Preset" 
-                onchange="reStyleElement('btn_LoadPreset', 'button-teal', 'button-amber')">
-            <option value="-">None</option>
-        </select>
-			</TD>
-            
-			<TD class="rowSuffix"><button class="sqdsp-click  button button-teal" type="button" id="btn_LoadPreset" value="Load" 
-                onclick="
-				SqueezeDSPFetchPresetSettings(sel_Preset.value, [
-    	                    function() { NewFieldValue('Last_preset', sel_Preset, false); },
-    	                    function() { edt_NewPreset.value = sel_Preset.value; },
-    	                    LocalUpdateSettings,
-    	                    function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal'); },
-    	                    function() { SqueezeDSPSaveAll(); },
-    	                    function() { DisplayAlert('Preset', 'Applied', 2000); }
-                ]);
+<!-- ============================================================
+     DSP ON/OFF — unchanged from original, always visible
+     ============================================================ -->
+<TABLE class="table-container">
+    <TR id="control_Bypass" class="row-header">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <label class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BYPASS" | string %]</label>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BYPASS_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="rowBody">
+            <div class="checkbox-row">
+                <div class="checkbox-group">
+                    <input class="Check" type="checkbox"
+                           name="val_Bypass" id="DSP" value="1"
+                           onclick="SwitchCheckbox(this, true); NewFieldValue('Bypass', this, false); ToggleControl(this, 'DSP_container', true);">
+                    <label for="DSP" class="Toggle">Toggle</label>
+                </div>
+                <button class="sqdsp-click button button-red" type="button"
+                        id="btn_ClearAll" value="Reset" style="margin-left: auto;"
+                        onclick="LocalClearSettings(); outputlist('');">Reset</button>
+            </div>
+        </TD>
+        <TD class="rowSuffix">
+            <button class="sqdsp-click button button-blue" type="button"
+                    id="btn_Apply" value="Apply"
+                    onclick="SqueezeDSPSaveAll(); DisplayAlert('All Settings', 'Applied', 2000);">Apply</button>
+        </TD>
+    </TR>
+</TABLE>
 
-                ">Load</button></TD >
-		</TR>
-		
-		<TR id="control_NewPreset">
-			<TD class="rowTitle">
-				<div class="tooltip"  >
-				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_SAVEPRESETFILE" | string %]</Output>
-				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
-				</div>	
-			</TD>
-			<TD class="rowBody">
-				<input class="sqdsp-edit" id="edt_NewPreset" value="None" />
-			</TD>
-			<TD class="rowSuffix">
-                <!--We load the preset and then save it again, this ensures that the latest format is used, and the preset is
-                applied-->
-				<button class="sqdsp-click  button button-green" type="button" name="btn_NewPreset" value="Save" onclick="
-                    NewFieldValue('Last_preset', edt_NewPreset, false); 
-					//alert(edt_NewPreset.value);
-                    SqueezeDSPSaveAll( SetNewPreset(edt_NewPreset) );												
-                ">Save</button>
-			</TD >
-		</TR>
+<DIV id="DSP_container">
 
-		<TR id="control_FIRWavFile">
-			<TD class="rowTitle">
-				<div class="tooltip"  >
-				<Output  class="infoTitle">[% "PLUGIN_SQUEEZEDSP_ROOMCORR" | string %]</Output>
-				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_ROOMCORR_HELP" | string %]</span>
-				</div>	
-			
-			</TD>
-			<TD class="rowBody">
-                <!-- For FIR Wav File -->
-                <select class="sqdsp-select" id="sel_FIRWavFile" 
-                onchange="NewFieldValue('FIRWavFile', this, false)">
+<!-- ============================================================
+     SECTION: PRESETS & FILES
+     Header row uses row-header class; body table uses section-body-table
+     to remove top border radius so header and body butt together.
+     ============================================================ -->
+<TABLE class="table-container">
+    <TR class="row-header" id="hdr_presets">
+        <TD class="rowTitle">
+            <span class="infoTitle">[% "PLUGIN_SQUEEZEDSP_PRESETSFILES" | string %]</span>
+        </TD>
+        <TD class="rowBody">
+            <div class="checkbox-row">
+                <div class="checkbox-group">
+                    <input class="Check" type="checkbox" id="toggle_presets" checked>
+                    <label class="Toggle toggle-section" for="toggle_presets">Toggle</label>
+                </div>
+            </div>
+        </TD>
+        <TD class="rowSuffix"></TD>
+    </TR>
+</TABLE>
+<DIV id="body_presets">
+<TABLE class="table-container section-body-table">
+    <TR id="control_Preset">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CHOOSE_PRESET" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="rowBody">
+            <select class="sqdsp-select" id="sel_Preset"
+                    onchange="reStyleElement('btn_LoadPreset', 'button-teal', 'button-amber')">
                 <option value="-">None</option>
-                </select>   
-			</TD>
-			<TD class="rowSuffix">                
+            </select>
+        </TD>
+        <TD class="rowSuffix">
+            <button class="sqdsp-click button button-teal" type="button"
+                    id="btn_LoadPreset" value="Load"
+                    onclick="SqueezeDSPFetchPresetSettings(sel_Preset.value, [
+                        function() { NewFieldValue('Last_preset', sel_Preset, false); },
+                        function() { edt_NewPreset.value = sel_Preset.value; },
+                        LocalUpdateSettings,
+                        function() { reStyleElement('btn_LoadPreset', 'button-amber', 'button-teal'); },
+                        function() { SqueezeDSPSaveAll(); },
+                        function() { DisplayAlert('Preset', 'Applied', 2000); }
+                    ]);">Load</button>
+        </TD>
+    </TR>
 
+    <TR id="control_NewPreset">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_SAVEPRESETFILE" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PRESET_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="rowBody">
+            <input class="sqdsp-edit" id="edt_NewPreset" value="None" />
+        </TD>
+        <TD class="rowSuffix">
+            <button class="sqdsp-click button button-green" type="button"
+                    name="btn_NewPreset" value="Save"
+                    onclick="NewFieldValue('Last_preset', edt_NewPreset, false);
+                             SqueezeDSPSaveAll(SetNewPreset(edt_NewPreset));">Save</button>
+        </TD>
+    </TR>
 
-		</TR>
+    <TR id="control_FIRWavFile">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_ROOMCORR" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_ROOMCORR_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="rowBody">
+            <select class="sqdsp-select" id="sel_FIRWavFile"
+                    onchange="NewFieldValue('FIRWavFile', this, false)">
+                <option value="-">None</option>
+            </select>
+        </TD>
+        <TD class="rowSuffix"></TD>
+    </TR>
 
-	</TABLE>
+    <TR id="control_FIRStrength" inc="1">
+        <TD class="rowTitle">
+            <div class="tooltip">
+				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_FIRSTRENGTH" | string %]</Output>
+				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_FIRSTRENGTH_HELP" | string %]</span>
 
-
-	<TABLE class="table-container" >
-		<TR id="control_Indicator" inc="0.1">	
-				<TD class="rowTitle">
-					<div class="tooltip"  >
-					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CLIPPING" | string %]</Output>
-					<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_CLIPPING_HELP" | string %]</span>
-				</div>	
-				</TD>
-				<TD class="rowBody"><label for="logSummary"  class="infoTitle"></label>
-					<span id="logSummary"></span>
-				</TD >
-				<TD class="rowSuffix">
-					 <!--We load the preset and then save it again, this ensures that the latest format is used, and the preset is
-                applied-->
-				<button class="sqdsp-click  button button-amber" type="button" name="btn_ClearLog" value="Clear" onclick="SqueezeDSPClearLog(function(success, msg) { 
-    if (success) {
-		DisplayAlert('Clear', 'Log Cleared', 2000)
-        
-        // Optionally refresh log display
-    	GetLogSummary();
-    } else {
-        DisplayAlert('Clear', 'Error: ' + msg, 2000);
-    }
-})">Clear Log</button>
-				</TD>
-			
-		</TR>
-	
-	
-		<TR id="control_Preamp" inc="0.1">
-			 <TD class="rowTitle">
-				<div class="tooltip"  >
-				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_PREAMP" | string %]</Output>
-			 	<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PREAMP_HELP" | string %]</span>
-				</div>	
-			 </TD>
-			 <TD class="Slide">
-				<input  class="range" type="range"   orient="horizontal"  min="-30" max="0" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" onchange="iSlide(this)" id="Preamp" ></Input>
-				<output id="PreampBubble" class="bubble" ></output></TD>
-						
-			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-30" max="0" step="0.1"   id="val_Preamp" onchange="valInputDecimal(this);" ></Input></TD>
-			
-		</TR>
-
-	 <TR id="control_Delay.delay" inc="0.1" >  
-		
-	    <TD class="rowTitle">
-				<div class="tooltip"  >
-				<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_DELAY" | string %]</Output>
-				<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_DELAY_HELP" | string %]</span>
-				</div>	
-		</TD >
-		
+            </div>
+        </TD>
 		<TD class="Slide">
-			<input  class="range" type="range"   orient="horizontal"  min="-20" max="20" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Delay.delay" ></Input>
-			<output id="Delay.delayBubble" class="bubble" ></output>
+			<input class="range" type="range" orient="horizontal"
+				min="0" max="100" step="1" value="100"
+				onpointerdown="showBubble(this)" onpointerup="hideBubble(this)"
+				ondblclick="SliderReset.call(this);" onchange="iSlide(this)"
+				id="FIRStrength">
+			<output id="FIRStrengthBubble" class="bubble"></output>
 		</TD>
-		<TD class="rowSuffix"><Input type="number"   class="OutputVal"  min="-20" max="20" step="0.1"  id="val_Delay.delay" onChange="valInputDecimal(this);" ></Input></TD >
-		
-	 </TR>
+        <TD class="rowSuffix">
+            <Input type="number" class="OutputVal" min="0" max="100" step="1"
+                   id="val_FIRStrength" onchange="valInputDecimal(this);"></Input>
+        </TD>
+    </TR>
+</TABLE>
+</DIV><!-- /body_presets -->
 
-		
-		<TR id="control_Balance" inc="0.1">
-			<TD class="rowTitle">
-				<div class="tooltip"  >
-					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BALANCE" | string %]</Output>
-							<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BALANCE_HELP" | string %]</span>
-				</div>	
-			</TD>
-			<TD class="Slide">
-					<input  class="range" type="range"   orient="horizontal"  min="-12" max="12" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Balance" ></Input>
-					<Output id="BalanceBubble" class="bubble" ></Output>
-			 </TD>
-			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Balance" onChange="valInputDecimal(this);" ></Input></TD>
-			
-		<TR id="control_Width" inc="0.1">
-			<TD class="rowTitle">
-				<div class="tooltip"  >
-					<Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_WIDTH" | string %]</Output>
-							<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_WIDTH_HELP" | string %]</span>
-				</div>	
-			</TD>
-			<TD class="Slide">
-					<input  class="range" type="range"   orient="horizontal"  min="-12" max="12" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this)" id="Width" ></Input>
-					<Output id="WidthBubble" class="bubble" ></Output>
-			 </TD>
-			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="-12" max="12" step="0.1" id="val_Width" onChange="valInputDecimal(this);" ></Input></TD>
-			
-<tr id="control_Loudness.enabled">
-    <td class="rowTitle">
+
+<!-- ============================================================
+     SECTION: SIGNAL
+     LEDs sit in rowBody beside toggle; Clear alone in rowSuffix
+     ============================================================ -->
+<TABLE class="table-container">
+    <TR class="row-header" id="hdr_signal">
+        <TD class="rowTitle">
+            <span class="infoTitle">[% "PLUGIN_SQUEEZEDSP_SIGNAL" | string %]</span>
+        </TD>
+        <TD class="rowBody">
+            <div class="checkbox-row">
+                <div class="checkbox-group">
+                    <input class="Check" type="checkbox" id="toggle_signal" checked>
+                    <label class="Toggle toggle-section" for="toggle_signal">Toggle</label>
+                </div>
+                <span id="logSummary"></span>
+            </div>
+        </TD>
+        <TD class="rowSuffix">
+            <button class="sqdsp-click button button-amber" type="button"
+                    name="btn_ClearLog" value="Clear Log"
+                    onclick="SqueezeDSPClearLog(function(success, msg) {
+                        if (success) { DisplayAlert('Clear', 'Log Cleared', 2000); GetLogSummary(); }
+                        else { DisplayAlert('Clear', 'Error: ' + msg, 2000); }
+                    })">Clear Log</button>
+        </TD>
+    </TR>
+</TABLE>
+<DIV id="body_signal">
+<TABLE class="table-container section-body-table">
+	    <TR style="height:0; visibility:hidden;">
+        <TD class="rowTitle"></TD>
+        <TD class="rowBody"></TD>
+        <TD class="rowSuffix"></TD>
+    </TR>
+    <TR id="control_Preamp" inc="0.1">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_PREAMP" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_PREAMP_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="Slide">
+            <input class="range" type="range" orient="horizontal"
+                   min="-30" max="0" step="0.1" value="0"
+                   onpointerdown="showBubble(this)" onpointerup="hideBubble(this)"
+                   onchange="iSlide(this)" id="Preamp">
+            <output id="PreampBubble" class="bubble"></output>
+        </TD>
+        <TD class="rowSuffix">
+            <Input type="number" class="OutputVal" min="-30" max="0" step="0.1"
+                   id="val_Preamp" onchange="valInputDecimal(this);"></Input>
+        </TD>
+    </TR>
+<TR id="control_ReplayGain.enabled">
+    <TD class="rowTitle">
         <div class="tooltip">
-            <label for="val_Loudness.enabled" class="infoTitle">Loudness</label>
-            <span class="tooltiptext">Loudness - Switching this on will boost Bass and Treble when playing at lower volumes.</span>
+			<label for="ReplayGain" class="infoTitle">[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN" | string %]</label>
+			<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN_HELP" | string %]</span>
         </div>
-    </td>
-    <td class="rowBody">
+    </TD>
+    <TD class="rowBody">
         <div class="checkbox-row">
             <div class="checkbox-group">
-                <input class="Check" type="checkbox" name="val_Loudness.enabled" id="Loudness" value="1" onclick="SwitchCheckbox(this, false); NewFieldValue('Loudness.enabled', this, false); updateLoudnessToggle();">
-                <label for="Loudness" class="Toggle">Toggle</label>
+                <input class="Check" type="checkbox"
+                       name="val_ReplayGain.enabled" id="ReplayGain" value="1"
+                       onclick="SwitchCheckbox(this, false); NewFieldValue('ReplayGain.enabled', this, false); updateReplayGainToggle();">
+                <label for="ReplayGain" class="Toggle">Toggle</label>
+            </div>
+				<span style="color:#e67e00;" id="replaygain-warning" >[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN_WARNING" | string %]</span>
+
+        </div>
+    </TD>
+    <TD class="rowSuffix">
+        <Input type="number" class="OutputVal" min="-20" max="0" step="0.1"
+               id="val_ReplayGain.fixed_gain" title='[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN_FIXED" | string %]'
+               onchange="NewFieldValue('ReplayGain.fixed_gain', this, false);"></Input>
+    </TD>
+</TR>
+<TR id="control_ReplayGain.spotify_gain">
+    <TD class="rowSubTitle">
+        <div class="tooltip">
+            [% "PLUGIN_SQUEEZEDSP_SPOTIFY_GAIN" | string %]
+			<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_SPOTIFY_GAIN_HELP" | string %]</span>
+        </div>
+    </TD>
+    <TD class="rowBody"></TD>
+    <TD class="rowSuffix">
+        <Input type="number" class="OutputVal" min="-20" max="0" step="0.1"
+               id="val_ReplayGain.spotify_gain"
+               onchange="NewFieldValue('ReplayGain.spotify_gain', this, false);"></Input>
+    </TD>
+</TR>
+
+    <TR id="control_Delay.delay" inc="0.1">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_DELAY" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_DELAY_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="Slide">
+            <input class="range" type="range" orient="horizontal"
+                   min="-20" max="20" step="0.1" value="0"
+                   onpointerdown="showBubble(this)" onpointerup="hideBubble(this)"
+                   ondblclick="SliderReset.call(this);" onchange="iSlide(this)"
+                   id="Delay.delay">
+            <output id="Delay.delayBubble" class="bubble"></output>
+        </TD>
+        <TD class="rowSuffix">
+            <Input type="number" class="OutputVal" min="-20" max="20" step="0.1"
+                   id="val_Delay.delay" onChange="valInputDecimal(this);"></Input>
+        </TD>
+    </TR>
+
+    <TR id="control_Balance" inc="0.1">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_BALANCE" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_BALANCE_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="Slide">
+            <input class="range" type="range" orient="horizontal"
+                   min="-12" max="12" step="0.1" value="0"
+                   onpointerdown="showBubble(this)" onpointerup="hideBubble(this)"
+                   ondblclick="SliderReset.call(this);" onchange="iSlide(this)"
+                   id="Balance">
+            <output id="BalanceBubble" class="bubble"></output>
+        </TD>
+        <TD class="rowSuffix">
+            <Input type="number" class="OutputVal" min="-12" max="12" step="0.1"
+                   id="val_Balance" onChange="valInputDecimal(this);"></Input>
+        </TD>
+    </TR>
+
+    <TR id="control_Width" inc="0.1">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_WIDTH" | string %]</Output>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_WIDTH_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="Slide">
+            <input class="range" type="range" orient="horizontal"
+                   min="-12" max="12" step="0.1" value="0"
+                   onpointerdown="showBubble(this)" onpointerup="hideBubble(this)"
+                   ondblclick="SliderReset.call(this);" onchange="iSlide(this)"
+                   id="Width">
+            <output id="WidthBubble" class="bubble"></output>
+        </TD>
+        <TD class="rowSuffix">
+            <Input type="number" class="OutputVal" min="-12" max="12" step="0.1"
+                   id="val_Width" onChange="valInputDecimal(this);"></Input>
+        </TD>
+    </TR>
+
+    <TR id="control_Crossfeed">
+    <TD class="rowTitle">
+        <div class="tooltip">
+            <Output class="infoTitle">[% "PLUGIN_SQUEEZEDSP_CROSSFEED" | string %]</Output>
+			<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_CROSSFEED_HELP" | string %]</span>
+        </div>
+    </TD>
+    <TD class="rowBody">
+        <div class="filter-group" id="crossfeed-selector">
+            <div class="filter-type-container">
+                <label class="filter-type">
+                    <input type="radio" name="crossfeed" value="off" checked
+                           onchange="NewFieldValue('Crossfeed', this, false);">
+                    <span class="full-label">Off</span>					                                        
+                    <span class="abbr-label">Off</span>
+                </label>
+            </div>
+            <div class="filter-type-container">
+                <label class="filter-type">
+                    <input type="radio" name="crossfeed" value="light"
+                           onchange="NewFieldValue('Crossfeed', this, false);">
+                    <span class="full-label">Light</span>
+                    <span class="abbr-label">Lt</span>
+                </label>
+            </div>
+            <div class="filter-type-container">
+                <label class="filter-type">
+                    <input type="radio" name="crossfeed" value="medium"
+                           onchange="NewFieldValue('Crossfeed', this, false);">
+                    <span class="full-label">Medium</span>
+					<span class="abbr-label">Med</span>
+                </label>
+            </div>
+            <div class="filter-type-container">
+                <label class="filter-type">
+                    <input type="radio" name="crossfeed" value="strong"
+                           onchange="NewFieldValue('Crossfeed', this, false);">
+                    <span class="full-label">Strong</span>
+					<span class="abbr-label">Str</span>
+                </label>
+            </div>
+			    <div class="filter-type-container">
+                <label class="filter-type">
+                    <input type="radio" name="crossfeed" value="bonkers"
+                           onchange="NewFieldValue('Crossfeed', this, false);">
+                    <span class="full-label">Bonkers</span>
+					<span class="abbr-label">Str</span>
+                </label>
             </div>
         </div>
-    </td>
-    <td class="rowSuffix"></td>
-</tr>
+    </TD>
+    <TD class="rowSuffix"></TD>
+</TR-->
 
-	
-	 <TR   id="control_Loudness"  >	
-		
-		
-			<TD class="rowSubTitle">
-				<div class="tooltip"  >[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL" | string %]<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL_HELP" | string %]</span>
-				</div>		
-			</TD>
-			<TD class="Slide">
-					<input  class="range" type="range"   orient="horizontal"  min="50" max="85" step="0.1" value="0" onpointerdown="showBubble(this)" onpointerup="hideBubble(this)" ondblclick="SliderReset.call(this);"  onchange="iSlide(this);updatePEQGraph();" id="Loudness.listening_level" ></Input>
-					<Output id="Loudness.listening_levelBubble" class="bubble" ></Output>
-			 </TD>
-			<TD class="rowSuffix"><Input type="number"   class="OutputVal" min="50" max="85" step="0.1" id="val_Loudness.listening_level" onChange="valInputDecimal(this);updatePEQGraph();" ></Input></TD>
-		</TR>
+    <TR id="control_Loudness.enabled">
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <label for="Loudness" class="infoTitle">Loudness</label>
+                <span class="tooltiptext">Switching this on will boost Bass and Treble when playing at lower volumes.</span>
+            </div>
+        </TD>
+        <TD class="rowBody">
+            <div class="checkbox-row">
+                <div class="checkbox-group">
+                    <input class="Check" type="checkbox"
+                           name="val_Loudness.enabled" id="Loudness" value="1"
+                           onclick="SwitchCheckbox(this, false); NewFieldValue('Loudness.enabled', this, false); updateLoudnessToggle();">
+                    <label for="Loudness" class="Toggle">Toggle</label>
+                </div>
+            </div>
+        </TD>
+        <TD class="rowSuffix"></TD>
+    </TR>
 
-	</TABLE>
+    <TR id="control_Loudness">
+        <TD class="rowSubTitle">
+            <div class="tooltip">
+                [% "PLUGIN_SQUEEZEDSP_LOUDLEVEL" | string %]
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_LOUDLEVEL_HELP" | string %]</span>
+            </div>
+        </TD>
+        <TD class="Slide">
+            <input class="range" type="range" orient="horizontal"
+                   min="50" max="85" step="0.1" value="0"
+                   onpointerdown="showBubble(this)" onpointerup="hideBubble(this)"
+                   ondblclick="SliderReset.call(this);"
+                   onchange="iSlide(this); updatePEQGraph();"
+                   id="Loudness.listening_level">
+            <output id="Loudness.listening_levelBubble" class="bubble"></output>
+        </TD>
+        <TD class="rowSuffix">
+            <Input type="number" class="OutputVal" min="50" max="85" step="0.1"
+                   id="val_Loudness.listening_level"
+                   onChange="valInputDecimal(this); updatePEQGraph();"></Input>
+        </TD>
+    </TR>
+</TABLE>
+</DIV><!-- /body_signal -->
+
+
+<!-- ============================================================
+     SECTION: EQUALIZER
+     ============================================================ -->
+<TABLE class="table-container">
+    <TR class="row-header" id="hdr_eq">
+        <TD class="rowTitle">
+            <span class="infoTitle">[% "PLUGIN_SQUEEZEDSP_EQUALIZER_SECTION" | string %]</span>
+        </TD>
+        <TD class="rowBody">
+            <div class="checkbox-row">
+                <div class="checkbox-group">
+                    <input class="Check" type="checkbox" id="toggle_eq" checked>
+                    <label class="Toggle toggle-section" for="toggle_eq">Toggle</label>
+                </div>
+            </div>
+        </TD>
+        <TD class="rowSuffix"></TD>
+    </TR>
+</TABLE>
+<DIV id="body_eq">
 <div id="peqGraphContainer" class="panel">
     <div class="graph-wrapper">
-        <!-- Y-axis label container -->
         <div class="y-axis-container">
             <div class="y-axis-label">Gain (dB)</div>
         </div>
-        
         <div class="graph-inner-container">
-            <!-- The actual graph SVG will go here -->
             <div id="peqGraph"></div>
-        
-            <!-- X-axis label container -->
             <div class="x-axis-container">
                 <div class="x-axis-label">Frequency (Hz)</div>
             </div>
@@ -375,80 +504,82 @@ print ( $myversion );
     </div>
 </div>
 
-	<TABLE class="table-container">
-		<TR id="control_PEQHeader">
-			<TD class="rowTitle">
-				<div class="tooltip">
-					<label for="peqContainer" class="infoTitle">
-						[% "PLUGIN_SQUEEZEDSP_EQUALIZER" | string %]
-					</label>
-					<span class="tooltiptext">
-						[% "PLUGIN_SQUEEZEDSP_EQUALIZER_HELP" | string %]
-					</span>
-				</div>
-			</TD>
-			<TD class="rowBody">
-				<div id="PEQ-filter-selector" class="filter-group">
-					<!-- Filter Type Selector - goes here -->
-				</div>
-			</TD>
-			<TD class="rowSuffix">
-				<!-- Additional controls if needed -->
-				<button  class="sqdsp-click button button-blue" 
-			
-				value="New" 
-				onclick="AddPEQBand();">Add</button>
-			</TD>
-		</TR>
-	</TABLE>
+<!-- PEQ Bands row — UNCHANGED from original -->
+<TABLE class="table-container">
+    <TR id="control_PEQHeader" class="row-header" >
+        <TD class="rowTitle">
+            <div class="tooltip">
+                <label for="peqContainer" class="infoTitle">
+                    [% "PLUGIN_SQUEEZEDSP_EQUALIZER" | string %]
+                </label>
+                <span class="tooltiptext">
+                    [% "PLUGIN_SQUEEZEDSP_EQUALIZER_HELP" | string %]
+                </span>
+            </div>
+        </TD>
+        <TD class="rowBody">
+            <div id="PEQ-filter-selector" class="filter-group">
+                <!-- Filter Type Selector injected here -->
+            </div>
+        </TD>
+        <TD class="rowSuffix">
+            <button class="sqdsp-click button button-blue"
+                    value="New" onclick="AddPEQBand();">Add</button>
+        </TD>
+    </TR>
 </TABLE>
 
-
-<!--div style="text-align: center; margin: 10px;">
-    <button class="sqdsp-click button button-blue" onclick="updatePEQGraph()">Test Graph</button>
-    <button class="sqdsp-click button button-blue" onclick="checkDataAvailability()">Check Data</button>
-	<button class="sqdsp-click button button-blue" onclick="testGraph()">Test Graph Now</button>
-    <button class="sqdsp-click button button-blue" onclick="updatePEQGraph()">Update Graph</button>
-</div>-->
-<!--Equalizer -->
 <div id="peqContainer">
-		<!-- This stuff will all be replaced by new EQ -->	
+    <!-- PEQ bands injected here -->
 </div>
-<!--Advanced Stuff -->
+</DIV><!-- /body_eq -->
+
+
+<!-- ============================================================
+     SECTION: EXTERNAL SOURCES
+     ============================================================ -->
+<TABLE class="table-container">
+    <TR class="row-header" id="hdr_external">
+        <TD class="rowTitle">
+            <span class="infoTitle">[% "PLUGIN_SQUEEZEDSP_IMPORTFILTERS" | string %]</span>
+        </TD>
+        <TD class="rowBody">
+            <div class="checkbox-row">
+                <div class="checkbox-group">
+                    <input class="Check" type="checkbox" id="toggle_external" checked>
+                    <label class="Toggle toggle-section" for="toggle_external">Toggle</label>
+                </div>
+            </div>
+        </TD>
+        <TD class="rowSuffix"></TD>
+    </TR>
+</TABLE>
+<DIV id="body_external">
 <div id="FileDrop" class="drop_zone">
-    DROP REW OR FIR WAV FILE HERE...<BR> -or- <BR>
-    <label class="button button-blue" style="width:185px;" for="filePicker">Choose REW or WAV File</label>
-    <input
-        type="file"
-        id="filePicker"
-        accept=".txt,.wav,text/plain,audio/wav"
-        class='button button-blue'
-    /><BR>
+    [% "PLUGIN_SQUEEZEDSP_DROPZONE" | string %]<BR> -or- <BR>
+    <label class="button button-blue" style="width:185px;" for="filePicker">[% "PLUGIN_SQUEEZEDSP_CHOOSEFILE" | string %]</label>
+    <input type="file" id="filePicker"
+           accept=".txt,.wav,text/plain,audio/wav"
+           class="button button-blue"><BR>
     <output id="LastFile"></output>
 </div>
-<div id="kofi-float" style="position:fixed; bottom:12px; right:12px; opacity:0.75; z-index:999;"
-     onmouseover="this.style.opacity='1'" 
-     onmouseout="this.style.opacity='0.75'">
-    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
-    <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'Y8Y31UOE3D');kofiwidget2.draw();</script>
-</div>
+
 <table class="table-container">
     <tr id="control_HeadphoneEQ">
         <td class="rowTitle">
             <div class="tooltip">
-				<label class="infoTitle">Headphone EQ <span style="font-size:0.75em; color:#e67e00;">(experimental)</span></label>
-<span class="tooltiptext">Search AutoEQ headphone profiles and Imports 48kHz FIR WAV if available. The WAV file will appear in the FIR dropdown once imported, select it to apply.</span>
+                <label class="infoTitle">[% "PLUGIN_SQUEEZEDSP_HEADPHONEEQ" | string %]
+                    <span style="font-size:0.75em; color:#e67e00;">[% "PLUGIN_SQUEEZEDSP_HEADPHONEEQ_EXPERIMENTAL" | string %]</span>
+                </label>
+                <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_HEADPHONEEQ_HELP" | string %]</span>
             </div>
         </td>
         <td class="rowBody">
             <div id="autoeq-search-container">
-                <input type="text"
-                       id="autoeq-search"
-                       class="sqdsp-edit"
-                       placeholder="Type headphone name (min. 2 chars)..."
-                       autocomplete="off"
-                       spellcheck="false">
-                <div id="autoeq-dropdown" ></div>
+                <input type="text" id="autoeq-search" class="sqdsp-edit"
+                       placeholder='[% "PLUGIN_SQUEEZEDSP_HEADPHONEEQ_PLACEHOLDER" | string %]'
+                       autocomplete="off" spellcheck="false">
+                <div id="autoeq-dropdown"></div>
             </div>
         </td>
         <td class="rowSuffix">
@@ -456,93 +587,75 @@ print ( $myversion );
         </td>
     </tr>
 </table>
-</DIV> <!-- DSP Container -->
-	<!-- end of page -->
-	[% END %]
+</DIV><!-- /body_external -->
+
+</DIV><!-- /DSP_container -->
+
+<!-- Ko-fi float -->
+<div id="kofi-float" style="position:fixed; bottom:12px; right:12px; opacity:0.75; z-index:999;"
+     onmouseover="this.style.opacity='1'"
+     onmouseout="this.style.opacity='0.75'">
+    <script type='text/javascript' src='https://storage.ko-fi.com/cdn/widget/Widget_2.js'></script>
+    <script type='text/javascript'>kofiwidget2.init('Support me on Ko-fi', '#72a4f2', 'Y8Y31UOE3D'); kofiwidget2.draw();</script>
+</div>
+
+[% END %]
 
 <script>
-
-// Plotting functions for SqueezeDSP integration
-
 
 const _graphObserver = new ResizeObserver(function(entries) {
     for (const entry of entries) {
         if (entry.contentRect.width > 0 && entry.contentRect.height > 0) {
-            if (typeof updatePEQGraph === 'function') {
-                updatePEQGraph();
-            }
+            if (typeof updatePEQGraph === 'function') updatePEQGraph();
         }
     }
 });
 
+
+
 function handleFileSelection(event) {
-    const files = event.target.files;
-    
-    if (!files || files.length === 0) {
-        return;
-    }
-    
-    if (files.length > 1) {
-        outputlist('Only 1 file at a time Please');
-        return;
-    }
-    
-    const file = files[0];
-    const extension = file.name.split('.').pop().toLowerCase();
-    
-    if (extension === 'txt') {
-        readFile(file, ConfirmREW);
-    } else if (extension === 'wav') {
-        importWavFile(file, outputlist, refreshFIRWavList);
-    } else {
-        outputlist('Unsupported file type: ' + extension);
+    var files = event.target.files;
+    if (!files || files.length === 0) return;
+    if (files.length > 1) { outputlist('Only 1 file at a time Please'); event.target.value = ''; return; }
+    var file = files[0];
+    var ext  = file.name.split('.').pop().toLowerCase();
+    if      (ext === 'txt') readFile(file, ConfirmREW);
+    else if (ext === 'wav') importWavFile(file, outputlist, refreshFIRWavList);
+    else                    outputlist('Unsupported file type: ' + ext);
+    event.target.value = '';
+}
+
+function handleUnsavedChanges(event) {
+    var applyButton = document.getElementById('btn_Apply');
+    if (applyButton && applyButton.classList.contains('button-amber')) {
+        event.preventDefault();
+        event.returnValue = 'You have unsaved changes. Press Leave to exit and Cancel to go back.';
+        return event.returnValue;
     }
 }
 
-// Start initialization when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     updateTextConstants();
     initializeApp();
-	initAutoEQUI();
-    
-    const theme = logParentTheme();
+    initAutoEQUI();
+    initSectionToggles();
+
+    var theme = logParentTheme();
     applyThemeClass(theme);
-    
-    //initializePEQGraph();
-    //GetLogSummary(); duplicate call
- 
-    // Setup file picker
-    const filePicker = document.getElementById('filePicker');
-    if (filePicker) {
-        filePicker.addEventListener('change', handleFileSelection);
-    }
-    
-    // Setup drag and drop
-    const dropZone = document.getElementById('FileDrop');
+
+    var filePicker = document.getElementById('filePicker');
+    if (filePicker) filePicker.addEventListener('change', handleFileSelection);
+
+    var dropZone = document.getElementById('FileDrop');
     if (dropZone) {
-        dropZone.addEventListener('dragenter', function(e) {
-            const output = document.getElementById('output');
-            if (output) output.textContent = '';
-            e.stopPropagation();
-            e.preventDefault();
-        });
-        
-        dropZone.addEventListener('dragover', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-        });
-        
-        dropZone.addEventListener('drop', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            dodrop(e);
-        });
-    
-	}
-    const graphContainer = document.getElementById('peqGraphContainer');
-    if (graphContainer) {
-        _graphObserver.observe(graphContainer);
+        dropZone.addEventListener('dragenter', function(e) { e.stopPropagation(); e.preventDefault(); });
+        dropZone.addEventListener('dragover',  function(e) { e.stopPropagation(); e.preventDefault(); });
+        dropZone.addEventListener('drop',      function(e) { e.stopPropagation(); e.preventDefault(); dodrop(e); });
     }
+
+    var graphContainer = document.getElementById('peqGraphContainer');
+    if (graphContainer) _graphObserver.observe(graphContainer);
+
     window.addEventListener('beforeunload', handleUnsavedChanges);
 });
 

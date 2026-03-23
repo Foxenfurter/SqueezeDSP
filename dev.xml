@@ -4,12 +4,12 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.51" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.60" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
       <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.51/SqueezeDSP-0.1.51.zip</url>
-	  <sha>9fb3ff3be31f55d8bd05480740cc974722957ec9</sha>
-	  <changes>Further performance improvements  in engine, code cleanup, startup improved, autoeq lookup</changes>
+	  <sha>dcd42c9af116038edafd84cac7e40f0622d05464</sha>
+	  <changes>ReplayGain added, Headphone crossfeed, tweak to UI and autoeq saves, convolver gain heavily tuned</changes>
       <creator>Jonathan Fox</creator>
 	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>
 	  <category>tools</category>

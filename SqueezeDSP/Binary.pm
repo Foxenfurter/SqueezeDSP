@@ -2,6 +2,8 @@ package Plugins::SqueezeDSP::Binary;
 use strict;
 use File::Copy;
 use File::Spec::Functions qw(:ALL);
+use Slim::Utils::Network;
+use Slim::Utils::Prefs;
 #use Plugins::SqueezeDSP::Plugin qw($log $thisapp $pluginDataDir $pluginSettingsDataDir $pluginImpulsesDataDir $pluginMatrixDataDir $pluginTempDataDir);
 
 sub binaries {
@@ -85,6 +87,12 @@ sub setup_binary {
         Plugins::SqueezeDSP::Utils::debug('Log file already exists: ' . $Plugins::SqueezeDSP::Plugin::logfile);
     }
     amendPluginConfig($appConfig, 'logFile', $Plugins::SqueezeDSP::Plugin::logfile);
+	# add LMS host and port to config for use by binary when calling back to server
+	my $lmsHost = Slim::Utils::Network::serverAddr();
+	my $serverPrefs = preferences('server');
+	my $lmsPort = $serverPrefs->get('httpport') || 9000;
+	amendPluginConfig($appConfig, 'lmsHost', $lmsHost);
+	amendPluginConfig($appConfig, 'lmsPort', $lmsPort);
 }
 
 sub housekeeping {

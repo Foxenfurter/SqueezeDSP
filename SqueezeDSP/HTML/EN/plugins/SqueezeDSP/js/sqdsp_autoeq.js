@@ -126,30 +126,28 @@ function parseLine(line) {
      * SqueezeDSP file import pipeline, identical to a manual file-picker load.
      * logFn : function(string) for status messages
      */
-    function importFile(fileObj, type, logFn) {
-        logFn('Downloading: ' + fileObj.name);
+	function importFile(fileObj, type, logFn, customName) {
+		const displayName = customName || fileObj.name;
+		logFn('Downloading: ' + displayName);
 
-        fetch(fileObj.download_url)
-            .then(r => {
-                if (!r.ok) throw new Error('HTTP ' + r.status);
-                return r.blob();
-            })
-            .then(blob => {
-                const mimeType = (type === 'wav') ? 'audio/wav' : 'text/plain';
-                const file     = new File([blob], fileObj.name, { type: mimeType });
+		fetch(fileObj.download_url)
+			.then(r => {
+				if (!r.ok) throw new Error('HTTP ' + r.status);
+				return r.blob();
+			})
+			.then(blob => {
+				const mimeType = (type === 'wav') ? 'audio/wav' : 'text/plain';
+				const file     = new File([blob], displayName, { type: mimeType });
 
-                if (type === 'wav') {
-                    // Reuse existing wav import path (confirms, uploads to server)
-                    importWavFile(file, logFn, refreshFIRWavList);
-                } else {
-                    // Reuse existing REW/PEQ text import path
-                    readFile(file, ConfirmREW);
-                    logFn('PEQ file ready for import: ' + fileObj.name);
-                }
-            })
-            .catch(err => logFn('Failed to download ' + fileObj.name + ': ' + err.message));
-    }
-
+				if (type === 'wav') {
+					importWavFile(file, logFn, refreshFIRWavList);
+				} else {
+					readFile(file, ConfirmREW);
+					logFn('PEQ file ready for import: ' + displayName);
+				}
+			})
+			.catch(err => logFn('Failed to download ' + displayName + ': ' + err.message));
+	}
     /* Public API */
     return { loadIndex, search, listFiles, selectBestFile, importFile };
 })();
@@ -270,8 +268,7 @@ function handleAutoEQSelection(entry, statusSpan) {
         if (statusSpan) statusSpan.textContent = msg;
         if (typeof outputlist === 'function') outputlist(msg);
     };
-console.log('Entry path:', entry.path);
-    console.log('API URL:', 'https://api.github.com/repos/jaakkopasanen/AutoEq/contents/results/' + entry.path.split('/').map(encodeURIComponent).join('/'));
+
     log('Looking up files for: ' + entry.name + ' (' + entry.source + ')');
 
     AutoEQIndex.listFiles(entry.path, function (files, err) {
@@ -290,6 +287,14 @@ console.log('Entry path:', entry.path);
         const typeLabel = (best.type === 'wav') ? 'FIR WAV' : 'Parametric EQ';
         log('Found ' + typeLabel + ': ' + best.fileObj.name);
 
-        AutoEQIndex.importFile(best.fileObj, best.type, log);
+        // build a descriptive name: HeadphoneName_Source.ext
+        const ext         = best.fileObj.name.split('.').pop();
+        const safeName    = (entry.name + '_' + entry.source)
+                                .replace(/[^a-zA-Z0-9_\-]/g, '_')
+                                .replace(/_+/g, '_')
+                                .substring(0, 80);
+        const customName  = safeName + '.' + ext;
+
+        AutoEQIndex.importFile(best.fileObj, best.type, log, customName);
     });
 }

@@ -26,7 +26,14 @@ function InitialiseData()
         Filters: [],
         FIRWavFile: "-",
         Last_preset: "",
-        Preset: "None"
+        Preset: "None",
+		FIRStrength: 100,
+		Crossfeed: "off",
+		ReplayGain: {
+			enabled: 0,
+			fixed_gain: -6.0,
+			spotify_gain: -4.0,
+		},
     };
 }
 

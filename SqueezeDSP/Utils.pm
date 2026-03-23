@@ -6,6 +6,10 @@ use File::Copy;
 use JSON::XS;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+use Slim::Player::Source;
+use Slim::Player::Playlist;
+use Slim::Player::ProtocolHandlers;
+use Slim::Schema;
 # Access Plugin's variables
 
 
@@ -154,5 +158,105 @@ sub SaveJSONFile {
     close $fh;
     return;
 }
+
+sub _trackGainQuery {
+    my $request = shift;
+    my $client  = $request->client();
+	
+	debug("_trackGainQuery called for player: " . ($client ? $client->id() : 'unknown'));
+    unless ($client) {
+        $request->setStatusBadParams();
+        return;
+    }
+
+    my $song = $client->streamingSong();
+    unless ($song) {
+        $request->addResult('error', 'no_song');
+        $request->setStatusDone();
+        return;
+    }
+
+    # current track
+    my $currentGain = _getTrackGainData($client, $song);
+    $request->addResult('url',             $currentGain->{url})        if defined $currentGain->{url};
+    $request->addResult('track_gain',      $currentGain->{track_gain}) if defined $currentGain->{track_gain};
+    $request->addResult('track_peak',      $currentGain->{track_peak}) if defined $currentGain->{track_peak};
+    $request->addResult('album_gain',      $currentGain->{album_gain}) if defined $currentGain->{album_gain};
+    $request->addResult('album_peak',      $currentGain->{album_peak}) if defined $currentGain->{album_peak};
+
+    # next track
+	my $nextIndex = Slim::Player::Source::streamingSongIndex($client) + 1;
+	my $nextURL   = Slim::Player::Playlist::track($client, $nextIndex);
+
+	# track() returns an object for remote tracks - extract url string
+	if (ref $nextURL) {
+		$nextURL = $nextURL->url();
+	}
+
+    if ($nextURL) {
+        my $nextTrack = Slim::Schema->objectForUrl({ 'url' => $nextURL, 'create' => 1, 'readTags' => 1 });
+        if ($nextTrack) {
+            my $nextGain = _getTrackGainDataFromTrack($client, $nextTrack, $nextURL);
+            $request->addResult('next_url',        $nextGain->{url})        if defined $nextGain->{url};
+            $request->addResult('next_track_gain', $nextGain->{track_gain}) if defined $nextGain->{track_gain};
+            $request->addResult('next_track_peak', $nextGain->{track_peak}) if defined $nextGain->{track_peak};
+            $request->addResult('next_album_gain', $nextGain->{album_gain}) if defined $nextGain->{album_gain};
+            $request->addResult('next_album_peak', $nextGain->{album_peak}) if defined $nextGain->{album_peak};
+        }
+    }
+
+    $request->setStatusDone();
+}
+
+sub _getTrackGainData {
+    my ($client, $song) = @_;
+    my $track = $song->currentTrack();
+    return {} unless $track;
+    return _getTrackGainDataFromTrack($client, $track, $track->url);
+}
+
+sub _getTrackGainDataFromTrack {
+    my ($client, $track, $url) = @_;
+
+	# ensure url is a plain string not an object
+    $url = $url->url() if ref $url;
+
+    my %data = (url => $url);
+
+if ($track->remote) {
+    my $handler = Slim::Player::ProtocolHandlers->handlerForURL($url);
+
+    if ($handler && $handler->can('trackGain')) {
+        $data{track_gain} = $handler->trackGain($client, $url);
+    }
+
+    unless (defined $data{track_gain}) {
+        if ($handler && $handler->can('getMetadataFor')) {
+            my $meta = $handler->getMetadataFor($client, $url);
+            $data{track_gain} = $meta->{replay_gain};
+            $data{track_peak} = $meta->{replay_peak};
+
+            # if still nothing log available keys for diagnosis
+			unless (defined $data{track_gain}) {
+				debug("[$url] no gain found in metadata, available keys: " . 
+					join(', ', sort keys %$meta));
+			}
+        }
+    }
+} else {
+        $data{track_gain} = $track->replay_gain();
+        $data{track_peak} = $track->replay_peak();
+
+        my $album = $track->album();
+        if ($album && $album->can('replay_gain')) {
+            $data{album_gain} = $album->replay_gain();
+            $data{album_peak} = $album->replay_peak();
+        }
+    }
+
+    return \%data;
+}
+
+
 
 1;

@@ -59,7 +59,10 @@ function LocalUpdateSettings() {
     ToggleControl(myRadio, 'DSP_container', true);
                 
     myRadio = LocalSetupToggle('Loudness', replaceNull(SqueezeDSPData.Client.Loudness.enabled,0));
-    ToggleControl(myRadio, 'control_Loudness', false);        
+    ToggleControl(myRadio, 'control_Loudness', false); 
+	myRadio = LocalSetupToggle('ReplayGain', replaceNull(SqueezeDSPData.Client.ReplayGain && SqueezeDSPData.Client.ReplayGain.enabled, 0));
+    updateReplayGainToggle();
+    
     reStyleElement('btn_Apply', 'button-amber', 'button-blue');
     ListenForSlide();
 }
@@ -71,6 +74,25 @@ function LocalDisplayVals() {
     DisplayVal('Balance', replaceNull(SqueezeDSPData.Client.Balance, 0));
     DisplayVal('Preamp', replaceNull(SqueezeDSPData.Client.Preamp, 0));
     DisplayVal('Loudness.listening_level', replaceNull(SqueezeDSPData.Client.Loudness.listening_level,85));
+	// Replay Gain — use specific defaults if not set
+	const rgFixed = (SqueezeDSPData.Client.ReplayGain && SqueezeDSPData.Client.ReplayGain.fixed_gain != null)
+    ? SqueezeDSPData.Client.ReplayGain.fixed_gain
+    : -6.0;
+	document.getElementById('val_ReplayGain.fixed_gain').value = rgFixed;
+	// Replay Gain Spotify gain — use specific default if not set ( spotify internal replaygain is targetting -14 LUFS, which is about -4 dB compared to the common -11 LUFS target)
+	const rgSpotify = (SqueezeDSPData.Client.ReplayGain && SqueezeDSPData.Client.ReplayGain.spotify_gain != null)
+    ? SqueezeDSPData.Client.ReplayGain.spotify_gain
+    : -4.0;
+	document.getElementById('val_ReplayGain.spotify_gain').value = rgSpotify;
+
+	DisplayVal('FIRStrength', replaceNull(SqueezeDSPData.Client.FIRStrength, 100));
+
+	// Crossfeed — restore radio state
+	const cfVal = replaceNull(SqueezeDSPData.Client.Crossfeed, 'off');
+	const cfRadio = document.querySelector(`#crossfeed-selector input[value="${cfVal}"]`);
+	if (cfRadio) cfRadio.checked = true;
+
+
     const presetPath = SqueezeDSPData.Client.Preset || 'none';
   
     document.getElementById('edt_NewPreset').value = getBaseFilename(presetPath);
@@ -142,7 +164,28 @@ function updateLoudnessToggle() {
     updatePEQGraph();
 }
 
+function updateReplayGainToggle() {
+    const enabled = SqueezeDSPData.Client.ReplayGain && SqueezeDSPData.Client.ReplayGain.enabled == 1;
+    const fixedGainInput = document.getElementById('val_ReplayGain.fixed_gain');
+    const spotifyGainInput = document.getElementById('val_ReplayGain.spotify_gain');
+    const spotifyRow = document.getElementById('control_ReplayGain.spotify_gain');
+    const warning = document.getElementById('replaygain-warning');
 
+    if (fixedGainInput) {
+        fixedGainInput.disabled = !enabled;
+        fixedGainInput.style.opacity = enabled ? '1' : '0.4';
+    }
+    if (spotifyGainInput) {
+        spotifyGainInput.disabled = !enabled;
+        spotifyGainInput.style.opacity = enabled ? '1' : '0.4';
+    }
+    if (spotifyRow) {
+        spotifyRow.style.display = enabled ? '' : 'none';
+    }
+    if (warning) {
+        warning.style.display = enabled ? '' : 'none';
+    }
+}
 
 
 function reStyleElement(ElementId, fromStyle, toStyle) {

@@ -7,9 +7,12 @@ function initializeApp() {
         myPlayer.value = playerid;
     }
 
-    SqueezeDSPGetList(LocalBuildLists);
+    SqueezeDSPGetList(function(data) {
+        LocalBuildLists(data);
+        SqueezeDSPFetchCurrentSettings(LocalUpdateSettings);
+    });
     BuildFilterType("PEQ-filter-selector", "peak");
-    SqueezeDSPFetchCurrentSettings(LocalUpdateSettings);
+    
 	
     GetLogSummary();
     setInterval(GetLogSummary, 30 * 1000);
@@ -47,6 +50,36 @@ function handleUnsavedChanges(event) {
         return event.returnValue;
     }
 }
+
+function initSectionToggles() {
+    var pairs = [
+        { toggle: 'toggle_presets',  body: 'body_presets'  },
+        { toggle: 'toggle_signal',   body: 'body_signal'   },
+        { toggle: 'toggle_eq',       body: 'body_eq'       },
+        { toggle: 'toggle_external', body: 'body_external' }
+    ];
+    pairs.forEach(function(p) {
+        var cb   = document.getElementById(p.toggle);
+        var body = document.getElementById(p.body);
+        if (!cb || !body) return;
+
+        // Restore saved state
+        var saved = localStorage.getItem('sqdsp_' + p.toggle);
+        if (saved !== null) {
+            cb.checked = saved === 'true';
+            body.style.display = cb.checked ? '' : 'none';
+        }
+
+        cb.addEventListener('change', function() {
+            body.style.display = this.checked ? '' : 'none';
+            localStorage.setItem('sqdsp_' + p.toggle, this.checked);
+            if (p.toggle === 'toggle_eq' && this.checked) {
+                if (typeof updatePEQGraph === 'function') updatePEQGraph();
+            }
+        });
+    });
+}
+
 
 // DOM Ready Initialization - handled in main page
 /*document.observe('dom:loaded', function() {

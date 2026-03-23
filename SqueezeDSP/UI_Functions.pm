@@ -549,6 +549,7 @@ sub clearlogCommand {
     
     $request->addResult('_success', $success);
     $request->addResult('_message', $message);
+	
     $request->setStatusDone();
 }
 

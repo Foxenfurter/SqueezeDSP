@@ -90,6 +90,10 @@ use File::Spec::Functions qw(:ALL);
 use FindBin qw($Bin);
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+#test
+use POSIX qw(strftime);  # add this
+use Data::Dumper;
+use Time::HiRes qw(time);
 
 # ======== START: VARIABLE DECLARATIONS ========
 # Package-level declarations (at the top, before any subs)
@@ -111,12 +115,13 @@ our (
     $thistag,            # Plugin tag
     $myconfigrevision,   # Config revision
     $binversion,          # Binary version
-	$cacheBust          # Cache busting token
+	$cacheBust,          # Cache busting token
+	$gainLog          # gain logger
 );
 
 # Revision number
-my $revision = "0.1.51";
-$binversion = "0_2_21";
+my $revision = "0.1.60";
+$binversion = "0_2_30";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -178,6 +183,9 @@ sub initPlugin {
     # Other initializations
     $convolver = "SqueezeDSP";
     $logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
+
+	#$gainLog = catdir(Slim::Utils::OSDetect::dirsFor('log'), "gain.log");  # add this
+	
     $myconfigrevision = Plugins::SqueezeDSP::TemplateConfig::get_config_revision();
     # ======== END: VARIABLE INITIALIZATION ========
 
@@ -193,6 +201,9 @@ sub initPlugin {
     Slim::Control::Request::addDispatch([$thistag . '.importwav'], [1, 1, 1, \&Plugins::SqueezeDSP::UI_Functions::importwavCommand]);
     Slim::Control::Request::addDispatch([$thistag . '.clearlog'], [1, 1, 0, \&Plugins::SqueezeDSP::UI_Functions::clearlogCommand]);
 
+	Slim::Control::Request::addDispatch([$thistag . '.trackgain'], [1, 1, 0, \&Plugins::SqueezeDSP::Utils::_trackGainQuery]);
+
+
     # Binary setup and housekeeping
     Plugins::SqueezeDSP::Binary::setup_binary($class);
     Plugins::SqueezeDSP::Binary::housekeeping();
@@ -201,14 +212,17 @@ sub initPlugin {
     # Event subscription
     Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new']]);
 
-	# Randomize token to avoid refreshing cache
-	#$cacheBust = int(rand(99999));
+	# add this for gain logging
+	#Slim::Control::Request::subscribe(\&_trackChanged, [['playlist'],['newsong']]);
+
 	# will clear cache on server start, so changing js files works
 	$cacheBust = time();
 }
 
 sub shutdown {
     Slim::Control::Request::unsubscribe(\&clientEvent);
+	#gain logging
+#	Slim::Control::Request::unsubscribe(\&_trackChanged);  # add this
 }
 
 sub clientEvent {
@@ -254,5 +268,7 @@ sub getFunctions { return \%noFunctions; }
 sub getDisplayName { return 'PLUGIN_SQUEEZEDSP_DISPLAYNAME'; }
 sub enabled { return 1; }
 sub getpluginVersion { return $revision; }
+
+
 
 1;
