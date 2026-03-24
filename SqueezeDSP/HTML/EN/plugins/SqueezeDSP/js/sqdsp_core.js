@@ -65,6 +65,7 @@ function LocalUpdateSettings() {
     
     reStyleElement('btn_Apply', 'button-amber', 'button-blue');
     ListenForSlide();
+	GetLogSummary();
 }
 
 function LocalDisplayVals() {
@@ -223,37 +224,54 @@ function GetLogSummary() {
 function LocalDisplayLogSummary(logData) {
     let myHTML = '';
     const tracklimit = 10;
-
+    let enabled = SqueezeDSPData.Client.ReplayGain && SqueezeDSPData.Client.ReplayGain.enabled == 1;
+	if (enabled == undefined) enabled = 0;
     try {
         for (let i = 1; i <= tracklimit; i++) {
-            const peakdBfs = logData.result['peakdBfs_' + i];
+            const peakdBfs = logData.result ? logData.result['peakdBfs_' + i] : undefined;
             let peakStyle = 'peak peak-unknown';
-            
-            if (peakdBfs < -5) peakStyle = 'peak peak-toolow';
-            else if (peakdBfs < -1) peakStyle = 'peak peak-ok';
-            else if (peakdBfs <= 0.1) peakStyle = 'peak peak-high';
-            else if (peakdBfs > 0.1) peakStyle = 'peak peak-clipping';
 
+            // Skip if peak is not a number
+			/*
+            if (typeof peakdBfs !== 'number') {
+                peakStyle = 'peak peak-unknown';
+			}*/
+           if (enabled == 1) {
+                if (peakdBfs < -12) peakStyle = 'peak peak-toolow';
+                else if (peakdBfs < -8) peakStyle = 'peak peak-bitlow'; // fixed name
+                else if (peakdBfs < -3) peakStyle = 'peak peak-ok';
+                else if (peakdBfs < 0) peakStyle = 'peak peak-high';
+                else peakStyle = 'peak peak-clipping';
+            } else {
+                if (peakdBfs < -5) peakStyle = 'peak peak-toolow';
+                else if (peakdBfs < -1) peakStyle = 'peak peak-ok';
+                else if (peakdBfs <= 0.1) peakStyle = 'peak peak-high';
+                else if (peakdBfs > 0.1) peakStyle = 'peak peak-clipping';
+                // No final else – unknown stays unknown*/
+            }
+
+            // Build tooltip with safe fallbacks
+            const safeValue = (key) => (logData.result && logData.result[key] != null) ? logData.result[key] : '—';
             const tooltipContent = `
                 <div class="tooltip-row">
                     <div class="tooltip-label">Playerid:</div>
-                    <div class="tooltip-value">${logData.result['playerid_' + i]}</div>
+                    <div class="tooltip-value">${safeValue('playerid_' + i)}</div>
                 </div>
                 <div class="tooltip-row">
                     <div class="tooltip-label">Start Date:</div>
-                    <div class="tooltip-value">${logData.result['date_' + i]}</div>
+                    <div class="tooltip-value">${safeValue('date_' + i)}</div>
                 </div>
                 <div class="tooltip-row">
                     <div class="tooltip-label">Start Time:</div>
-                    <div class="tooltip-value">${logData.result['time_' + i]}</div>
+                    <div class="tooltip-value">${safeValue('time_' + i)}</div>
                 </div>
                 <div class="tooltip-row">
                     <div class="tooltip-label">Preamp Gain:</div>
-                    <div class="tooltip-value">${logData.result['preamp_' + i]}</div>
+                    <div class="tooltip-value">${safeValue('preamp_' + i)}</div>
                 </div>
                 <div class="tooltip-row">
                     <div class="tooltip-label">Sample Rate:</div>
-                    <div class="tooltip-value">${logData.result['outputrate_' + i]}</div>
+                    <div class="tooltip-value">${safeValue('outputrate_' + i)}</div>
                 </div>
                 <div class="tooltip-row">
                     <div class="tooltip-label">Peak Level:</div>
@@ -274,7 +292,7 @@ function LocalDisplayLogSummary(logData) {
         console.error("LocalDisplayLogSummary error:", error);
         DisplayAlert("LocalDisplayLogSummary", "Error building log summary", 3000);
     }
-    
+
     document.getElementById('logSummary').innerHTML = myHTML;
 }
 

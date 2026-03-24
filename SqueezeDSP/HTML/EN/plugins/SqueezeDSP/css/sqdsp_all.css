@@ -1027,6 +1027,12 @@ input[type="button"] {
   background-image: linear-gradient(to bottom, #4fc9ee, blue);
 }
 
+.peak-bitlow {
+  background: #00cccc;
+   background-image: linear-gradient(to bottom, #aaffff, #008888);
+}
+
+
 .clipping-possible { background-color: yellow; }
 
 

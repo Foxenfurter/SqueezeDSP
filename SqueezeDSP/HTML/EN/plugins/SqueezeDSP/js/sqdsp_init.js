@@ -14,7 +14,7 @@ function initializeApp() {
     BuildFilterType("PEQ-filter-selector", "peak");
     
 	
-    GetLogSummary();
+    //GetLogSummary();
     setInterval(GetLogSummary, 30 * 1000);
 }
 
