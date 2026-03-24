@@ -4,16 +4,17 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.51" minTarget="7.8.0" maxTarget="*">
+     <plugin name="SqueezeDSP" version="0.1.60" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
-      <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (test version)</desc>
-     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.51/SqueezeDSP-0.1.51.zip</url>
-	  <sha>9fb3ff3be31f55d8bd05480740cc974722957ec9</sha>
+      <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
+     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.60/SqueezeDSP-0.1.60.zip</url>
+	  <sha>3dee16ab8d3d3a22d071167f4d95bb140f1daa48</sha>
       <creator>Jonathan Fox</creator>      
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
       <category>tools</category>
       <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
       <changes>
+	  <change>0.1.60 - ReplayGain added, Headphone crossfeed, tweak to UI and autoeq saves, fir filter strength added, convolver gain heavily tuned</change>	  
 	  <change>0.1.51 - Further performance improvements  in engine, code cleanup, startup improved, autoeq lookup</change>	  
 	  <change>0.1.50 - Major performance improvements  in engine, tweaks to UI</change>
 	  <change>0.1.41 - large number of tweaks to styling, scales better to small screens</change>
