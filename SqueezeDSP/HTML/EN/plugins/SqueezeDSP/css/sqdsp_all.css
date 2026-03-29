@@ -674,6 +674,29 @@ input[type="button"] {
   gap: 4px;
   flex-shrink: 0;
 }
+/* =============================================================
+   Replay gain switches
+   ============================================================= */
+
+#replaygain-mode-labels {
+    margin-left: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10pt;
+}
+
+#replaygain-mode-labels input[type="checkbox"] {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    margin: 0 3px 0 10px;
+    cursor: pointer;
+}
+
+#replaygain-mode-labels input[type="checkbox"]:first-child {
+    margin-left: 0;
+}
 
 
 /* =============================================================
@@ -1046,6 +1069,11 @@ input[type="button"] {
   max-height: 280px;
   overflow-y: auto;
   scroll-behavior: smooth;
+
+  width: auto;
+    min-width: 100%;
+    max-width: 500px;   /* adjust as needed */
+    box-sizing: border-box;
 }
 
 .autoeq-option {
@@ -1058,6 +1086,8 @@ input[type="button"] {
   border-bottom: 1px solid #ddd;
   color: #212121 !important;
   background: #ffffff !important;
+
+  flex-wrap: wrap;
 }
 
 .autoeq-option:hover,
@@ -1069,10 +1099,17 @@ input[type="button"] {
 .autoeq-name {
   flex: 1;
   font-size: 0.9em;
+  color: #212121 !important;
+ /*
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  color: #212121 !important;
+  */
+  white-space: normal;        /* allow wrapping */
+    word-break: break-word;     /* break long words if necessary */
+    overflow: visible;
+    text-overflow: clip;
+  
 }
 
 .autoeq-source {
@@ -1081,6 +1118,8 @@ input[type="button"] {
   opacity: 0.6;
   white-space: nowrap;
   color: #212121 !important;
+
+  white-space: nowrap;
 }
 
 

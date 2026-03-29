@@ -13,6 +13,8 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.61	Fox: Force fixing custom-conf.conf re-write and amending headphone dropdown to scale better
+	0.1.60  Fox: Added replay gain, fir filter strength, toggles for panels
 	0.1.51	Fox: Proper empty structure created and returned for new player, error was causing issues on UI
 	0.1.50  Fox: Added a clear log function and added HLS to the fully supported list of formats for transcoding, this should allow support for streaming services that use HLS such as Apple Music and Amazon Music.
     0.1.41  Fox: css changes to fix minor issues with the UI
@@ -120,8 +122,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.60";
-$binversion = "0_2_30";
+my $revision = "0.1.61";
+$binversion = "0_2_31";
 use vars qw($VERSION);
 $VERSION = $revision;
 

@@ -270,8 +270,8 @@ print ( $myversion );
 <TR id="control_ReplayGain.enabled">
     <TD class="rowTitle">
         <div class="tooltip">
-			<label for="ReplayGain" class="infoTitle">[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN" | string %]</label>
-			<span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN_HELP" | string %]</span>
+            <label for="ReplayGain" class="infoTitle">[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN" | string %]</label>
+            <span class="tooltiptext">[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN_HELP" | string %]</span>
         </div>
     </TD>
     <TD class="rowBody">
@@ -282,8 +282,14 @@ print ( $myversion );
                        onclick="SwitchCheckbox(this, false); NewFieldValue('ReplayGain.enabled', this, false); updateReplayGainToggle();">
                 <label for="ReplayGain" class="Toggle">Toggle</label>
             </div>
-				<span style="color:#e67e00;" id="replaygain-warning" >[% "PLUGIN_SQUEEZEDSP_REPLAYGAIN_WARNING" | string %]</span>
-
+            <label id="replaygain-mode-labels" style="display:none;">
+                <input type="checkbox" id="ReplayGainTrackOnly"
+                       onchange="onReplayGainModeChange('track', this);">
+                Track only&nbsp;&nbsp;
+                <input type="checkbox" id="ReplayGainAlbumOnly"
+                       onchange="onReplayGainModeChange('album', this);">
+                Album only
+            </label>
         </div>
     </TD>
     <TD class="rowSuffix">

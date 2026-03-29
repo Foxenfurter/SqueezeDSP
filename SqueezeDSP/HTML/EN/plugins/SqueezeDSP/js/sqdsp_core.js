@@ -167,25 +167,54 @@ function updateLoudnessToggle() {
 
 function updateReplayGainToggle() {
     const enabled = SqueezeDSPData.Client.ReplayGain && SqueezeDSPData.Client.ReplayGain.enabled == 1;
-    const fixedGainInput = document.getElementById('val_ReplayGain.fixed_gain');
+    const fixedGainInput  = document.getElementById('val_ReplayGain.fixed_gain');
     const spotifyGainInput = document.getElementById('val_ReplayGain.spotify_gain');
-    const spotifyRow = document.getElementById('control_ReplayGain.spotify_gain');
-    const warning = document.getElementById('replaygain-warning');
+    const spotifyRow      = document.getElementById('control_ReplayGain.spotify_gain');
+    const modeLabels      = document.getElementById('replaygain-mode-labels');
+    const trackOnly       = document.getElementById('ReplayGainTrackOnly');
+    const albumOnly       = document.getElementById('ReplayGainAlbumOnly');
 
     if (fixedGainInput) {
-        fixedGainInput.disabled = !enabled;
+        fixedGainInput.disabled    = !enabled;
         fixedGainInput.style.opacity = enabled ? '1' : '0.4';
     }
     if (spotifyGainInput) {
-        spotifyGainInput.disabled = !enabled;
+        spotifyGainInput.disabled    = !enabled;
         spotifyGainInput.style.opacity = enabled ? '1' : '0.4';
     }
     if (spotifyRow) {
         spotifyRow.style.display = enabled ? '' : 'none';
     }
-    if (warning) {
-        warning.style.display = enabled ? '' : 'none';
+
+    // Show mode checkboxes only when ReplayGain is enabled
+    if (modeLabels) {
+        modeLabels.style.display = enabled ? '' : 'none';
     }
+
+    // Reflect current mode onto checkboxes
+    if (trackOnly && albumOnly) {
+        const mode = SqueezeDSPData.Client.ReplayGain.mode || 3;
+        trackOnly.checked = (mode === 1);
+        albumOnly.checked = (mode === 2);
+    }
+}
+
+// Called when either mode checkbox changes.
+// The two are mutually exclusive — checking one clears the other.
+// If both are unchecked the mode falls back to smart gain (3).
+function onReplayGainModeChange(which, checkbox) {
+    const trackOnly = document.getElementById('ReplayGainTrackOnly');
+    const albumOnly = document.getElementById('ReplayGainAlbumOnly');
+
+    if (which === 'track') {
+        if (checkbox.checked) albumOnly.checked = false;
+    } else {
+        if (checkbox.checked) trackOnly.checked = false;
+    }
+
+    const mode = trackOnly.checked ? 1 : albumOnly.checked ? 2 : 3;
+    SqueezeDSPData.Client.ReplayGain.mode = mode;
+    NewFieldValue('ReplayGain.mode', { value: mode }, false);
 }
 
 
@@ -241,43 +270,53 @@ function LocalDisplayLogSummary(logData) {
                 else if (peakdBfs < -8) peakStyle = 'peak peak-bitlow'; // fixed name
                 else if (peakdBfs < -3) peakStyle = 'peak peak-ok';
                 else if (peakdBfs < 0) peakStyle = 'peak peak-high';
-                else peakStyle = 'peak peak-clipping';
+				else if (peakdBfs >= 0) peakStyle = 'peak peak-clipping';
+                else peakStyle = 'peak peak peak-unknown';
             } else {
                 if (peakdBfs < -5) peakStyle = 'peak peak-toolow';
                 else if (peakdBfs < -1) peakStyle = 'peak peak-ok';
                 else if (peakdBfs <= 0.1) peakStyle = 'peak peak-high';
-                else if (peakdBfs > 0.1) peakStyle = 'peak peak-clipping';
+                else if (peakdBfs >= 0) peakStyle = 'peak peak-clipping';
+				else peakStyle = 'peak peak peak-unknown';
                 // No final else – unknown stays unknown*/
             }
 
             // Build tooltip with safe fallbacks
             const safeValue = (key) => (logData.result && logData.result[key] != null) ? logData.result[key] : '—';
-            const tooltipContent = `
-                <div class="tooltip-row">
-                    <div class="tooltip-label">Playerid:</div>
-                    <div class="tooltip-value">${safeValue('playerid_' + i)}</div>
-                </div>
-                <div class="tooltip-row">
-                    <div class="tooltip-label">Start Date:</div>
-                    <div class="tooltip-value">${safeValue('date_' + i)}</div>
-                </div>
-                <div class="tooltip-row">
-                    <div class="tooltip-label">Start Time:</div>
-                    <div class="tooltip-value">${safeValue('time_' + i)}</div>
-                </div>
-                <div class="tooltip-row">
-                    <div class="tooltip-label">Preamp Gain:</div>
-                    <div class="tooltip-value">${safeValue('preamp_' + i)}</div>
-                </div>
-                <div class="tooltip-row">
-                    <div class="tooltip-label">Sample Rate:</div>
-                    <div class="tooltip-value">${safeValue('outputrate_' + i)}</div>
-                </div>
-                <div class="tooltip-row">
-                    <div class="tooltip-label">Peak Level:</div>
-                    <div class="tooltip-value">${peakdBfs}</div>
-                </div>
-            `;
+				const tooltipContent = `
+					<div class="tooltip-row">
+						<div class="tooltip-label">Playerid:</div>
+						<div class="tooltip-value">${safeValue('playerid_' + i)}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Start Date:</div>
+						<div class="tooltip-value">${safeValue('date_' + i)}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Start Time:</div>
+						<div class="tooltip-value">${safeValue('time_' + i)}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Preamp Gain:</div>
+						<div class="tooltip-value">${safeValue('preamp_' + i)}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Internal Gain:</div>
+						<div class="tooltip-value">${safeValue('internalgain_' + i)}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Sample Rate:</div>
+						<div class="tooltip-value">${safeValue('outputrate_' + i)}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Peak Level:</div>
+						<div class="tooltip-value">${peakdBfs}</div>
+					</div>
+					<div class="tooltip-row">
+						<div class="tooltip-label">Input Peak:</div>
+						<div class="tooltip-value">${safeValue('inputpeak_' + i)}</div>
+					</div>
+				`;
 
             myHTML += `
                 <div class="led-container">

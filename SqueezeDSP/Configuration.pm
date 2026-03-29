@@ -14,51 +14,60 @@ sub initConfiguration {
     my @origLines;
     my @clientIDs = sort map { $_->id() } Slim::Player::Client::clients();
     my @foundClients;
-    my $PRE_0_9_21 = 0;
-    my $tryMoveConfig = 0;
-    
+
     @origLines = ();
     $Plugins::SqueezeDSP::Plugin::configPath = Plugins::SqueezeDSP::Utils::newConfigPath();
     sleep 1;
     Plugins::SqueezeDSP::Utils::debug ( "Config Path: " . $Plugins::SqueezeDSP::Plugin::configPath);
-    
+
     if( -f $Plugins::SqueezeDSP::Plugin::configPath ) {
-        open( CONFIG, "$Plugins::SqueezeDSP::Plugin::configPath" ) || do { 
-            Plugins::SqueezeDSP::Utils::fatal( $client, undef, "Can't read from $Plugins::SqueezeDSP::Plugin::configPath" ); 
-            return 0; 
+        open( CONFIG, "$Plugins::SqueezeDSP::Plugin::configPath" ) || do {
+            Plugins::SqueezeDSP::Utils::fatal( $client, undef, "Can't read from $Plugins::SqueezeDSP::Plugin::configPath" );
+            return 0;
         };
         @origLines = <CONFIG>;
         close( CONFIG );
-        my @revs = split /\./, $Plugins::SqueezeDSP::Plugin::myconfigrevision;
-        for( @origLines ) {
-            if( m/#$Plugins::SqueezeDSP::Plugin::confBegin#rev\:(.*)#client\:(.*)#/i ) {
-                my @test = split /\./, $1;
-                for my $ver ( @revs ) {
-                    my $vert = shift( @test ) || 0;
-                    next if $vert == $ver;
-                    Plugins::SqueezeDSP::Utils::debug ("Template version higher than config: " . $ver . " - " . $vert );
-                    $upgradeReason = "Previous version $1 less than my $Plugins::SqueezeDSP::Plugin::myconfigrevision ($vert less than $ver)" unless $Plugins::SqueezeDSP::Plugin::needUpgrade;
-                    $Plugins::SqueezeDSP::Plugin::needUpgrade = 1;
-                    last;
-                }
-                push( @foundClients, $2 );
-            }
-        }
-        unless( $Plugins::SqueezeDSP::Plugin::needUpgrade ) {
-            for my $c (@clientIDs) {
-                my $ok = 0;
-                for my $cc (@foundClients) {
-                    if( $c eq $cc ) {
-                        $ok = 1;
+
+        # Check for corruption: empty file or missing begin marker
+        my $hasBeginMarker = grep( /#$Plugins::SqueezeDSP::Plugin::confBegin#rev:/i, @origLines );
+        if( !@origLines || !$hasBeginMarker ) {
+            Plugins::SqueezeDSP::Utils::debug( "Config file missing or corrupt, will rebuild fresh" );
+            $upgradeReason = "Config file missing or corrupt" unless $Plugins::SqueezeDSP::Plugin::needUpgrade;
+            $Plugins::SqueezeDSP::Plugin::needUpgrade = 1;
+            @foundClients = @clientIDs;   # Include all current clients
+            @origLines = ();              # Discard old contents
+        } else {
+            my @revs = split /\./, $Plugins::SqueezeDSP::Plugin::myconfigrevision;
+            for( @origLines ) {
+                if( m/#$Plugins::SqueezeDSP::Plugin::confBegin#rev\:(.*)#client\:(.*)#/i ) {
+                    my @test = split /\./, $1;
+                    for my $ver ( @revs ) {
+                        my $vert = shift( @test ) || 0;
+                        next if $vert == $ver;
+                        Plugins::SqueezeDSP::Utils::debug ("Template version higher than config: " . $ver . " - " . $vert );
+                        $upgradeReason = "Previous version $1 less than my $Plugins::SqueezeDSP::Plugin::myconfigrevision ($vert less than $ver)" unless $Plugins::SqueezeDSP::Plugin::needUpgrade;
+                        $Plugins::SqueezeDSP::Plugin::needUpgrade = 1;
                         last;
                     }
+                    push( @foundClients, $2 );
                 }
-                unless( $ok ) {
-                    $upgradeReason = "Client $c was not yet registered" unless $Plugins::SqueezeDSP::Plugin::needUpgrade;
-                    $Plugins::SqueezeDSP::Plugin::needUpgrade = 1;
-                    Plugins::SqueezeDSP::Utils::debug ("Client $c was not yet registered" );
-                    push( @foundClients, $c );
-                    last;
+            }
+            unless( $Plugins::SqueezeDSP::Plugin::needUpgrade ) {
+                for my $c (@clientIDs) {
+                    my $ok = 0;
+                    for my $cc (@foundClients) {
+                        if( $c eq $cc ) {
+                            $ok = 1;
+                            last;
+                        }
+                    }
+                    unless( $ok ) {
+                        $upgradeReason = "Client $c was not yet registered" unless $Plugins::SqueezeDSP::Plugin::needUpgrade;
+                        $Plugins::SqueezeDSP::Plugin::needUpgrade = 1;
+                        Plugins::SqueezeDSP::Utils::debug ("Client $c was not yet registered" );
+                        push( @foundClients, $c );
+                        last;
+                    }
                 }
             }
         }
@@ -68,15 +77,15 @@ sub initConfiguration {
         $Plugins::SqueezeDSP::Plugin::needUpgrade = 1;
         @foundClients = @clientIDs;
     }
-        
-    upgradePrefs( $PRE_0_9_21, @foundClients );
+
+    upgradePrefs( @foundClients );
     removeNativeConversion();
     return unless $Plugins::SqueezeDSP::Plugin::needUpgrade;
 
     Plugins::SqueezeDSP::Utils::debug( "Need to rewrite " . $Plugins::SqueezeDSP::Plugin::configPath . " (" .$upgradeReason . ")" );
-    open( OUT, ">$Plugins::SqueezeDSP::Plugin::configPath" ) || do { 
-        Plugins::SqueezeDSP::Utils::fatal( $client, undef, "Can't write to $Plugins::SqueezeDSP::Plugin::configPath" ); 
-        return; 
+    open( OUT, ">$Plugins::SqueezeDSP::Plugin::configPath" ) || do {
+        Plugins::SqueezeDSP::Utils::fatal( $client, undef, "Can't write to $Plugins::SqueezeDSP::Plugin::configPath" );
+        return;
     };
 
     my $now = localtime;
@@ -94,8 +103,18 @@ sub initConfiguration {
         print OUT "# #$Plugins::SqueezeDSP::Plugin::confEnd#client:$clientID# ***** END AUTOMATICALLY GENERATED SECTION - DO NOT EDIT *****\n";
         print OUT "\n";
     }
-    
+
     close( OUT );
+
+    # Verify that the file was written successfully and is non‑empty
+    if( -s $Plugins::SqueezeDSP::Plugin::configPath == 0 ) {
+        Plugins::SqueezeDSP::Utils::fatal( $client, undef, "Config file written but appears empty!" );
+        return;
+    }
+
+    # Optionally set permissions so the file can be manually edited
+    chmod 0666, $Plugins::SqueezeDSP::Plugin::configPath;   # or 0644 for owner‑only write
+
     $Plugins::SqueezeDSP::Plugin::needUpgrade = 0;
     Plugins::SqueezeDSP::Utils::debug( "Reload Conversion Tables" );
     Slim::Player::TranscodingHelper::loadConversionTables();
@@ -107,10 +126,9 @@ sub upgradePrefs
 {
 	# Going to run this each time the server starts and update revision number for each active client
 	# 
-	my ( $PRE_0_9_21, @clientIDs ) = @_;
+	my (  @clientIDs ) = @_;
 	$Plugins::SqueezeDSP::Plugin::revision;
-	#return if ( $prevrev eq $revision ) && !$PRE_0_9_21;
-	
+		
 	foreach my $clientID ( @clientIDs )
 	{
 		Plugins::SqueezeDSP::Utils::debug( "client " . $clientID );
@@ -161,10 +179,6 @@ sub upgradePrefs
 		}
 	}
 }
-
-
-
-
 
 
 # find the appropriate template depending on client type

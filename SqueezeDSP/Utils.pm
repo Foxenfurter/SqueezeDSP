@@ -163,7 +163,7 @@ sub _trackGainQuery {
     my $request = shift;
     my $client  = $request->client();
 	
-	debug("_trackGainQuery called for player: " . ($client ? $client->id() : 'unknown'));
+    debug("_trackGainQuery called for player: " . ($client ? $client->id() : 'unknown'));
     unless ($client) {
         $request->setStatusBadParams();
         return;
@@ -184,14 +184,31 @@ sub _trackGainQuery {
     $request->addResult('album_gain',      $currentGain->{album_gain}) if defined $currentGain->{album_gain};
     $request->addResult('album_peak',      $currentGain->{album_peak}) if defined $currentGain->{album_peak};
 
-    # next track
-	my $nextIndex = Slim::Player::Source::streamingSongIndex($client) + 1;
-	my $nextURL   = Slim::Player::Playlist::track($client, $nextIndex);
+    # Determine whether the current track is in album sequence with either its
+    # neighbour in the playlist. trackAlbumMatch() checks whether the track at
+    # the given offset (+1 next, -1 previous) is adjacent on the same album.
+    # The || means: if either comparison returns true, album_match is true.
+    # trackAlbumMatch() handles edge cases internally (first/last track,
+    # playlist wrap-around, repeat mode) so no extra logic is needed here.
+	my $albumMatch = 0;
+    if (defined $currentGain->{album_gain}) {
+        # Check whether the current track is in album sequence with either neighbour.
+        # || means: true if either the previous (-1) or next (+1) track matches.
+        # trackAlbumMatch() handles edge cases (first/last track, repeat mode) internally.
+        $albumMatch = Slim::Player::ReplayGain->trackAlbumMatch($client, -1)
+                   || Slim::Player::ReplayGain->trackAlbumMatch($client,  1);
+    }
 
-	# track() returns an object for remote tracks - extract url string
-	if (ref $nextURL) {
-		$nextURL = $nextURL->url();
-	}
+    $request->addResult('album_match', $albumMatch ? 1 : 0);
+
+    # next track
+    my $nextIndex = Slim::Player::Source::streamingSongIndex($client) + 1;
+    my $nextURL   = Slim::Player::Playlist::track($client, $nextIndex);
+
+    # track() returns an object for remote tracks - extract url string
+    if (ref $nextURL) {
+        $nextURL = $nextURL->url();
+    }
 
     if ($nextURL) {
         my $nextTrack = Slim::Schema->objectForUrl({ 'url' => $nextURL, 'create' => 1, 'readTags' => 1 });
@@ -218,32 +235,37 @@ sub _getTrackGainData {
 sub _getTrackGainDataFromTrack {
     my ($client, $track, $url) = @_;
 
-	# ensure url is a plain string not an object
     $url = $url->url() if ref $url;
 
     my %data = (url => $url);
 
-if ($track->remote) {
-    my $handler = Slim::Player::ProtocolHandlers->handlerForURL($url);
+    if ($track->remote) {
+        my $handler = Slim::Player::ProtocolHandlers->handlerForURL($url);
+        my $meta;
 
-    if ($handler && $handler->can('trackGain')) {
-        $data{track_gain} = $handler->trackGain($client, $url);
-    }
-
-    unless (defined $data{track_gain}) {
-        if ($handler && $handler->can('getMetadataFor')) {
-            my $meta = $handler->getMetadataFor($client, $url);
-            $data{track_gain} = $meta->{replay_gain};
-            $data{track_peak} = $meta->{replay_peak};
-
-            # if still nothing log available keys for diagnosis
-			unless (defined $data{track_gain}) {
-				debug("[$url] no gain found in metadata, available keys: " . 
-					join(', ', sort keys %$meta));
-			}
+        if ($handler && $handler->can('trackGain')) {
+            $data{track_gain} = $handler->trackGain($client, $url);
         }
-    }
-} else {
+
+        unless (defined $data{track_gain}) {
+            if ($handler && $handler->can('getMetadataFor')) {
+                $meta = $handler->getMetadataFor($client, $url);
+                $data{track_gain} = $meta->{replay_gain};
+                $data{track_peak} = $meta->{replay_peak};
+            }
+        }
+
+        # Look up album gain via Qobuz external ID stored in local DB
+        my $albumId = $meta ? $meta->{albumId} : undef;
+        if ($albumId) {
+            my $album = Slim::Schema->single('Album', { extid => "qobuz:album:$albumId" });
+            if ($album && defined $album->replay_gain()) {
+                $data{album_gain} = $album->replay_gain();
+                $data{album_peak} = $album->replay_peak();
+            }
+        }
+
+    } else {
         $data{track_gain} = $track->replay_gain();
         $data{track_peak} = $track->replay_peak();
 

@@ -31,6 +31,7 @@ function InitialiseData()
 		Crossfeed: "off",
 		ReplayGain: {
 			enabled: 0,
+			mode:         3,   // 1=track only, 2=album only, 3=smart gain (default)
 			fixed_gain: -6.0,
 			spotify_gain: -4.0,
 		},
@@ -415,42 +416,6 @@ function SqueezeDSPFetchCurrentSettings(callback) {
     });
 }
 
-function SqueezeDSPFetchCurrentSettingsOld(callback) {
-    new Ajax.Request('/jsonrpc.js', {
-        method: 'post',
-        postBody: Object.toJSON({
-            id: 1, 
-            method: 'slim.request', 
-            params: [getCurrentPlayer(), ['squeezedsp.readclientSettings']]
-        }),
-        onSuccess: (response) => {
-            const data = response.responseText.evalJSON();
-            const rawJson = data.result.json;
-            
-            try {
-                // Parse JSON directly into application state
-                
-                InitialiseSqueezeDSPData();
-                SqueezeDSPData = JSON.parse(rawJson);
-                
-                // Add any non-persistent metadata
-                SqueezeDSPData.ClientName = data.result.clientName;
-                SqueezeDSPData.Revision = data.result.revision || 1;
-                
-                // Transform legacy filters to new format
-                SqueezeDSPData = transformLegacyFilters(SqueezeDSPData);
-                
-                if (callback) callback();
-               
-            } catch (e) {
-                console.error("JSON parsing error:", e);
-            } finally {
-                // Ensure we reset the flag even if errors occur
-                
-            }
-        }
-    });
-}
 
 function SqueezeDSPFetchPresetSettings(presetFilePath, callback) {
     // Only proceed if this is not a programmatic change

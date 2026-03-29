@@ -6,10 +6,11 @@ package Plugins::SqueezeDSP::TemplateConfig;
 
 sub get_config_revision
 {
-	my $configrevision = "0.1.10";
+	my $configrevision = "0.1.11";
 	return $configrevision;
 }
 
+# 0.1.11 corrected ogf line which had duplicate convolver app.
 # 0.1.10 added hls flc and wav
 # 1.0.9 alc format is sensitive to where the parameters are for faad, standardised for all faad based transcoding
 # 1.0.8 Change to mp3 as raw format caused chipmunk chatter on talkSport, issue with wmadec decoding addressed
@@ -91,7 +92,7 @@ ogg wav * $CLIENTID$
 
 ogf wav * $CLIENTID$
 	# IFR
-	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$]  [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16 
+	[flac] --ogg -dcs --force-raw-format --endian=little --sign=signed  -- $FILE$ | [$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$	--formatin=PCM  --Clientid="$CLIENTID$" --bitsout=16 
 
 ops wav * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--resample %D}

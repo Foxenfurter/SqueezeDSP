@@ -78,7 +78,9 @@ sub logsummaryQuery {
                     inputrate => $startvalues[3],
                     outputrate    => $startvalues[6],
                     preamp     => $startvalues[10],    
-                    peakdBfs => $endvalues[13],
+                    internalgain => $startvalues[14],   # <-- 2026/03/27
+    				peakdBfs     => $endvalues[13],
+    				inputpeak    => $endvalues[17],     # <-- 2026/03/27
                 );
                 push @reportlines, \%reportrow;
                 $trackcount++;
@@ -102,7 +104,9 @@ sub logsummaryQuery {
         $request->addResult("inputrate_$trackpos", $reportrow->{inputrate});
         $request->addResult("outputrate_$trackpos", $reportrow->{outputrate});
         $request->addResult("preamp_$trackpos", $reportrow->{preamp});
-        $request->addResult("peakdBfs_$trackpos", $reportrow->{peakdBfs});
+        $request->addResult("internalgain_$trackpos", $reportrow->{internalgain});  # <-- 2026/03/27
+		$request->addResult("peakdBfs_$trackpos",     $reportrow->{peakdBfs});
+		$request->addResult("inputpeak_$trackpos",    $reportrow->{inputpeak}); # <-- 2026/03/27
         $trackpos++;
     }
 
