@@ -4,12 +4,12 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-    <plugin name="SqueezeDSP" version="0.1.61" minTarget="7.8.0" maxTarget="*">
+    <plugin name="SqueezeDSP" version="0.1.70" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
      
-     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.61/SqueezeDSP-0.1.61.zip</url>
-	  <sha>154d720ca9b66f2574bc684cde0213b867e12db1</sha>
-	  <changes>Added strict album gain and track gain, tweaked autoeq dropdown, tidied up transcoder template, rebuilt in go 1.26</changes>
+     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.70/SqueezeDSP-0.1.70.zip</url>
+	  <sha>9a62a98959a73a740dd2ef4f0e26f0158dba140b</sha>
+	  <changes>Direct Encoding of MP3 and Flac, simplified conversion rules, downsamples to match player, caches track gain</changes>
 	  <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
       <creator>Jonathan Fox</creator>
 	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>

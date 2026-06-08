@@ -6,6 +6,8 @@ use File::Copy;
 use JSON::XS;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
+use Slim::Utils::Cache;
+
 use Slim::Player::Source;
 use Slim::Player::Playlist;
 use Slim::Player::ProtocolHandlers;
@@ -21,6 +23,7 @@ my $pluginImpulsesDataDir = $Plugins::SqueezeDSP::Plugin::pluginImpulsesDataDir;
 my $pluginMatrixDataDir = $Plugins::SqueezeDSP::Plugin::pluginMatrixDataDir;
 my $pluginTempDataDir = $Plugins::SqueezeDSP::Plugin::pluginTempDataDir;
 my $prefs = $Plugins::SqueezeDSP::Plugin::prefs;
+my $cache = Slim::Utils::Cache->new();
 
 sub keyval {
     my $k = shift;
@@ -183,6 +186,7 @@ sub _trackGainQuery {
     $request->addResult('track_peak',      $currentGain->{track_peak}) if defined $currentGain->{track_peak};
     $request->addResult('album_gain',      $currentGain->{album_gain}) if defined $currentGain->{album_gain};
     $request->addResult('album_peak',      $currentGain->{album_peak}) if defined $currentGain->{album_peak};
+	$request->addResult('album_id',        $currentGain->{album_id})   if defined $currentGain->{album_id};
 
     # Determine whether the current track is in album sequence with either its
     # neighbour in the playlist. trackAlbumMatch() checks whether the track at
@@ -219,6 +223,7 @@ sub _trackGainQuery {
             $request->addResult('next_track_peak', $nextGain->{track_peak}) if defined $nextGain->{track_peak};
             $request->addResult('next_album_gain', $nextGain->{album_gain}) if defined $nextGain->{album_gain};
             $request->addResult('next_album_peak', $nextGain->{album_peak}) if defined $nextGain->{album_peak};
+			$request->addResult('next_album_id',   $nextGain->{album_id})    if defined $nextGain->{album_id};
         }
     }
 
@@ -239,31 +244,53 @@ sub _getTrackGainDataFromTrack {
 
     my %data = (url => $url);
 
-    if ($track->remote) {
-        my $handler = Slim::Player::ProtocolHandlers->handlerForURL($url);
-        my $meta;
+	if ($track->remote) {
+		my $handler = Slim::Player::ProtocolHandlers->handlerForURL($url);
+		my $meta;
 
-        if ($handler && $handler->can('trackGain')) {
-            $data{track_gain} = $handler->trackGain($client, $url);
-        }
+		# Always fetch metadata - needed for album ID regardless of whether
+		# trackGain() succeeds
+		if ($handler && $handler->can('getMetadataFor')) {
+			$meta = $handler->getMetadataFor($client, $url);
+		}
 
-        unless (defined $data{track_gain}) {
-            if ($handler && $handler->can('getMetadataFor')) {
-                $meta = $handler->getMetadataFor($client, $url);
-                $data{track_gain} = $meta->{replay_gain};
-                $data{track_peak} = $meta->{replay_peak};
-            }
-        }
+		if ($handler && $handler->can('trackGain')) {
+			$data{track_gain} = $handler->trackGain($client, $url);
+		}
 
-        # Look up album gain via Qobuz external ID stored in local DB
-        my $albumId = $meta ? $meta->{albumId} : undef;
-        if ($albumId) {
-            my $album = Slim::Schema->single('Album', { extid => "qobuz:album:$albumId" });
-            if ($album && defined $album->replay_gain()) {
-                $data{album_gain} = $album->replay_gain();
-                $data{album_peak} = $album->replay_peak();
-            }
-        }
+		# Fall back to metadata for track gain/peak if not provided directly
+		unless (defined $data{track_gain}) {
+			$data{track_gain} = $meta->{replay_gain} if $meta;
+			$data{track_peak} = $meta->{replay_peak} if $meta;
+		}
+
+		my $albumId = $meta ? $meta->{albumId} : undef;
+		debug("_getTrackGainDataFromTrack: albumId=" . ($albumId // 'undef') . " meta keys=" . ($meta ? join(',', keys %$meta) : 'no meta'));
+		if ($albumId) {
+			$data{album_id} = "qobuz:album:$albumId";
+
+			my $album = Slim::Schema->single('Album', { extid => "qobuz:album:$albumId" });
+			debug("schema lookup: " . ($album ? "found, gain=" . ($album->replay_gain() // 'undef') : "not found"));
+
+			if ($album && defined $album->replay_gain()) {
+				$data{album_gain} = $album->replay_gain();
+				$data{album_peak} = $album->replay_peak();
+			}
+			# cache fallback - gain is min(track_gains), not a true album tag
+			unless (defined $data{album_gain}) {
+				eval {
+					require Plugins::Qobuz::API::Common;
+					my $qobuzCache = Plugins::Qobuz::API::Common->getCache();
+					my $cached = $qobuzCache->get('album_with_tracks_' . $albumId)
+							|| $qobuzCache->get('albumInfo_' . $albumId);
+					if ($cached && ref $cached && defined $cached->{replay_gain}) {
+						$data{album_gain} = $cached->{replay_gain};
+						$data{album_peak} = $cached->{replay_peak};
+					}
+				};
+				debug("Qobuz cache eval error: $@") if $@;
+			}
+		}
 
     } else {
         $data{track_gain} = $track->replay_gain();
@@ -273,6 +300,8 @@ sub _getTrackGainDataFromTrack {
         if ($album && $album->can('replay_gain')) {
             $data{album_gain} = $album->replay_gain();
             $data{album_peak} = $album->replay_peak();
+            # *** NEW: expose album identifier for local tracks too ***
+            $data{album_id}   = 'local:album:' . $album->id();
         }
     }
 

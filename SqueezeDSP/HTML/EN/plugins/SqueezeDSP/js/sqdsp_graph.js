@@ -205,7 +205,7 @@ class FrequencyResponsePlotter {
                 top: Math.max(8 * scale, 6),     // Reduced from 12
                 right: Math.max(8 * scale, 5),    // Reduced from 12
                bottom: Math.max(30 * scale, 20), // CHANGED: from 40 to 25 (was too big) // Reduced from 35-40
-                left: Math.max(30 * scale, 22)    // Reduced from 45-50
+                left: Math.max(30 * scale, 32)    // Reduced from 45-50
             };
         } else {
             // Normal UI - reduced margins
@@ -213,7 +213,7 @@ class FrequencyResponsePlotter {
                 top: Math.max(8 * scale, 6),      // Reduced from 10
                 right: Math.max(8 * scale, 5),    // Reduced from 10
                 bottom: Math.max(25 * scale, 12), // Reduced from 25-30
-                left: Math.max(25 * scale, 18)    // Reduced from 35-45
+                left: Math.max(25 * scale, 24)    // Reduced from 35-45
             };
         }
         
@@ -392,7 +392,12 @@ class FrequencyResponsePlotter {
         return svg;
     }
 // Add this function to detect Material UI
-    detectMaterialUI() {
+	detectMaterialUI() {
+    const materialLink = document.querySelector('link[href*="/material/"]');
+	return materialLink !== null;
+	}
+
+    detectMaterialUI_old() {
         // Check if we're in Material UI mode
         // You can implement this based on your application
         // For now, let's check for common Material UI indicators

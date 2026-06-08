@@ -111,19 +111,19 @@ our (
     $convolver,          # Convolver name
     $logfile,            # Log file path
     $fatalError,         # Fatal error message
-    $needUpgrade,        # Upgrade flag
+   # $needUpgrade,        # Upgrade flag
     $doneJiveInit,       # Jive init flag
-    $configPath,         # Config path
+   # $configPath,         # Config path
     $thistag,            # Plugin tag
-    $myconfigrevision,   # Config revision
+  #  $myconfigrevision,   # Config revision
     $binversion,          # Binary version
 	$cacheBust,          # Cache busting token
 	$gainLog          # gain logger
 );
 
 # Revision number
-my $revision = "0.1.61";
-$binversion = "0_2_31";
+my $revision = "0.1.70";
+$binversion = "0_2_40";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -143,14 +143,14 @@ my $modeRoomCorr     = "PLUGIN.SqueezeDSP.RoomCorrection";
 my $modeMatrix       = "PLUGIN.SqueezeDSP.Matrix";
 
 our %noFunctions = ();
-$needUpgrade = 0;
+#$needUpgrade = 0;
 $fatalError = undef;
 $doneJiveInit = 0;
 # ======== END: VARIABLE DECLARATIONS ========
 
 # Load submodules
 use Plugins::SqueezeDSP::Settings;
-use Plugins::SqueezeDSP::TemplateConfig;
+#use Plugins::SqueezeDSP::TemplateConfig;
 use Plugins::SqueezeDSP::Configuration;
 use Plugins::SqueezeDSP::UI_Functions;
 use Plugins::SqueezeDSP::Utils;
@@ -188,7 +188,7 @@ sub initPlugin {
 
 	#$gainLog = catdir(Slim::Utils::OSDetect::dirsFor('log'), "gain.log");  # add this
 	
-    $myconfigrevision = Plugins::SqueezeDSP::TemplateConfig::get_config_revision();
+   # $myconfigrevision = Plugins::SqueezeDSP::TemplateConfig::get_config_revision();
     # ======== END: VARIABLE INITIALIZATION ========
 
     Plugins::SqueezeDSP::Utils::debug("plugin " . $revision . " enabled");
