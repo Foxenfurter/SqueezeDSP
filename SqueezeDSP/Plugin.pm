@@ -13,6 +13,7 @@ package Plugins::SqueezeDSP::Plugin;
 	#
 	#	
 	#
+	0.1.71	Fox: Updates to core binary outputs mp3 and flac and also transcoding now simpler but requires different cleanup
 	0.1.61	Fox: Force fixing custom-conf.conf re-write and amending headphone dropdown to scale better
 	0.1.60  Fox: Added replay gain, fir filter strength, toggles for panels
 	0.1.51	Fox: Proper empty structure created and returned for new player, error was causing issues on UI
@@ -122,8 +123,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.62";
-$binversion = "0_2_31";
+my $revision = "0.1.71";
+$binversion = "0_2_40";
 use vars qw($VERSION);
 $VERSION = $revision;
 
