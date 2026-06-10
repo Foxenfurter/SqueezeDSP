@@ -122,8 +122,8 @@ our (
 );
 
 # Revision number
-my $revision = "0.1.70";
-$binversion = "0_2_40";
+my $revision = "0.1.62";
+$binversion = "0_2_31";
 use vars qw($VERSION);
 $VERSION = $revision;
 
@@ -206,11 +206,14 @@ sub initPlugin {
 	Slim::Control::Request::addDispatch([$thistag . '.trackgain'], [1, 1, 0, \&Plugins::SqueezeDSP::Utils::_trackGainQuery]);
 
 
+	# Call cleanup of Conversion tables
+  	Plugins::SqueezeDSP::Configuration::cleanupConversionTables();
+
     # Binary setup and housekeeping
     Plugins::SqueezeDSP::Binary::setup_binary($class);
     Plugins::SqueezeDSP::Binary::housekeeping();
-    Plugins::SqueezeDSP::Configuration::removeNativeConversion();
     
+	
     # Event subscription
     Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new']]);
 
@@ -224,8 +227,10 @@ sub initPlugin {
 sub shutdown {
     Slim::Control::Request::unsubscribe(\&clientEvent);
 	#gain logging
-#	Slim::Control::Request::unsubscribe(\&_trackChanged);  # add this
+	Slim::Control::Request::unsubscribe(\&_trackChanged);  # add this
 }
+
+
 
 sub clientEvent {
     my $request = shift;
