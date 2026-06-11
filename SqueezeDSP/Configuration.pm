@@ -3,18 +3,48 @@ use strict;
 use File::Spec::Functions qw(:ALL);
 use Slim::Player::TranscodingHelper;
 #use Plugins::SqueezeDSP::Utils;
+my %_initInProgress = ();
 
 # ------ configuration helpers ------
 sub initConfiguration {
     my $client = shift;
+	 my $clientId = $client->id();
     Plugins::SqueezeDSP::Utils::debug( "client " . $client->id() ." name " . $client->name ." initializing" );
+
+ 	return if $_initInProgress{$clientId};
+    $_initInProgress{$clientId} = 1;
 
     $Plugins::SqueezeDSP::Plugin::fatalError = undef;
     my @clientIDs = sort map { $_->id() } Slim::Player::Client::clients();
 
-    upgradePrefs( @clientIDs );
-	#Now done once when server is ready, not here:
-    removeNativeConversion();
+    upgradePrefs( @clientIDs );	
+	_waitForReady($client);
+	
+	chmod 0666, $Plugins::SqueezeDSP::Plugin::configPath;   
+
+}
+
+sub _waitForReady {
+    my ($client, $attempts) = @_;
+    my $clientId = $client->id();
+    
+    if ($attempts > 20) {
+        Plugins::SqueezeDSP::Utils::debug("$clientId: readyToStream timeout, proceeding anyway");
+        delete $_initInProgress{$clientId};
+        removeNativeConversion($client);
+        return;
+    }
+    
+    if ($client->readyToStream()) {
+        delete $_initInProgress{$clientId};
+        removeNativeConversion($client);
+    } else {
+        Slim::Utils::Timers::setTimer(
+            $client,
+            Time::HiRes::time() + 0.5,
+            sub { _waitForReady($client, $attempts + 1) }
+        );
+    }
 }
 
 sub initConfigurationOld {
@@ -131,7 +161,7 @@ sub initConfigurationOld {
     $Plugins::SqueezeDSP::Plugin::needUpgrade = 0;
     Plugins::SqueezeDSP::Utils::debug( "Reload Conversion Tables" );
     Slim::Player::TranscodingHelper::loadConversionTables();
-    #removeNativeConversion();
+    removeNativeConversion();
 }
 
 # Going to run this each time the server starts and update revision number for each active client
@@ -146,7 +176,7 @@ sub upgradePrefs
 	{
 		Plugins::SqueezeDSP::Utils::debug( "client " . $clientID );
 		my $client = Slim::Player::Client::getClient( $clientID );
-# Check IMMEDIATELY after getClient()
+	# Check IMMEDIATELY after getClient()
     unless (defined($client)) 
 		{  # Or if (not defined $client) {
         print "Error: Could not get client object for ID: " . $clientID;
@@ -227,198 +257,79 @@ sub template {
     return $template;
 }
 
-# Need to do this as a two step process, remove the generics at startup using this routine
-# then remove the player specific entries once the player starts. 
-sub cleanupConversionTables {
-    # 1. Clear and reload
-    %Slim::Player::TranscodingHelper::commandTable = ();
-    %Slim::Player::TranscodingHelper::capabilities = ();
-    Plugins::SqueezeDSP::Utils::debug("Conversion tables cleared.");
-    Slim::Player::TranscodingHelper::loadConversionTables();
-    Plugins::SqueezeDSP::Utils::debug("Default LMS rules reloaded.");
-	
-	# ------------------------------------------------------------
-    # Step 1:Remove any Native conversions
-    # ------------------------------------------------------------
+sub removeNativeConversion {
+    my $client = shift;
     
-	my $conv = Slim::Player::TranscodingHelper::Conversions();
-    my %players = %{Plugins::SqueezeDSP::Utils::_getEnabledPlayers()};
-    for my $profile (sort keys %$conv) {
-        my ($inputtype, $outputtype, $clienttype, $clientid) = Plugins::SqueezeDSP::Utils::_inspectProfile($profile);
-        my $command = $conv->{$profile};
-        
-        if ($command eq "-") {
-            Plugins::SqueezeDSP::Utils::debug("delete native command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid,  command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
-	}
-
-
     my $conv      = Slim::Player::TranscodingHelper::Conversions();
     my $convolver = $Plugins::SqueezeDSP::Plugin::convolver;
-    my $prefs     = Slim::Utils::Prefs::preferences('server');
 
-    Plugins::SqueezeDSP::Utils::debug("cleanupConversionTables: " . scalar(keys %$conv) . " profiles found.");
-
-    my %caps = %Slim::Player::TranscodingHelper::capabilities;
-
-    # ------------------------------------------------------------
-    # Step 2: Build copy table with stripped profile and normalized command
-    # ------------------------------------------------------------
-    my @entries;
-    for my $profile (keys %$conv) {
-        my $command = $conv->{$profile};
-
-        # Strip priority suffix from profile (e.g., -1, -00, -01, -2)
-        my $stripped_profile = $profile;
-        $stripped_profile =~ s/-\d+$//;        # remove trailing -1, -00, -2
-        $stripped_profile =~ s/-\*-\d+$//;     # handle patterns like -*-1 -> -*
-
-        my $base_cmd = _normalize_command($command);
-        my $dedup_key = "$stripped_profile||$base_cmd";   # composite key
-
-        push @entries, {
-            profile         => $profile,
-            stripped_profile=> $stripped_profile,
-            command         => $command,
-            cap             => $caps{$profile} // {},
-            base_cmd        => $base_cmd,
-            dedup_key       => $dedup_key,
-            disabled        => 0,
-        };
-    }
-
-    # ------------------------------------------------------------
-    # Step 3: Deduplicate by composite key – keep last occurrence
-    # ------------------------------------------------------------
-    @entries = sort { $a->{dedup_key} cmp $b->{dedup_key} } @entries;
-
-    my $i = 0;
-    while ($i < $#entries) {
-        if ($entries[$i]{dedup_key} eq $entries[$i+1]{dedup_key}) {
-            splice(@entries, $i, 1);   # remove current
-        } else {
-            $i++;
-        }
-    }
-    Plugins::SqueezeDSP::Utils::debug("After deduplication: " . scalar(@entries) . " entries.");
-
-    # ------------------------------------------------------------
-    # Step 4: Flag disabled = any entry without SqueezeDSP in its command
-    # ------------------------------------------------------------
-    for my $e (@entries) {
-        if (index($e->{command}, $convolver) == -1) {
-            $e->{disabled} = 1;
-        }
-    }
-
-    # ------------------------------------------------------------
-    # Step 5: Clear live tables again
-    # ------------------------------------------------------------
-    %Slim::Player::TranscodingHelper::commandTable = ();
-    %Slim::Player::TranscodingHelper::capabilities = ();
-
-    # ------------------------------------------------------------
-    # Step 6: Insert ONLY enabled (disabled=0) entries
-    # ------------------------------------------------------------
-	dumpWorkingCopy(\@entries, $convolver);
-    my @disabled_profiles;
-    for my $e (@entries) {
-        if ($e->{disabled}) {
-            push @disabled_profiles, $e->{profile};
-            #Plugins::SqueezeDSP::Utils::debug("Omitting (disabled): $e->{profile}");
-        } else {
-            $Slim::Player::TranscodingHelper::commandTable{$e->{profile}} = $e->{command};
-            $Slim::Player::TranscodingHelper::capabilities{$e->{profile}} = $e->{cap};
-            #Plugins::SqueezeDSP::Utils::debug("Inserting enabled: $e->{profile}");
-        }
-    }
-
-    $prefs->set('disabledformats', \@disabled_profiles);
-
-    Plugins::SqueezeDSP::Utils::debug("cleanupConversionTables complete. Inserted " .
-        (scalar(@entries) - scalar(@disabled_profiles)) . " enabled rules, omitted " .
-        scalar(@disabled_profiles) . " disabled rules.");
-}
-
-# ------------------------------------------------------------
-# Helper: aggressive normalization (already defined)
-# ------------------------------------------------------------
-sub _normalize_command {
-    my ($cmd) = @_;
-    my $norm = $cmd;
-    $norm =~ s/\s+-priority\s+\d+\s*/ /g;
-    $norm =~ s/\s+-threads\s+\d+\s*/ /g;
-    $norm =~ s/\s+-p\d+\s*/ /g;
-    $norm =~ s/\s+--threads=\d+\s*/ /g;
-    $norm =~ s|/usr/bin/||g;
-    $norm =~ s|/bin/||g;
-    $norm =~ s|/usr/local/bin/||g;
-    $norm =~ s|/opt/local/bin/||g;
-    $norm =~ s/--(\w+)=\S+/--$1/g;   # strip values from --key=value
-    $norm =~ s/\s+\d+\s+/ /g;
-    $norm =~ s/\s+/ /g;
-    $norm =~ s/^\s+|\s+$//g;
-    return $norm;
-}
-
-sub dumpWorkingCopy {
-    my ($entries, $convolver) = @_;
-    Plugins::SqueezeDSP::Utils::debug("========== WORKING COPY AFTER DEDUP & FLAGGING ==========");
-    foreach my $e (sort { $a->{base_cmd} cmp $b->{base_cmd} } @$entries) {
-        my $status = $e->{disabled} ? "DISABLED" : "ENABLED";
-        Plugins::SqueezeDSP::Utils::debug("$status: $e->{profile}");
-        Plugins::SqueezeDSP::Utils::debug("  base_cmd: $e->{base_cmd}");
-        Plugins::SqueezeDSP::Utils::debug("  command: $e->{command}");
-        if ($e->{command} =~ /\Q$convolver\E/) {
-            Plugins::SqueezeDSP::Utils::debug("  contains $convolver: YES");
-        } else {
-            Plugins::SqueezeDSP::Utils::debug("  contains $convolver: NO");
-        }
-    }
-    Plugins::SqueezeDSP::Utils::debug("=================================================================");
-}
-
-
-# removes entries added for the specific player that has just started
-# real belt and braces stuff.
-sub removeNativeConversion {
-    my $conv = Slim::Player::TranscodingHelper::Conversions();
-    my %players = %{Plugins::SqueezeDSP::Utils::_getEnabledPlayers()};
     for my $profile (sort keys %$conv) {
-        my ($inputtype, $outputtype, $clienttype, $clientid) = Plugins::SqueezeDSP::Utils::_inspectProfile($profile);
         my $command = $conv->{$profile};
-        my $enabled = Slim::Player::TranscodingHelper::enabledFormat($profile);
-        #if ($enabled == 1 && $clienttype eq "*" && $command eq "-") {
-		#disable all native passthrough rules
-		(my $trimmed = $command) =~ s/^\s+|\s+$//g;
-		#any native passthrough rule 
-		if ($enabled == 1 &&  $trimmed eq "-") {
-            Plugins::SqueezeDSP::Utils::debug("delete - command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
-		if ($enabled == 1 && $clientid eq "*" && $command eq "native") {
-            Plugins::SqueezeDSP::Utils::debug("delete native command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
-		# disable any rule that is not outputting flc or mp3
-		if ($enabled == 1 && $outputtype ne "flc" && $outputtype ne "mp3" ) {
-            Plugins::SqueezeDSP::Utils::debug("delete other non mp3/flc command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
-
-		## remove competing flac and mp3 rules
-        if ($enabled == 2 && $clientid eq "*" && ( $outputtype eq "flc" || $outputtype eq "mp3") ) {
-            Plugins::SqueezeDSP::Utils::debug("delete flac command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
+        
+        # Skip entries that are already ours
+        next if index($command, $convolver) != -1;
+        
+        # Only remove native passthroughs - preserve real transcoding fallbacks
+        next unless $command eq '-' || $command eq '';
+        
+        Plugins::SqueezeDSP::Utils::debug("delete native passthrough: $profile => $command");
+        delete $Slim::Player::TranscodingHelper::commandTable{$profile};
+        delete $Slim::Player::TranscodingHelper::capabilities{$profile};
     }
+    
+    Plugins::SqueezeDSP::Utils::debug("removeNativeConversion complete.");
+}
+
+sub removeNativeConversionBrute {
+	 my $client = shift;
+	#Slim::Player::TranscodingHelper::loadConversionTables();
+	my $conv = Slim::Player::TranscodingHelper::Conversions();
+		
+    my %players = %{Plugins::SqueezeDSP::Utils::_getEnabledPlayers()};
+	my $convolver = $Plugins::SqueezeDSP::Plugin::convolver;
+	my $prefs     = Slim::Utils::Prefs::preferences('server');
+	for my $profile (sort keys %$conv) {
+		my $command = $conv->{$profile};
+		if (index($command, $convolver) == -1) {
+			Plugins::SqueezeDSP::Utils::debug("delete unwanted entry: $profile => $command");
+			delete $Slim::Player::TranscodingHelper::commandTable{$profile};
+			delete $Slim::Player::TranscodingHelper::capabilities{$profile};
+		}
+	}
 	Plugins::SqueezeDSP::Utils::debug("removeNativeConversion complete.");
 }
 
+sub removeNativeConversionExperimental {
+    my $client = shift;
+    
+    my $conv = Slim::Player::TranscodingHelper::Conversions();
+    my $convolver = $Plugins::SqueezeDSP::Plugin::convolver;
+    my $clientId = $client ? $client->id() : undef;
+    my $model    = $client ? $client->model() : undef;
+
+    for my $profile (sort keys %$conv) {
+        my $command = $conv->{$profile};
+        
+        # Skip entries that are already ours
+        next if index($command, $convolver) != -1;
+        
+        # Only remove native passthroughs - preserve real transcoding fallbacks
+        next unless $command eq '-' || $command eq '';
+        
+        my ($in, $out, $pmodel, $pid) = split(/-/, $profile, 4);
+        
+        my $isWildcard    = ($pmodel eq '*' && $pid eq '*');
+        my $matchesClient = ($clientId && $pid    eq $clientId);
+        my $matchesModel  = ($model    && $pmodel eq $model);
+        
+        if ($isWildcard || $matchesClient || $matchesModel) {
+            Plugins::SqueezeDSP::Utils::debug("delete native passthrough: $profile");
+            delete $Slim::Player::TranscodingHelper::commandTable{$profile};
+            delete $Slim::Player::TranscodingHelper::capabilities{$profile};
+        }
+    }
+}
+
+
 1;
+

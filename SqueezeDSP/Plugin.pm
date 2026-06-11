@@ -207,16 +207,29 @@ sub initPlugin {
 	Slim::Control::Request::addDispatch([$thistag . '.trackgain'], [1, 1, 0, \&Plugins::SqueezeDSP::Utils::_trackGainQuery]);
 
 
-	# Call cleanup of Conversion tables
-  	Plugins::SqueezeDSP::Configuration::cleanupConversionTables();
-
+	#and in case it is not called!
+	#Slim::Control::Request::subscribe(    \&Plugins::SqueezeDSP::Configuration::cleanupConversionTables,    [['server'], ['init']]);
+ 	#Slim::Control::Request::subscribe(    \&Plugins::SqueezeDSP::Configuration::cleanupConversionTables,    [['serverInit']]);
+=pod	
+	Slim::Utils::Timers::setTimer(
+		undef,
+		Time::HiRes::time(),
+		\&Plugins::SqueezeDSP::Configuration::cleanupConversionTables
+	);
+=cut
     # Binary setup and housekeeping
     Plugins::SqueezeDSP::Binary::setup_binary($class);
     Plugins::SqueezeDSP::Binary::housekeeping();
-    
-	
+=pod
+	my @formats  = qw(aac aif alc alcx ape dsf dff flc hls mov mp3 mp4 mp4x mpc ogg ops ogf spt wav wma wmal wmap wvp);
+	my @outputs  = qw(flc mp3);
+
+	for my $fmt (@formats) {
+		Slim::Player::TranscodingHelper::registerProxyFormat($fmt, $_) for @outputs;
+	}
+=cut			
     # Event subscription
-    Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new']]);
+    Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new', 'reconnect']]);
 
 	# add this for gain logging
 	#Slim::Control::Request::subscribe(\&_trackChanged, [['playlist'],['newsong']]);
@@ -239,7 +252,7 @@ sub clientEvent {
     return unless defined $client;
     
     Plugins::SqueezeDSP::Configuration::initConfiguration($client);
-    
+=pod    
     if (!$doneJiveInit) {
         my $node = {
             id => $thistag,
@@ -251,6 +264,7 @@ sub clientEvent {
         Plugins::SqueezeDSP::Utils::debug($thistag . " node registered");
         $doneJiveInit = 1;
     }
+=cut
 }
 
 sub webPages {

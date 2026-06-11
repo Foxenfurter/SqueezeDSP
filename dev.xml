@@ -8,9 +8,9 @@
       <title lang="EN">SqueezeDSP</title>
      
      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.71/SqueezeDSP-0.1.71.zip</url>
-	  <sha>5fc8e251a6994829472273bb7e4192a4f6ecb5d0</sha>
+	  <sha>85ca6d2d443b14d33e467c9910cff1a32ef63f6a</sha>
 	  <changes>Direct Encoding of MP3 and Flac, simplified conversion rules, downsamples to match player, caches track gain</changes>
-	  <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)</desc>
+	  <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (dev version)a</desc>
       <creator>Jonathan Fox</creator>
 	  <icon>https://raw.githubusercontent.com/Foxenfurter/SqueezeDSP/refs/heads/main/SqueezeDSP/HTML/EN/plugins/SqueezeDSP/images/squeezedsp-blu.png</icon>
 	  <category>tools</category>
