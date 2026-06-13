@@ -4,17 +4,18 @@
     <title lang="EN">SqueezeDSP</title>
   </details>
   <plugins>
-     <plugin name="SqueezeDSP" version="0.1.61" minTarget="7.8.0" maxTarget="*">
+	<plugin name="SqueezeDSP" version="0.1.71" minTarget="7.8.0" maxTarget="*">
       <title lang="EN">SqueezeDSP</title>
      
-     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.61/SqueezeDSP-0.1.61.zip</url>
-	  <sha>154d720ca9b66f2574bc684cde0213b867e12db1</sha>
+     <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.71/SqueezeDSP-0.1.71.zip</url>
+	  <sha>fe4517d305347edf726b3357137f6e4e704495a1</sha>
       <creator>Jonathan Fox</creator>      
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
       <category>tools</category>
 	  <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (test version)</desc>
       <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
       <changes>
+	  <change>0.1.71 - Added mp3 output as an option, downsampling to match player, dsd format supported, simplified custom-conv.conf setup, fixed scale display issue with graph</change>
 	  <change>0.1.61 - Added strict album gain and track gain, tweaked autoeq dropdown, tidied up transcoder template, rebuilt in go 1.26</change>	  
 	  <change>0.1.60 - ReplayGain added, Headphone crossfeed, tweak to UI and autoeq saves, fir filter strength added, convolver gain heavily tuned</change>	  
 	  <change>0.1.51 - Further performance improvements  in engine, code cleanup, startup improved, autoeq lookup</change>	  
