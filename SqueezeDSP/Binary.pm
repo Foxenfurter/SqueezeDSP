@@ -76,8 +76,15 @@ sub setup_binary {
     amendPluginConfig($appConfig, 'settingsDataFolder', $Plugins::SqueezeDSP::Plugin::pluginSettingsDataDir);
     amendPluginConfig($appConfig, 'impulseDataFolder', $Plugins::SqueezeDSP::Plugin::pluginImpulsesDataDir);
     amendPluginConfig($appConfig, 'tempDataFolder', $Plugins::SqueezeDSP::Plugin::pluginTempDataDir);
-    my $soxbinary = Slim::Utils::Misc::findbin('sox');
-    amendPluginConfig($appConfig, 'soxExe', $soxbinary);
+    my $mybinary = Slim::Utils::Misc::findbin('sox');
+    amendPluginConfig($appConfig, 'soxExe', $mybinary);
+	my $mybinary = Slim::Utils::Misc::findbin('ffmpeg');
+    amendPluginConfig($appConfig, 'ffmpegExe', $mybinary);
+		my $mybinary = Slim::Utils::Misc::findbin('lame');
+    amendPluginConfig($appConfig, 'lameExe', $mybinary);
+
+
+
     $Plugins::SqueezeDSP::Plugin::logfile = catdir(Slim::Utils::OSDetect::dirsFor('log'), "squeezedsp.log");
     if (! -e $Plugins::SqueezeDSP::Plugin::logfile) {
         open my $fh, '>', $Plugins::SqueezeDSP::Plugin::logfile or die "Could not create log file: $!";
