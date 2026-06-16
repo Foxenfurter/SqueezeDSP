@@ -112,15 +112,16 @@ our (
     $convolver,          # Convolver name
     $logfile,            # Log file path
     $fatalError,         # Fatal error message
-   # $needUpgrade,        # Upgrade flag
+    $needUpgrade,        # Upgrade flag
     $doneJiveInit,       # Jive init flag
-   # $configPath,         # Config path
+    $configPath,         # Config path
     $thistag,            # Plugin tag
-  #  $myconfigrevision,   # Config revision
+    $myconfigrevision,   # Config revision
     $binversion,          # Binary version
 	$cacheBust,          # Cache busting token
 	$gainLog          # gain logger
 );
+
 
 # Revision number
 my $revision = "0.1.71";
@@ -151,7 +152,7 @@ $doneJiveInit = 0;
 
 # Load submodules
 use Plugins::SqueezeDSP::Settings;
-#use Plugins::SqueezeDSP::TemplateConfig;
+use Plugins::SqueezeDSP::TemplateConfig;
 use Plugins::SqueezeDSP::Configuration;
 use Plugins::SqueezeDSP::UI_Functions;
 use Plugins::SqueezeDSP::Utils;
@@ -211,6 +212,7 @@ sub initPlugin {
     # Binary setup and housekeeping
     Plugins::SqueezeDSP::Binary::setup_binary($class);
     Plugins::SqueezeDSP::Binary::housekeeping();
+    Plugins::SqueezeDSP::Configuration::removeNativeConversion();
 
     # Event subscription
     Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new', 'reconnect']]);
@@ -220,6 +222,7 @@ sub initPlugin {
 
 	# will clear cache on server start, so changing js files works
 	$cacheBust = time();
+
 }
 
 sub shutdown {
