@@ -215,7 +215,9 @@ sub initPlugin {
     Plugins::SqueezeDSP::Configuration::removeNativeConversion();
 
     # Event subscription
-    Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new', 'reconnect']]);
+    #Slim::Control::Request::subscribe(\&clientEvent, [['client'],['new', 'reconnect']]);
+	Slim::Control::Request::subscribe(\&clientEventNew, [['client'],['new']]);
+	Slim::Control::Request::subscribe(\&clientEventReconnect, [['client'],['reconnect']]);
 
 	# add this for gain logging
 	#Slim::Control::Request::subscribe(\&_trackChanged, [['playlist'],['newsong']]);
@@ -233,25 +235,21 @@ sub shutdown {
 
 
 
-sub clientEvent {
+sub clientEventNew {
     my $request = shift;
     my $client  = $request->client();
     return unless defined $client;
-    
+	Plugins::SqueezeDSP::Utils::debug( "New Client detected" );
     Plugins::SqueezeDSP::Configuration::initConfiguration($client);
-=pod    
-    if (!$doneJiveInit) {
-        my $node = {
-            id => $thistag,
-            text => Slim::Utils::Strings::string(getDisplayName()),
-            weight => 5,
-            node => 'extras',
-        };
-        Slim::Control::Jive::registerPluginNode($node);
-        Plugins::SqueezeDSP::Utils::debug($thistag . " node registered");
-        $doneJiveInit = 1;
-    }
-=cut
+}
+
+sub clientEventNew {
+    my $request = shift;
+    my $client  = $request->client();
+    return unless defined $client;
+	Plugins::SqueezeDSP::Utils::debug( "Existing Client reconnected" );
+    Plugins::SqueezeDSP::Configuration::initConfiguration($client);
+	Plugins::SqueezeDSP::Configuration::removeNativeConversion();
 }
 
 sub webPages {

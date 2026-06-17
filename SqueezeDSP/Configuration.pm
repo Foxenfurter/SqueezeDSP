@@ -16,7 +16,7 @@ sub initConfiguration {
  	#return if $_initInProgress{$clientId};
     #$_initInProgress{$clientId} = 1;
 
-$Plugins::SqueezeDSP::Plugin::fatalError = undef;
+	$Plugins::SqueezeDSP::Plugin::fatalError = undef;
     my $upgradeReason = '';
     my @origLines;
     my @clientIDs = sort map { $_->id() } Slim::Player::Client::clients();
