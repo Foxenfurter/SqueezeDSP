@@ -173,20 +173,27 @@ sub removeUnwantedConversion {
 sub removeNativeConversion {
     my $conv = Slim::Player::TranscodingHelper::Conversions();
     my %players = %{Plugins::SqueezeDSP::Utils::_getEnabledPlayers()};
+	my $convolver = $Plugins::SqueezeDSP::Plugin::convolver;
+
     for my $profile (sort keys %$conv) {
         my ($inputtype, $outputtype, $clienttype, $clientid) = Plugins::SqueezeDSP::Utils::_inspectProfile($profile);
         my $command = $conv->{$profile};
         my $enabled = Slim::Player::TranscodingHelper::enabledFormat($profile);
-        if ($enabled == 1 && $clienttype eq "*" && $command eq "-") {
-            Plugins::SqueezeDSP::Utils::debug("delete native command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
-        if ($enabled == 1 && $clientid eq "*" && ( $outputtype eq "flc" || $outputtype eq "mp3" )) {
-            Plugins::SqueezeDSP::Utils::debug("delete flac command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
-            delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
-            delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
-        }
+		# we get to keep squeezedsp commands whatever the formatting.
+		if (index($command, $convolver) == -1) {
+			# remove any native conversion
+			if ($enabled == 1 && $command eq "-") {
+				Plugins::SqueezeDSP::Utils::debug("delete native command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
+				delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
+				delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
+			}
+			# remove any competing conversions to flac or mp3 
+			if ($enabled == 1 && ( $outputtype eq "flc" || $outputtype eq "mp3" )) {
+				Plugins::SqueezeDSP::Utils::debug("delete $outputtype command - input: $inputtype, output $outputtype, clienttype $clienttype, clientid $clientid, enabled $enabled, command $command");
+				delete $Slim::Player::TranscodingHelper::commandTable{ $profile };
+				delete $Slim::Player::TranscodingHelper::capabilities{ $profile };
+			}
+		}
     }
 }
 

@@ -243,7 +243,7 @@ sub clientEventNew {
     Plugins::SqueezeDSP::Configuration::initConfiguration($client);
 }
 
-sub clientEventNew {
+sub clientEventReconnect {
     my $request = shift;
     my $client  = $request->client();
     return unless defined $client;

@@ -8,11 +8,11 @@
       <title lang="EN">SqueezeDSP</title>
      
      <url>https://github.com/Foxenfurter/SqueezeDSP/releases/download/v0.1.71/SqueezeDSP-0.1.71.zip</url>
-	  <sha>d2d796fc9a3b3478df003f9831b75d9a7ec468b1</sha>
+	  <sha>ce042dd693370f4467f02491f9741a1c87a92a79</sha>
       <creator>Jonathan Fox</creator>      
       <sha1-tool>https://emn178.github.io/online-tools/sha1_checksum.html</sha1-tool>
       <category>tools</category>
-	  <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (test version)c</desc>
+	  <desc lang="EN">DSP for Squeezebox server - provides Parametric EQ and DSP (test version)d</desc>
       <info>https://github.com/Foxenfurter/SqueezeDSP/blob/main/README.md</info>
       <changes>
 	  <change>0.1.71 - Added mp3 output as an option, downsampling to match player, dsd format supported, simplified custom-conv.conf setup, fixed scale display issue with graph</change>
