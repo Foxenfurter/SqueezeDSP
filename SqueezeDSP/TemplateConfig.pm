@@ -10,6 +10,7 @@ sub get_config_revision
 	return $configrevision;
 }
 
+# 0.2.02 added soc (SpotOn) — Spotify HTTP streaming, convolver reads PCM from stdin
 # 0.2.01 Amended all settings to use new SqueezeDSP adapter Eliminated wav16 replace with MP3
 # 0.1.11 corrected ogf line which had duplicate convolver app.
 # 0.1.10 added hls flc and wav
@@ -106,6 +107,10 @@ ogf mp3 * $CLIENTID$
 ops mp3 * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--maxSampleRate=%d}
 	[sox] -q -t opus $FILE$ -t wav - |  [$CONVAPP$]  --trackURL=$URL$ $RESAMPLE$ --Clientid="$CLIENTID$"  --bitsout=24 --formatout=MP3
+
+soc mp3 * $CLIENTID$
+	# I
+	[$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM --trackURL=$URL$ --Clientid="$CLIENTID$" --bitsout=24 --formatout=MP3
 
 spt mp3 * $CLIENTID$
 	# RT:{START=--start-position %s}
@@ -207,6 +212,10 @@ ogf flc * $CLIENTID$
 ops flc * $CLIENTID$
 	# IFB:{BITRATE=--abr %B}D:{RESAMPLE=--maxSampleRate=%d}
 	[sox] -q -t opus $FILE$ -t wav - |  [$CONVAPP$]  --trackURL=$URL$ $RESAMPLE$ --Clientid="$CLIENTID$"  --bitsout=24 --formatout=FLC
+
+soc flc * $CLIENTID$
+	# I
+	[$CONVAPP$] --bitsin=$SAMPLESIZE$ --samplerate=$SAMPLERATE$ --be=false --channels=$CHANNELS$ --formatin=PCM --trackURL=$URL$ --Clientid="$CLIENTID$" --bitsout=24 --formatout=FLC
 
 spt flc * $CLIENTID$
 	# RT:{START=--start-position %s}
